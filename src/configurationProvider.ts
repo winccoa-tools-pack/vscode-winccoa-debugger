@@ -11,6 +11,7 @@
  */
 
 import * as vscode from 'vscode';
+import { WinccoaProject } from './projectDetector';
 
 export interface WinCCDebugConfiguration extends vscode.DebugConfiguration {
   /** Request type */
@@ -33,29 +34,38 @@ export interface WinCCDebugConfiguration extends vscode.DebugConfiguration {
 }
 
 export class WinCCConfigurationProvider implements vscode.DebugConfigurationProvider {
+  /** Inject the current project so configurations can be auto-filled */
+  setActiveProject(project: WinccoaProject | null): void {
+    this.activeProject = project;
+  }
+
+  private activeProject: WinccoaProject | null = null;
+
   /**
    * Provide initial debug configurations
-   * 
+   *
    * This is called when the user creates a new launch.json file.
    */
   provideDebugConfigurations(
     folder: vscode.WorkspaceFolder | undefined,
-    token?: vscode.CancellationToken
+    _token?: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.DebugConfiguration[]> {
+    const p = this.activeProject;
+    const installDir = p?.installDir ?? '/opt/WinCC_OA/3.21';
     return [
       {
         type: 'winccoa',
         request: 'attach',
         name: 'Attach to WinCC OA Manager',
-        host: 'localhost',
-        port: 4999,
-        system: 'System1',
+        host: p?.host ?? 'localhost',
+        port: p?.port ?? 4999,
+        system: p?.system ?? 'System1',
         manager: {
           type: 'CTRL',
           number: 1
         },
         pathMappings: {
-          '/opt/WinCC_OA/3.21/scripts': '${workspaceFolder}/scripts'
+          [`${installDir}/scripts`]: '${workspaceFolder}/scripts'
         }
       }
     ];
@@ -70,11 +80,11 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
    * - Resolve variables
    */
   resolveDebugConfiguration(
-    folder: vscode.WorkspaceFolder | undefined,
+    _folder: vscode.WorkspaceFolder | undefined,
     config: vscode.DebugConfiguration,
-    token?: vscode.CancellationToken
+    _token?: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.DebugConfiguration> {
-    // If launch.json is missing or empty
+    // If launch.json is missing or empty → create a minimal config
     if (!config.type && !config.request && !config.name) {
       const editor = vscode.window.activeTextEditor;
       if (editor && editor.document.languageId === 'ctrl') {
@@ -84,19 +94,23 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
       }
     }
 
-    // Validate required fields
+    // Fill in defaults from detected project
+    const p = this.activeProject;
     if (!config.host) {
-      config.host = 'localhost';
+      config.host = p?.host ?? 'localhost';
     }
-
     if (!config.port) {
-      config.port = 4999;
+      config.port = p?.port ?? 4999;
     }
 
     if (!config.system) {
-      return vscode.window.showErrorMessage('Please specify the WinCC OA system name in launch.json').then(_ => {
-        return undefined; // abort launch
-      });
+      if (p?.system) {
+        config.system = p.system;
+      } else {
+        return vscode.window.showErrorMessage(
+          'No WinCC OA project selected. Open Project Admin and select a project first.',
+        ).then(() => undefined);
+      }
     }
 
     if (!config.manager) {
