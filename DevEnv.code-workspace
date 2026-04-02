@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "name": "WinCC OA Debugger Extension",
+      "path": "."
+    },
+    {
+      "name": "Debug Adapter Package",
+      "path": "../../npm-winccoa-repos/npm-winccoa-debugger"
+    },
+    {
+      "name": "DevEnv Project",
+      "path": "../../wincc_proj/DevEnv3.21"
+    }
+  ],
+  "settings": {
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#1F3D29",
+      "titleBar.activeBackground": "#2B5538",
+      "titleBar.activeForeground": "#FAFCFB"
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/out": true,
+      "**/bin": true
+    }
+  }
+}
