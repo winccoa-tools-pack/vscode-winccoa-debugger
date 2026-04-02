@@ -1,9 +1,9 @@
 {
-  "name": "winccoa-hello-world",
-  "displayName": "WinCC OA — Hello World",
-  "description": "VS Code extension template for WinCC OA tools.",
+  "name": "vscode-winccoa-debugger",
+  "displayName": "WinCC OA — Debugger",
+  "description": "Debug Adapter for WinCC OA CTRL scripts",
   "publisher": "winccoa-tools-pack",
-  "version": "0.2.1",
+  "version": "0.1.0",
   "author": "winccoa-tools-pack",
   "license": "MIT",
   "icon": "resources/icon.png",
@@ -19,7 +19,7 @@
     "vscode": "^1.110.0"
   },
   "categories": [
-    "Other"
+    "Debuggers"
   ],
   "keywords": [
     "wincc-oa",
@@ -29,18 +29,202 @@
     "siemens",
     "etm",
     "industrial",
-    "automation"
+    "automation",
+    "debugger",
+    "ctrl"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onDebugResolve:winccoa",
+    "onDebugDynamicConfigurations:winccoa"
   ],
   "main": "./dist/extension.js",
   "private": false,
   "contributes": {
-    "commands": [
+    "breakpoints": [
       {
-        "command": "winccoa.helloWorld",
-        "title": "WinCC OA: Hello World"
+        "language": "ctrl"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "winccoa",
+        "label": "WinCC OA Debugger",
+        "languages": [
+          "ctrl"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "host",
+              "system",
+              "manager"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Host where WinCC OA is running",
+                "default": "localhost"
+              },
+              "port": {
+                "type": "number",
+                "description": "Port for datapoint connection",
+                "default": 4999
+              },
+              "system": {
+                "type": "string",
+                "description": "WinCC OA system name"
+              },
+              "manager": {
+                "type": "object",
+                "description": "Manager configuration",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CTRL",
+                      "UI",
+                      "EVENT",
+                      "ASCII",
+                      "DEVICE",
+                      "API",
+                      "DRIVER"
+                    ],
+                    "description": "Manager type",
+                    "default": "CTRL"
+                  },
+                  "number": {
+                    "type": "number",
+                    "description": "Manager number",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "number"
+                ]
+              },
+              "pathMappings": {
+                "type": "object",
+                "description": "Path mappings from local to remote",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable trace logging",
+                "default": false
+              }
+            }
+          },
+          "attach": {
+            "required": [
+              "host",
+              "system",
+              "manager"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Host where WinCC OA is running",
+                "default": "localhost"
+              },
+              "port": {
+                "type": "number",
+                "description": "Port for datapoint connection",
+                "default": 4999
+              },
+              "system": {
+                "type": "string",
+                "description": "WinCC OA system name"
+              },
+              "manager": {
+                "type": "object",
+                "description": "Manager configuration",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CTRL",
+                      "UI",
+                      "EVENT",
+                      "ASCII",
+                      "DEVICE",
+                      "API",
+                      "DRIVER"
+                    ],
+                    "description": "Manager type",
+                    "default": "CTRL"
+                  },
+                  "number": {
+                    "type": "number",
+                    "description": "Manager number",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "number"
+                ]
+              },
+              "pathMappings": {
+                "type": "object",
+                "description": "Path mappings from local to remote",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable trace logging",
+                "default": false
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "winccoa",
+            "request": "attach",
+            "name": "Attach to WinCC OA Manager",
+            "host": "localhost",
+            "port": 4999,
+            "system": "${input:systemName}",
+            "manager": {
+              "type": "CTRL",
+              "number": 1
+            },
+            "pathMappings": {
+              "/opt/WinCC_OA/3.21/scripts": "${workspaceFolder}/scripts"
+            }
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "WinCC OA: Attach to Manager",
+            "description": "Attach to a running WinCC OA manager",
+            "body": {
+              "type": "winccoa",
+              "request": "attach",
+              "name": "Attach to WinCC OA Manager",
+              "host": "localhost",
+              "port": 4999,
+              "system": "^\"\\${1:System1}\"",
+              "manager": {
+                "type": "^\"\\${2:CTRL}\"",
+                "number": "^\"\\${3:1}\""
+              },
+              "pathMappings": {
+                "/opt/WinCC_OA/3.21/scripts": "^\"\\${workspaceFolder}/scripts\""
+              }
+            }
+          }
+        ],
+        "variables": {
+          "systemName": "extension.winccoa.debugger.getSystemName"
+        }
       }
     ]
   },
@@ -76,6 +260,9 @@
     "test:coverage": "npm run test:unit:coverage && npm run test:integration:coverage",
     "ci:integration": "npm ci && npm run compile && npm run test:integration",
     "style-check": "npm run format:check && npm run lint"
+  },
+  "dependencies": {
+    "@winccoa-tools-pack/winccoa-debug-adapter": "file:../../npm-winccoa-repos/npm-winccoa-debugger"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
