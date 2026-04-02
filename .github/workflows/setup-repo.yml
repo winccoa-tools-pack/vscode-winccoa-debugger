@@ -1,0 +1,47 @@
+###############################################################################
+# 🚀  One-time repository initialisation (runs after "Use this template")
+#
+#  Calls the org-level reusable-setup-repo.yml which:
+#    1. Replaces template placeholders in package.json, README.md, etc.
+#    2. Resets the version to 0.0.1
+#    3. Creates the `develop` branch (GitFlow default branch)
+#    4. Applies repository settings & rulesets (branch protection)
+#    5. Commits everything, then **deletes this file** so derived repos
+#       don't carry the init logic.
+#
+#  This workflow is a no-op on the template repo itself.
+###############################################################################
+name: "🔧 Setup new repository"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      repo_description:
+        description: "Short repo description (used in package.json & repository.settings.yml)"
+        required: false
+        type: string
+      display_name:
+        description: "VS Code extension display name (e.g. 'WinCC OA — My Tool')"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  setup:
+    # Skip on the template repo itself
+    if: github.repository != 'winccoa-tools-pack/template-vscode-extension'
+    uses: winccoa-tools-pack/.github/.github/workflows/reusable-setup-repo.yml@main
+    with:
+      project_type: vscode
+      template_repo: "winccoa-tools-pack/template-vscode-extension"
+      repo_description: ${{ inputs.repo_description || '' }}
+      display_name: ${{ inputs.display_name || '' }}
+      template_package_name: "winccoa-hello-world"
+      template_readme_title: "WinCC OA VS Code Extension Template"
+    secrets: inherit
