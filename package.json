@@ -34,6 +34,7 @@
     "ctrl"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onDebugResolve:winccoa",
     "onDebugDynamicConfigurations:winccoa"
   ],
@@ -225,6 +226,18 @@
         "variables": {
           "systemName": "extension.winccoa.debugger.getSystemName"
         }
+      }
+    ],
+    "commands": [
+      {
+        "command": "winccoa.debugger.showStatus",
+        "title": "Show Debugger Status",
+        "category": "WinCC OA"
+      },
+      {
+        "command": "winccoa.debugger.showOutput",
+        "title": "Show Debugger Output",
+        "category": "WinCC OA"
       }
     ]
   },
