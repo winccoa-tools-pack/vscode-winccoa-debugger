@@ -71,9 +71,13 @@
                 "description": "Port for datapoint connection",
                 "default": 4999
               },
+              "project": {
+                "type": "string",
+                "description": "WinCC OA project name used for the -proj connection argument (e.g. 'DevEnv3.21'). When omitted, 'system' is used as fallback."
+              },
               "system": {
                 "type": "string",
-                "description": "WinCC OA system name"
+                "description": "WinCC OA system name used as DP prefix (e.g. 'System1:'). Use empty string for single-system projects."
               },
               "manager": {
                 "type": "object",
@@ -141,9 +145,13 @@
                 "description": "Port for datapoint connection",
                 "default": 4999
               },
+              "project": {
+                "type": "string",
+                "description": "WinCC OA project name used for the -proj connection argument (e.g. 'DevEnv3.21'). When omitted, 'system' is used as fallback."
+              },
               "system": {
                 "type": "string",
-                "description": "WinCC OA system name"
+                "description": "WinCC OA system name used as DP prefix (e.g. 'System1:'). Use empty string for single-system projects."
               },
               "manager": {
                 "type": "object",
@@ -257,6 +265,11 @@
           "type": "string",
           "default": "",
           "description": "Absolute path to the debug adapter cli.js. Used as fallback when the bundled adapter is not found (e.g. during development). Example: /home/user/npm-winccoa-repos/npm-winccoa-debugger/dist/cjs/cli.js"
+        },
+        "winccoa.debugger.bootstrapPath": {
+          "type": "string",
+          "default": "/opt/WinCC_OA/3.21/javascript/winccoa-manager/lib/bootstrap.js",
+          "description": "Absolute path to the WinCC OA bootstrap.js. Required to start the debug adapter with pmon authentication."
         }
       }
     }
