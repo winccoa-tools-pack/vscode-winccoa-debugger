@@ -27,6 +27,18 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 30000
             }
+        },
+        {
+            // Full E2E debugger tests: real WCCOActrl + WinCC OA project required.
+            // Skip gracefully via WINCCOA_E2E_SKIP=1 or absence of WCCOActrl.
+            label: 'debuggerE2eTests',
+            files: 'out/test/integration/debugger-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 60000
+            }
         }
     ]
 });

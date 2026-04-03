@@ -301,6 +301,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vscode-test --label unitTests",
     "test:integration": "vscode-test --label integrationTests",
+    "test:e2e": "npm run compile:tsc && vscode-test --label debuggerE2eTests",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:coverage": "npm run test:unit:coverage && npm run test:integration:coverage",
