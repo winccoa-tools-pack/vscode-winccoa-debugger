@@ -71,9 +71,11 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
           number: 1
         },
         // Key   = local VS Code absolute path (what breakpoint events carry)
-        // Value = WinCC OA remote path (relative to project root, as the CTRL debugger expects)
+        // Value = WinCC OA remote base path (relative to project scripts root).
+        // Use empty string "" when scripts are addressed without any prefix,
+        // i.e. WinCC OA knows 'test.ctl' not 'scripts/test.ctl'.
         pathMappings: {
-          '${workspaceFolder}/scripts': 'scripts'
+          '${workspaceFolder}/scripts': ''
         }
       }
     ];
