@@ -77,4 +77,34 @@ execSync(`${codeBin} --install-extension "${localVsix}" --force`, { stdio: 'inhe
 console.log('\n[5/5] Opening VS Code...');
 execSync(`${codeBin} "${testWorkspace}"`, { stdio: 'inherit', detached: true });
 
+// [post] Symlink adapter dist into the installed extension so the adapter is found
+// without needing node_modules.  dist/adapter/ → npm-winccoa-debugger/dist/cjs/
+console.log('\nLinking debug adapter into installed extension...');
+const os = require('os');
+const installedExtDir = path.join(os.homedir(), '.vscode', 'extensions', `${extId}-${version}`);
+const adapterLinkDir = path.join(installedExtDir, 'dist', 'adapter');
+const adapterSrcDir = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'npm-winccoa-repos',
+  'npm-winccoa-debugger',
+  'dist',
+  'cjs',
+);
+
+if (!fs.existsSync(adapterSrcDir)) {
+  console.warn(
+    `WARNING: Adapter source not found at ${adapterSrcDir}.\n` +
+    `  Run: (cd ../npm-winccoa-repos/npm-winccoa-debugger && npm run build) then re-run make test-local`,
+  );
+} else {
+  if (fs.existsSync(adapterLinkDir)) {
+    fs.rmSync(adapterLinkDir, { recursive: true, force: true });
+  }
+  fs.symlinkSync(adapterSrcDir, adapterLinkDir, 'dir');
+  console.log(`  Linked: ${adapterLinkDir} -> ${adapterSrcDir}`);
+}
+
 console.log('\n✅ Test setup complete!');

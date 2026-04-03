@@ -9,7 +9,7 @@
       "path": "../../npm-winccoa-repos/npm-winccoa-debugger"
     },
     {
-      "name": "DevEnv Project",
+      "name": "DevEnv3.21",
       "path": "../../wincc_proj/DevEnv3.21"
     }
   ],
@@ -17,7 +17,15 @@
     "workbench.colorCustomizations": {
       "activityBar.background": "#1F3D29",
       "titleBar.activeBackground": "#2B5538",
-      "titleBar.activeForeground": "#FAFCFB"
+      "titleBar.activeForeground": "#FAFCFB",
+      "titleBar.inactiveBackground": "#1A3322",
+      "titleBar.inactiveForeground": "#F8FCF9",
+      "statusBar.background": "#1A3322",
+      "statusBar.foreground": "#F8FCF9",
+      "statusBar.debuggingBackground": "#1A3322",
+      "statusBar.debuggingForeground": "#F8FCF9",
+      "statusBar.noFolderBackground": "#1A3322",
+      "statusBar.noFolderForeground": "#F8FCF9"
     },
     "files.exclude": {
       "**/node_modules": true,
@@ -25,5 +33,24 @@
       "**/out": true,
       "**/bin": true
     }
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "winccoa",
+        "request": "attach",
+        "name": "WinCC OA: Attach to CTRL 1",
+        "host": "localhost",
+        "port": 4999,
+        "manager": {
+          "type": "CTRL",
+          "number": 1
+        },
+        "pathMappings": {
+          "/home/testus/wincc_proj/DevEnv3.21/scripts": "${workspaceFolder:DevEnv3.21}/scripts"
+        }
+      }
+    ]
   }
 }

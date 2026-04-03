@@ -112,6 +112,11 @@
                 },
                 "default": {}
               },
+              "adapterManagerNumber": {
+                "type": "number",
+                "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
+                "default": 99
+              },
               "trace": {
                 "type": "boolean",
                 "description": "Enable trace logging",
@@ -177,6 +182,11 @@
                 },
                 "default": {}
               },
+              "adapterManagerNumber": {
+                "type": "number",
+                "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
+                "default": 99
+              },
               "trace": {
                 "type": "boolean",
                 "description": "Enable trace logging",
@@ -239,7 +249,17 @@
         "title": "Show Debugger Output",
         "category": "WinCC OA"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "WinCC OA Debugger",
+      "properties": {
+        "winccoa.debugger.adapterCliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the debug adapter cli.js. Used as fallback when the bundled adapter is not found (e.g. during development). Example: /home/user/npm-winccoa-repos/npm-winccoa-debugger/dist/cjs/cli.js"
+        }
+      }
+    }
   },
   "extensionDependencies": [
     "RichardJanisch.winccoa-project-admin"
