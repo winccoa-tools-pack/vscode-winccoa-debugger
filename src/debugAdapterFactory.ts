@@ -29,8 +29,36 @@ const ADAPTER_READY_TIMEOUT_MS = 15_000;
 const ADAPTER_READY_POLL_MS = 100;
 
 export class WinCCDebugAdapterDescriptorFactory
-  implements vscode.DebugAdapterDescriptorFactory
+  implements vscode.DebugAdapterDescriptorFactory, vscode.Disposable
 {
+  /** Active adapter processes keyed by debug session ID. */
+  private readonly children = new Map<string, cp.ChildProcess>();
+
+  constructor(context: vscode.ExtensionContext) {
+    // Kill the adapter process as soon as VS Code terminates the debug session.
+    context.subscriptions.push(
+      vscode.debug.onDidTerminateDebugSession((session) => {
+        this.killChild(session.id);
+      }),
+    );
+  }
+
+  dispose(): void {
+    // Kill all remaining adapters when the extension deactivates.
+    for (const id of [...this.children.keys()]) {
+      this.killChild(id);
+    }
+  }
+
+  private killChild(sessionId: string): void {
+    const child = this.children.get(sessionId);
+    if (!child) { return; }
+    this.children.delete(sessionId);
+    if (!child.killed) {
+      child.kill();
+    }
+  }
+
   async createDebugAdapterDescriptor(
     session: vscode.DebugSession,
     _executable: vscode.DebugAdapterExecutable | undefined,
@@ -58,10 +86,17 @@ export class WinCCDebugAdapterDescriptorFactory
       stdio: ['ignore', 'inherit', 'inherit'],
     });
 
+    // Track so we can kill it when the session ends.
+    this.children.set(session.id, child);
+
     child.on('error', (err) => {
       void vscode.window.showErrorMessage(
         `WinCC OA debug adapter failed to start: ${err.message}`,
       );
+    });
+
+    child.on('exit', () => {
+      this.children.delete(session.id);
     });
 
     await this.waitForPort(tcpPort);

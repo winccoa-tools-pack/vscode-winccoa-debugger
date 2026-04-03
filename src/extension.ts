@@ -31,10 +31,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     context.subscriptions.push(statusBarItem);
 
     // ── Debug adapter components ──────────────────────────────────────────────
-    const factory = new WinCCDebugAdapterDescriptorFactory();
+    const factory = new WinCCDebugAdapterDescriptorFactory(context);
     configProvider = new WinCCConfigurationProvider();
 
     context.subscriptions.push(
+        factory,
         vscode.debug.registerDebugAdapterDescriptorFactory('winccoa', factory),
         vscode.debug.registerDebugConfigurationProvider('winccoa', configProvider),
     );
