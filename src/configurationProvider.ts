@@ -16,7 +16,13 @@ import { WinccoaProject } from './projectDetector';
 export interface WinCCDebugConfiguration extends vscode.DebugConfiguration {
   /** Request type */
   request: 'launch' | 'attach';
-  /** WinCC OA system name */
+  /**
+   * WinCC OA project name — passed as `-proj <project>` when the adapter connects.
+   * Typically the project directory base name, e.g. `DevEnv3.21`.
+   * When omitted, `system` is used as fallback.
+   */
+  project?: string;
+  /** WinCC OA system name (used as DP prefix, e.g. `System1:`) */
   system: string;
   /** Host where WinCC OA is running */
   host: string;
@@ -64,8 +70,10 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
           type: 'CTRL',
           number: 1
         },
+        // Key   = local VS Code absolute path (what breakpoint events carry)
+        // Value = WinCC OA remote path (relative to project root, as the CTRL debugger expects)
         pathMappings: {
-          [`${installDir}/scripts`]: '${workspaceFolder}/scripts'
+          '${workspaceFolder}/scripts': 'scripts'
         }
       }
     ];
