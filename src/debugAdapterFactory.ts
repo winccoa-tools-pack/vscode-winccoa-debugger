@@ -63,14 +63,23 @@ export class WinCCDebugAdapterDescriptorFactory
     session: vscode.DebugSession,
     _executable: vscode.DebugAdapterExecutable | undefined,
   ): Promise<vscode.DebugAdapterDescriptor> {
-    const adapterCliPath = this.resolveAdapterCli();
-    const bootstrapPath = this.resolveBootstrap();
-    const tcpPort = await this.findFreePort();
-
     const config = session.configuration as {
       project?: string;
       system?: string;
+      adapterPort?: number;
     };
+
+    // When adapterPort is set the adapter is already running as a pmon manager.
+    // Just connect — no spawn needed, no bootstrap required.
+    if (config.adapterPort) {
+      await this.waitForPort(config.adapterPort);
+      return new vscode.DebugAdapterServer(config.adapterPort, '127.0.0.1');
+    }
+
+    // Fallback: spawn adapter via bootstrap.js (requires WinCC OA installation).
+    const adapterCliPath = this.resolveAdapterCli();
+    const bootstrapPath = this.resolveBootstrap();
+    const tcpPort = await this.findFreePort();
 
     const spawnArgs = [
       bootstrapPath,
@@ -78,7 +87,6 @@ export class WinCCDebugAdapterDescriptorFactory
       '-pmonIndex', '99',
       adapterCliPath,
       '--tcp-port', String(tcpPort),
-      '--system', config.system || 'System1',
     ];
 
     const child = cp.spawn(process.execPath, spawnArgs, {
@@ -86,7 +94,6 @@ export class WinCCDebugAdapterDescriptorFactory
       stdio: ['ignore', 'inherit', 'inherit'],
     });
 
-    // Track so we can kill it when the session ends.
     this.children.set(session.id, child);
 
     child.on('error', (err) => {

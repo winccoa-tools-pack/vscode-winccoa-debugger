@@ -57,7 +57,6 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
     _token?: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.DebugConfiguration[]> {
     const p = this.activeProject;
-    const installDir = p?.installDir ?? '/opt/WinCC_OA/3.21';
     return [
       {
         type: 'winccoa',
@@ -66,6 +65,11 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
         host: p?.host ?? 'localhost',
         port: p?.port ?? 4999,
         system: p?.system ?? 'System1',
+        // manager.number = the CTRL manager number you want to debug.
+        // The manager MUST already be running (registered in config/progs and
+        // started by pmon). Example progs entry:
+        //   WCCOActrl | manual | 30 | 3 | 1 | -num 5 -f scripts/loop_test.ctl
+        // WinCC OA then auto-creates _CtrlDebug_CTRL_5.* debug datapoints.
         manager: {
           type: 'CTRL',
           number: 1

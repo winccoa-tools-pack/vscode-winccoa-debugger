@@ -39,6 +39,50 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 60000
             }
+        },
+        {
+            // E2E breakpoint-cycle tests: vscode-dbg fixture project, manager 91.
+            label: 'debuggerBpCycleE2e',
+            files: 'out/test/integration/debugger-bp-cycle-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
+        },
+        {
+            // E2E step-commands tests: vscode-dbg fixture project, manager 92.
+            label: 'debuggerStepCommandsE2e',
+            files: 'out/test/integration/debugger-step-commands-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
+        },
+        {
+            // E2E library-breakpoint tests: vscode-dbg fixture project, manager 93.
+            label: 'debuggerLibraryBpE2e',
+            files: 'out/test/integration/debugger-library-bp-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
+        },
+        {
+            // E2E stop-on-entry tests: vscode-dbg fixture project, manager 94 (manual).
+            label: 'debuggerStopOnEntryE2e',
+            files: 'out/test/integration/debugger-stop-on-entry-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
         }
     ]
 });

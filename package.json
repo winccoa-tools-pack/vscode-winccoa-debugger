@@ -6,7 +6,7 @@
   "version": "0.1.0",
   "author": "winccoa-tools-pack",
   "license": "MIT",
-  "icon": "resources/icon.png",
+  "icon": "resources/winccoa-debugger-512.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/winccoa-tools-pack/<your-repository>"
@@ -301,7 +301,13 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vscode-test --label unitTests",
     "test:integration": "vscode-test --label integrationTests",
-    "test:e2e": "npm run compile:tsc && vscode-test --label debuggerE2eTests",
+    "setup:e2e-links": "node scripts/setup-e2e-links.mjs",
+    "test:e2e": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerE2eTests",
+    "test:e2e:bpcycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e",
+    "test:e2e:step": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStepCommandsE2e",
+    "test:e2e:libbp": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLibraryBpE2e",
+    "test:e2e:soe": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStopOnEntryE2e",
+    "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:coverage": "npm run test:unit:coverage && npm run test:integration:coverage",
@@ -309,7 +315,8 @@
     "style-check": "npm run format:check && npm run lint"
   },
   "dependencies": {
-    "@winccoa-tools-pack/winccoa-debug-adapter": "file:../../npm-winccoa-repos/npm-winccoa-debugger"
+    "@winccoa-tools-pack/winccoa-debug-adapter": "file:../../npm-winccoa-repos/npm-winccoa-debugger",
+    "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -354,8 +361,5 @@
   },
   "config": {
     "winccoaImage": "mpokornyetm/winccoa-tools-pack-npm-winccoa-core:npm-winccoa-core"
-  },
-  "dependencies": {
-    "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
   }
 }

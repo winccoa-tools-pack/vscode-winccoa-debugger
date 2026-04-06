@@ -11,6 +11,9 @@
     {
       "name": "DevEnv3.21",
       "path": "../../wincc_proj/DevEnv3.21"
+    },
+    {
+      "path": "src/test/fixtures/projects/runnable"
     }
   ],
   "settings": {
@@ -32,7 +35,8 @@
       "**/dist": true,
       "**/out": true,
       "**/bin": true
-    }
+    },
+    "winccoaLogviewer.autoClearOnScriptExecution": false
   },
   "launch": {
     "version": "0.2.0",

@@ -1,0 +1,441 @@
+WCCILpmon    (1), 2026.04.06 16:30:54.586, SYS,  INFO,        1, Manager Start, WAIT_MODE
+WCCILpmon    (1), 2026.04.06 16:30:56.609, SYS,  INFO,       20/pmon, Got START_ALL command from ::1, starting the project
+WCCILpmon    (1), 2026.04.06 16:30:56.611, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 16:30:56.813, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 16:30:57.114, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 17:19:13.652, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:19:13.652, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:19:13.789, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:19:14.820, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:19:14.820, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:20:12.608, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:20:12.837, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:20:13.092, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:20:13.394, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:13.639, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:20:13.641, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:13.894, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:20:13.897, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:14.154, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:20:14.155, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:14.415, SYS,  INFO,       12/pmon, Manager WCCOActrl(1) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:20:14.419, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:20:14.674, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:20:14.674, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:20:14.945, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:20:14.946, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:15.100, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:16.141, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:20:16.141, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:20:25.224, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:20:25.465, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:20:25.697, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:20:26.099, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:26.429, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:20:26.431, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:26.748, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:20:26.750, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:27.076, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:20:27.078, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:27.337, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:20:27.338, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:27.485, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:28.512, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:20:28.512, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:20:45.938, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:20:46.248, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:20:46.605, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:20:47.008, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:47.315, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:20:47.317, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:47.602, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:20:47.604, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:47.880, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:20:47.882, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:20:48.163, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:20:48.163, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:48.290, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:20:49.317, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:20:49.318, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:21:03.826, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:21:04.141, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:21:04.493, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:21:04.895, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:05.213, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:05.215, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:05.544, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:05.547, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:05.862, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:05.864, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:06.194, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:21:06.194, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:06.331, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:07.363, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:21:07.363, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:21:20.194, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:21:20.485, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:21:20.871, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:21:21.272, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:21.579, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:21.582, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:21.880, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:21.882, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:22.167, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:22.169, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:22.473, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:21:22.473, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:22.607, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:23.632, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:21:23.632, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:21:35.478, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:21:35.784, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:21:36.156, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:21:36.558, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:36.894, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:36.896, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:37.209, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:37.211, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:37.520, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:37.522, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:37.852, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:21:37.853, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:37.993, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:21:39.020, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:21:39.020, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:21:47.272, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:21:47.496, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:21:47.753, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:21:48.054, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:48.322, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:48.325, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:48.579, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:48.581, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:48.849, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:48.851, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:21:49.132, SYS,  INFO,       12/pmon, Manager WCCOActrl(1) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:21:49.133, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:21:49.415, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:49.417, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:21:49.697, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:49.699, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:21:49.988, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:49.989, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:21:50.291, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:21:50.294, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 17:21:50.632, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(4) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:21:50.634, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 17:21:50.972, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(4) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:21:50.974, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 17:21:51.404, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(4) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:21:51.406, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 17:21:51.805, SYS,  INFO,       12/pmon, Manager WCCOActrl(4) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:21:51.806, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 17:22:07.911, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:22:07.911, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:08.044, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:09.070, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:22:09.070, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:22:26.845, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:22:27.243, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:22:27.708, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:22:28.414, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:22:28.855, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:22:28.857, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:22:29.241, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:22:29.242, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:29.374, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:30.406, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:22:30.407, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:22:42.555, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:22:42.963, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:22:43.427, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:22:44.030, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:22:44.415, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:22:44.417, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:22:44.748, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:22:44.749, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:22:45.147, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:22:45.147, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:45.303, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:22:46.326, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:22:46.327, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:24:15.720, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:24:16.042, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:24:16.390, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:24:16.793, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:17.113, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:24:17.115, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:17.422, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:24:17.424, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:17.715, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:24:17.716, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:18.019, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:24:18.019, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:18.157, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:19.183, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:24:19.183, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:24:24.847, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:24:25.070, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:24:25.326, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:24:25.730, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:26.047, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:24:26.049, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:26.359, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:24:26.361, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:26.686, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:24:26.687, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:27.103, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:24:27.104, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:27.255, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:28.281, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:24:28.282, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:24:54.161, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:24:54.450, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:24:54.832, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:24:55.234, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:55.575, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:24:55.577, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:55.916, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:24:55.919, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:56.236, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:24:56.240, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:24:56.561, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:24:56.562, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:56.691, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:24:57.730, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:24:57.731, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:39:08.194, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:39:08.448, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:39:08.778, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:39:09.281, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:09.647, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:39:09.650, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:09.993, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:39:09.996, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:10.324, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:39:10.326, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:10.648, SYS,  INFO,       12/pmon, Manager WCCOActrl(1) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:39:10.649, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:39:10.908, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:39:10.908, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:39:11.049, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:39:12.082, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:39:12.082, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:39:41.704, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:39:41.927, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:39:42.180, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:39:42.584, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:42.923, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:39:42.924, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:43.250, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:39:43.251, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:43.571, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:39:43.572, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:39:43.903, SYS,  INFO,       12/pmon, Manager WCCOActrl(1) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:39:43.905, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:39:44.218, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:39:44.222, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:39:44.588, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:39:44.589, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:39:44.723, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:39:45.754, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:39:45.754, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:43:28.696, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:43:29.064, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:43:29.553, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:43:30.261, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:43:30.701, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:43:30.704, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:43:31.136, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:43:31.138, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:43:31.537, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:43:31.541, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:43:31.948, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:43:31.948, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:43:32.113, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:43:33.183, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:43:33.184, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:44:38.723, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:44:39.149, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:44:39.761, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:44:40.677, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:44:41.176, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:44:41.178, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:44:41.660, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(1) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:44:41.662, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:44:42.112, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:44:42.113, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:44:42.283, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:44:43.325, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:44:43.326, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 17:56:03.929, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 17:56:04.153, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 17:56:04.410, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 17:56:04.817, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 17:56:05.119, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:56:05.328, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 17:56:05.329, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:56:05.543, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 17:56:05.545, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:56:05.775, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 17:56:05.775, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 17:56:05.995, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 17:56:05.997, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 17:56:06.298, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 17:56:06.384, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 17:56:06.384, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:56:06.384, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:56:07.224, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:56:07.347, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 17:56:08.367, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 17:56:08.368, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 18:01:14.773, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 18:01:14.994, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 18:01:15.256, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 18:01:15.558, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 18:01:15.901, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:16.131, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:01:16.132, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:16.356, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:01:16.357, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:16.586, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:01:16.588, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:16.814, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:01:16.815, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 18:01:17.116, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 18:01:17.274, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(3) at index 5
+WCCILpmon    (1), 2026.04.06 18:01:17.275, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:17.486, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:01:17.487, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:17.785, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:01:17.788, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:18.001, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:01:18.001, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:01:18.218, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:01:21.070, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:01:21.071, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 4 -num 2 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
+WCCILpmon    (1), 2026.04.06 18:01:23.212, SYS,  INFO,       25/pmon, Got STOP command (SIGTERM) from ::1, stopping the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:01:23.212, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:23.291, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 18:01:23.291, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:23.291, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:23.291, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:24.057, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:24.189, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:01:25.208, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 18:01:25.209, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 18:08:31.921, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 18:08:32.143, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 18:08:32.406, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 18:08:32.708, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 18:08:33.010, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:08:33.212, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:08:33.213, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:08:33.425, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:08:33.427, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:08:33.639, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:08:33.640, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:08:33.850, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:08:33.851, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 18:08:34.152, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 18:08:52.770, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 18:08:52.770, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:08:52.770, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:08:53.090, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:08:53.215, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:08:54.242, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 18:08:54.242, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 18:28:05.882, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 18:28:06.105, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 18:28:06.370, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 18:28:06.774, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 18:28:07.077, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:07.342, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:28:07.343, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:07.566, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:28:07.567, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:07.783, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:28:07.784, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:08.007, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:28:08.008, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 18:28:08.115, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(3) at index 5
+WCCILpmon    (1), 2026.04.06 18:28:08.116, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:08.345, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:28:08.347, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:08.576, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:28:08.577, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:08.789, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:28:08.791, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:09.003, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:28:09.003, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 18:28:13.876, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:28:13.877, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 4 -num 2 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
+WCCILpmon    (1), 2026.04.06 18:28:16.007, SYS,  INFO,       25/pmon, Got STOP command (SIGTERM) from ::1, stopping the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:28:16.007, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:16.064, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 18:28:16.064, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:16.064, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:16.064, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:17.057, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:17.190, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:28:18.221, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 18:28:18.221, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 18:28:44.910, SYS,  INFO,        1, Manager Start, START_MODE
+WCCILpmon    (1), 2026.04.06 18:28:45.213, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 18:28:45.589, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 18:28:46.401, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 18:28:46.906, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:47.278, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:28:47.279, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:47.659, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:28:47.661, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:48.151, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:28:48.154, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:28:48.591, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:28:48.593, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 18:28:48.994, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 18:29:08.145, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(3) at index 5
+WCCILpmon    (1), 2026.04.06 18:29:08.147, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:29:08.532, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 18:29:08.533, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:29:08.913, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 18:29:08.914, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:29:09.266, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 18:29:09.267, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 18:29:09.605, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 18:29:14.859, SYS,  INFO,       24/pmon, Got START command from ::1, starting the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:29:14.862, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 4 -num 2 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
+WCCILpmon    (1), 2026.04.06 18:29:17.281, SYS,  INFO,       25/pmon, Got STOP command (SIGTERM) from ::1, stopping the manager WCCOActrl(2) at index 4
+WCCILpmon    (1), 2026.04.06 18:29:17.281, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:17.409, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 18:29:17.409, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:17.409, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(2) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:17.410, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:18.023, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:18.181, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 18:29:19.216, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 18:29:19.216, SYS,  INFO,        2, Manager Stop
+WCCILpmon    (1), 2026.04.06 19:33:23.263, SYS,  INFO,        1, Manager Start, WAIT_MODE
+WCCILpmon    (1), 2026.04.06 19:33:25.285, SYS,  INFO,       20/pmon, Got START_ALL command from ::1, starting the project
+WCCILpmon    (1), 2026.04.06 19:33:25.286, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILdataSQLite" -PROJ "runnable" -pmonIndex 1 
+WCCILpmon    (1), 2026.04.06 19:33:25.582, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCILevent" -PROJ "runnable" -pmonIndex 2 
+WCCILpmon    (1), 2026.04.06 19:33:25.985, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 3 -num 1 bp_basic_loop.ctl
+WCCILpmon    (1), 2026.04.06 19:33:26.149, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 19:33:26.394, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #1
+WCCILpmon    (1), 2026.04.06 19:33:26.396, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 19:33:26.626, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #2
+WCCILpmon    (1), 2026.04.06 19:33:26.627, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 19:33:26.878, SYS,  INFO,       11/pmon, Detected stopped manager WCCOActrl(3) - restarting it #3
+WCCILpmon    (1), 2026.04.06 19:33:26.879, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 5 -num 3 call_library_function.ctl
+WCCILpmon    (1), 2026.04.06 19:33:27.222, SYS,  INFO,       12/pmon, Manager WCCOActrl(3) restarting too rapidly - giving up restarting
+WCCILpmon    (1), 2026.04.06 19:33:27.223, SYS,  INFO,        1, Manager Start, "/opt/WinCC_OA/3.21/bin/WCCOActrl" -PROJ "runnable" -pmonIndex 6 -num 4 callstack_depth3.ctl
+WCCILpmon    (1), 2026.04.06 19:33:27.624, SYS,  INFO,        9/pmon, The project is up and running. Entering monitor mode
+WCCILpmon    (1), 2026.04.06 19:33:30.199, SYS,  INFO,       21/pmon, Got STOP_ALL command from ::1, stopping the project
+WCCILpmon    (1), 2026.04.06 19:33:30.200, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(4) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 19:33:30.200, SYS,  INFO,       17/pmon, Stopping Manager WCCOActrl(1) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 19:33:31.223, SYS,  INFO,       17/pmon, Stopping Manager WCCILevent(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 19:33:31.361, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 19:33:32.260, SYS,  INFO,        3/pmon, Got shutdown command - stopping the project and terminating
+WCCILpmon    (1), 2026.04.06 19:33:32.260, SYS,  INFO,       17/pmon, Stopping Manager WCCILdataSQLite(0) with signal SIGTERM
+WCCILpmon    (1), 2026.04.06 19:33:32.271, SYS,  INFO,       15/pmon, Completely stopped the project - terminating
+WCCILpmon    (1), 2026.04.06 19:33:32.271, SYS,  INFO,        2, Manager Stop
