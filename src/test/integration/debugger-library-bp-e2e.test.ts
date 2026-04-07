@@ -118,6 +118,7 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
         vscode.debug.addBreakpoints(addedBreakpoints);
 
         try {
+            await lifecycle.startManagerByNum(LIB_MANAGER);
             await helper.startSession(
                 undefined,
                 buildLaunchConfig('E2E: library BP'),
@@ -167,6 +168,7 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(LIB_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -188,6 +190,7 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
         vscode.debug.addBreakpoints(addedBreakpoints);
 
         try {
+            await lifecycle.startManagerByNum(LIB_MANAGER);
             await helper.startSession(
                 undefined,
                 buildLaunchConfig('E2E: main BP with lib'),
@@ -212,6 +215,7 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(LIB_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });

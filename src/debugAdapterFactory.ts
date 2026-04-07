@@ -1,26 +1,18 @@
 /**
  * WinCCDebugAdapterDescriptorFactory
  *
- * Factory that creates debug adapter descriptors for WinCC OA debugging sessions.
+ * Connects VS Code to the WinCC OA debug adapter TCP server.
  *
- * The adapter is started via WinCC OA's bootstrap.js so that the native
- * ConnectionBinding is initialised with proper pmon authentication before our
- * TypeScript code runs.  bootstrap.js redirects stdout → stderr, so the DAP
- * stream cannot use stdin/stdout.  Instead the adapter opens a TCP server on a
- * free local port and VS Code connects to it via DebugAdapterServer.
+ * The adapter process is started and managed by WinCC OA pmon as a `node`
+ * manager entry in the project's progs file.  The adapter listens on a fixed
+ * TCP port (default 7474) and VS Code connects via DebugAdapterServer.
  *
- * The adapter cli.js is resolved in this order:
- *  1. dist/adapter/cli.js  — a symlink created by `make test-local`.
- *  2. winccoa.debugger.adapterCliPath  — VS Code setting for manual override.
- *
- * bootstrap.js path defaults to the WinCC OA 3.21 installation; override via
- * the "winccoa.debugger.bootstrapPath" VS Code setting.
+ * The launch configuration must contain `adapterPort: <number>` — this is
+ * populated by WinccoaProjectLifecycle (tests) or the extension's launch
+ * provider (production).
  */
 
-import * as cp from 'child_process';
-import * as fs from 'fs';
 import * as net from 'net';
-import * as path from 'path';
 import * as vscode from 'vscode';
 
 /** Milliseconds to wait for the adapter's TCP server to become available. */
@@ -31,32 +23,12 @@ const ADAPTER_READY_POLL_MS = 100;
 export class WinCCDebugAdapterDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory, vscode.Disposable
 {
-  /** Active adapter processes keyed by debug session ID. */
-  private readonly children = new Map<string, cp.ChildProcess>();
-
-  constructor(context: vscode.ExtensionContext) {
-    // Kill the adapter process as soon as VS Code terminates the debug session.
-    context.subscriptions.push(
-      vscode.debug.onDidTerminateDebugSession((session) => {
-        this.killChild(session.id);
-      }),
-    );
+  constructor(_context: vscode.ExtensionContext) {
+    // Adapter lifecycle is managed by pmon — nothing to subscribe to.
   }
 
   dispose(): void {
-    // Kill all remaining adapters when the extension deactivates.
-    for (const id of [...this.children.keys()]) {
-      this.killChild(id);
-    }
-  }
-
-  private killChild(sessionId: string): void {
-    const child = this.children.get(sessionId);
-    if (!child) { return; }
-    this.children.delete(sessionId);
-    if (!child.killed) {
-      child.kill();
-    }
+    // Adapter lifecycle is managed by pmon — nothing to dispose.
   }
 
   async createDebugAdapterDescriptor(
@@ -64,101 +36,19 @@ export class WinCCDebugAdapterDescriptorFactory
     _executable: vscode.DebugAdapterExecutable | undefined,
   ): Promise<vscode.DebugAdapterDescriptor> {
     const config = session.configuration as {
-      project?: string;
-      system?: string;
       adapterPort?: number;
     };
 
-    // When adapterPort is set the adapter is already running as a pmon manager.
-    // Just connect — no spawn needed, no bootstrap required.
-    if (config.adapterPort) {
-      await this.waitForPort(config.adapterPort);
-      return new vscode.DebugAdapterServer(config.adapterPort, '127.0.0.1');
-    }
-
-    // Fallback: spawn adapter via bootstrap.js (requires WinCC OA installation).
-    const adapterCliPath = this.resolveAdapterCli();
-    const bootstrapPath = this.resolveBootstrap();
-    const tcpPort = await this.findFreePort();
-
-    const spawnArgs = [
-      bootstrapPath,
-      '-PROJ', config.project || config.system || 'DevEnv3.21',
-      '-pmonIndex', '99',
-      adapterCliPath,
-      '--tcp-port', String(tcpPort),
-    ];
-
-    const child = cp.spawn(process.execPath, spawnArgs, {
-      detached: false,
-      stdio: ['ignore', 'inherit', 'inherit'],
-    });
-
-    this.children.set(session.id, child);
-
-    child.on('error', (err) => {
-      void vscode.window.showErrorMessage(
-        `WinCC OA debug adapter failed to start: ${err.message}`,
+    const port = config.adapterPort;
+    if (!port) {
+      throw new Error(
+        'WinCC OA debug adapter: adapterPort is required in launch configuration.\n' +
+        'The adapter must be started as a pmon-managed node manager before debugging.',
       );
-    });
-
-    child.on('exit', () => {
-      this.children.delete(session.id);
-    });
-
-    await this.waitForPort(tcpPort);
-
-    return new vscode.DebugAdapterServer(tcpPort, '127.0.0.1');
-  }
-
-  private resolveAdapterCli(): string {
-    // 1. Bundled / symlinked adapter (created by make test-local)
-    const bundled = path.join(__dirname, 'adapter', 'cli.js');
-    if (fs.existsSync(bundled)) {
-      return bundled;
     }
 
-    // 2. Developer override via VS Code setting
-    const configured = vscode.workspace
-      .getConfiguration('winccoa.debugger')
-      .get<string>('adapterCliPath');
-    if (configured && fs.existsSync(configured)) {
-      return configured;
-    }
-
-    throw new Error(
-      'WinCC OA debug adapter not found.\n\n' +
-        'Either run `make test-local` to set up the dev environment, ' +
-        'or set "winccoa.debugger.adapterCliPath" in your VS Code settings ' +
-        'to the absolute path of the adapter cli.js file.',
-    );
-  }
-
-  private resolveBootstrap(): string {
-    const configured = vscode.workspace
-      .getConfiguration('winccoa.debugger')
-      .get<string>('bootstrapPath');
-    if (configured) {
-      return configured;
-    }
-    return '/opt/WinCC_OA/3.21/javascript/winccoa-manager/lib/bootstrap.js';
-  }
-
-  private findFreePort(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-      server.listen(0, '127.0.0.1', () => {
-        const address = server.address();
-        if (!address || typeof address === 'string') {
-          server.close();
-          reject(new Error('Could not determine free port'));
-          return;
-        }
-        const port = address.port;
-        server.close(() => resolve(port));
-      });
-      server.on('error', reject);
-    });
+    await this.waitForPort(port);
+    return new vscode.DebugAdapterServer(port, '127.0.0.1');
   }
 
   private waitForPort(port: number): Promise<void> {

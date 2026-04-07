@@ -83,6 +83,28 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 90000
             }
+        },
+        {
+            // E2E spurious-stops regression: context requests must not trigger extra StoppedEvents.
+            label: 'debuggerSpuriousStopsE2e',
+            files: 'out/test/integration/debugger-spurious-stops-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
+        },
+        {
+            // E2E race-condition regression: concurrent setBreakpoints must not duplicate BPs.
+            label: 'debuggerRaceConditionE2e',
+            files: 'out/test/integration/debugger-race-condition-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
         }
     ]
 });

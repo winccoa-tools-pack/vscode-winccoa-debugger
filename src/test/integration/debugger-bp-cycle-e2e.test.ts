@@ -112,6 +112,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         addBreakpoint(scriptPath, BP_LINE);
 
         try {
+            await lifecycle.startManagerByNum(BP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: bp line 13'), 25_000);
 
             const stopped = await helper.waitForEvent('stopped', 20_000);
@@ -122,6 +123,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -138,6 +140,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         addBreakpoint(scriptPath, BP_LINE);
 
         try {
+            await lifecycle.startManagerByNum(BP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: stack frame'), 25_000);
 
             const stopped = await helper.waitForEvent('stopped', 20_000);
@@ -160,6 +163,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -176,6 +180,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         addBreakpoint(scriptPath, BP_LINE);
 
         try {
+            await lifecycle.startManagerByNum(BP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: variables'), 25_000);
 
             const stopped = await helper.waitForEvent('stopped', 20_000);
@@ -209,6 +214,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -225,6 +231,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         addBreakpoint(scriptPath, BP_LINE);
 
         try {
+            await lifecycle.startManagerByNum(BP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: continue'), 25_000);
 
             const stop1 = await helper.waitForEvent('stopped', 20_000);
@@ -254,6 +261,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -270,6 +278,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         addBreakpoint(scriptPath, BP_LINE);
 
         try {
+            await lifecycle.startManagerByNum(BP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: spurious stops'), 25_000);
 
             const stop1 = await helper.waitForEvent('stopped', 20_000);
@@ -308,6 +317,7 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });

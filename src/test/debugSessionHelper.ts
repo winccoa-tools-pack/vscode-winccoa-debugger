@@ -50,11 +50,18 @@ export class DebugSessionHelper {
     // ─── public API ──────────────────────────────────────────────────────────
 
     /**
-     * Starts a debug session and waits until the adapter has sent
-     * its first `initialized` event (i.e. it is ready for configuration).
+     * Starts a debug session and waits until:
+     *   1. The VS Code session object exists (`onDidStartDebugSession`)
+     *   2. The adapter has sent its `initialized` event
+     *   3. VS Code has finished sending breakpoints and `configurationDone`
+     *      (signalled by the adapter's resulting `continued` or `stopped` event)
      *
      * IMPORTANT: Call `vscode.debug.addBreakpoints()` BEFORE this so that
      * VS Code sends `setBreakpoints` automatically after `InitializedEvent`.
+     *
+     * After this returns, all registered breakpoints have been sent to the
+     * adapter and the adapter is ready. The caller can then start the
+     * target CTRL manager via `lifecycle.startManagerByNum(n)`.
      */
     async startSession(
         workspaceFolder: vscode.WorkspaceFolder | undefined,
@@ -98,6 +105,56 @@ export class DebugSessionHelper {
         }
 
         await startedPromise;
+
+        // Wait for configurationDone cycle to complete:
+        // adapter sends 'initialized' → VS Code sends setBreakpoints → configurationDone
+        // → adapter sends 'continued' (or 'stopped' for stopOnEntry).
+        // We peek at received events without consuming them so waitForEvent() still works.
+        await this.waitForConfigurationDone(timeoutMs);
+    }
+
+    /**
+     * Waits until the adapter has processed `configurationDone` — indicated by
+     * a `continued` or `stopped` event (whichever comes first after `initialized`).
+     * Does NOT consume the event so `waitForEvent()` callers still see it.
+     */
+    private waitForConfigurationDone(timeoutMs: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const deadline = Date.now() + timeoutMs;
+
+            const check = () => {
+                // After configurationDone the adapter always sends either
+                // 'continued' (normal attach) or 'stopped' (stopOnEntry).
+                const done = this.received.some(
+                    (m) => m.type === 'event' && (m.event === 'continued' || m.event === 'stopped'),
+                );
+                if (done) {
+                    resolve();
+                    return true;
+                }
+                return false;
+            };
+
+            if (check()) return;
+
+            const timer = setTimeout(() => {
+                const pendingIdx = this.waiters.indexOf(poll);
+                if (pendingIdx !== -1) this.waiters.splice(pendingIdx, 1);
+                reject(new Error(
+                    `Timed out (${timeoutMs}ms) waiting for configurationDone cycle. ` +
+                    `Received: ${this.received.filter(m => m.type === 'event').map(m => m.event).join(', ')}`,
+                ));
+            }, deadline - Date.now());
+
+            const poll = () => {
+                if (check()) {
+                    clearTimeout(timer);
+                } else {
+                    this.waiters.push(poll);
+                }
+            };
+            this.waiters.push(poll);
+        });
     }
 
     /**

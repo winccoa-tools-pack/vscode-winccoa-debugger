@@ -71,6 +71,10 @@ const POLL_INTERVAL_MS = 500;
 const STARTUP_TIMEOUT_MS = 30_000;
 /** Maximum time to wait for WinCC OA to stop */
 const STOP_TIMEOUT_MS = 15_000;
+/** TCP port on which the pmon-managed debug adapter listens (matches cli.ts default 7474) */
+const ADAPTER_PORT = 7474;
+/** Maximum time to wait for the debug adapter TCP server to become available */
+const ADAPTER_READY_TIMEOUT_MS = 10_000;
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -196,12 +200,24 @@ export class WinccoaProjectLifecycle {
             );
         }
         console.log(`[WinccoaProjectLifecycle] WinCC OA ready at ${this.host}:${this.port}`);
+
+        // The node debugAdapter.js manager is declared as 'once' in progs — pmon starts it
+        // automatically together with the project. Just wait for its TCP port.
+        const adapterReady = await waitForPort('127.0.0.1', ADAPTER_PORT, ADAPTER_READY_TIMEOUT_MS);
+        if (!adapterReady) {
+            throw new Error(
+                `[WinccoaProjectLifecycle] Debug adapter did not become reachable on ` +
+                `127.0.0.1:${ADAPTER_PORT} within ${ADAPTER_READY_TIMEOUT_MS / 1000}s`,
+            );
+        }
+        console.log(`[WinccoaProjectLifecycle] Debug adapter ready on port ${ADAPTER_PORT}`);
     }
 
     /**
      * Stop pmon and wait for port to close.
-     * The pvssInst.conf registration is kept by default so the project remains
-     * visible in VS Code Project Admin.  Set WINCCOA_UNREGISTER_ON_STOP=1 to remove it.
+     * If this lifecycle instance registered the project (didRegisterProject=true),
+     * the pvssInst.conf entry is always removed so integration tests leave a clean state.
+     * If the project was already registered before start() ran, no registration change is made.
      */
     public async stop(): Promise<void> {
         if (process.env['WINCCOA_EXTERNAL'] === '1') return;
@@ -222,7 +238,7 @@ export class WinccoaProjectLifecycle {
         await waitForPortClosed(this.host, this.port, STOP_TIMEOUT_MS);
         console.log('[WinccoaProjectLifecycle] WinCC OA stopped');
 
-        if (this.didRegisterProject && process.env['WINCCOA_UNREGISTER_ON_STOP'] === '1') {
+        if (this.didRegisterProject) {
             console.log(`[WinccoaProjectLifecycle] Unregistering project "${PROJECT_NAME}" …`);
             await pmon.unregisterProject(PROJECT_NAME);
             this.didRegisterProject = false;
@@ -279,6 +295,47 @@ export class WinccoaProjectLifecycle {
         await pmon.stopManager(PROJECT_NAME, idx);
     }
 
+    // ─── private: adapter manager ──────────────────────────────────────────────
+
+    /**
+     * Starts the pmon-managed `node debugAdapter.js` manager.
+     * Searches the manager list for an entry whose options include 'debugAdapter.js'.
+     */
+    private async startAdapterManager(): Promise<void> {
+        const info = this.resolveInstallation()!;
+        const pmon = new PmonComponent();
+        pmon.setVersion(info.version);
+
+        const list = await pmon.getManagerOptionsList(PROJECT_NAME);
+        const idx = list.findIndex((m) => m.startOptions?.includes('debugAdapter.js'));
+        if (idx < 0) {
+            throw new Error(
+                `[WinccoaProjectLifecycle] No debugAdapter.js manager found in manager list`,
+            );
+        }
+        console.log(`[WinccoaProjectLifecycle] Starting debugAdapter.js manager (index ${idx}) …`);
+        await pmon.startManager(PROJECT_NAME, idx);
+    }
+
+    /**
+     * Stops the pmon-managed `node debugAdapter.js` manager.
+     * No-op if the manager is not found in the list.
+     */
+    private async stopAdapterManager(): Promise<void> {
+        const info = this.resolveInstallation()!;
+        const pmon = new PmonComponent();
+        pmon.setVersion(info.version);
+
+        const list = await pmon.getManagerOptionsList(PROJECT_NAME);
+        const idx = list.findIndex((m) => m.startOptions?.includes('debugAdapter.js'));
+        if (idx < 0) {
+            console.log(`[WinccoaProjectLifecycle] No debugAdapter.js manager found — skipping stop`);
+            return;
+        }
+        console.log(`[WinccoaProjectLifecycle] Stopping debugAdapter.js manager (index ${idx}) …`);
+        await pmon.stopManager(PROJECT_NAME, idx);
+    }
+
     /**
      * Returns the project name used for all debug launch configurations.
      */
@@ -305,15 +362,15 @@ export class WinccoaProjectLifecycle {
         host: string;
         port: number;
         winCCOAVersion: string;
-        adapterManagerNumber: number;
+        adapterPort: number;
     } {
         return {
             project: PROJECT_NAME,
-            system: PROJECT_NAME,
+            system: process.env['WINCCOA_TEST_SYSTEM'] ?? 'System1',
             host: this.host,
             port: this.port,
             winCCOAVersion: this.getVersion(),
-            adapterManagerNumber: 99,
+            adapterPort: ADAPTER_PORT,
         };
     }
 
@@ -364,7 +421,7 @@ export class WinccoaProjectLifecycle {
 
     private restoreConfigPlaceholders(): void {
         if (process.env['WINCCOA_EXTERNAL'] === '1') return;
-        if (!this.didRegisterProject || process.env['WINCCOA_UNREGISTER_ON_STOP'] !== '1') return;
+        if (!this.didRegisterProject) return;
 
         const info = this.resolveInstallation();
         if (!info) return;

@@ -106,6 +106,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         addBreakpoint(scriptPath, BP_DEEP);
 
         try {
+            await lifecycle.startManagerByNum(STEP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: step-next'), 25_000);
 
             const stop1 = await helper.waitForEvent('stopped', 20_000);
@@ -138,8 +139,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
-            addedBreakpoints = [];
-            await helper.dispose();
+            addedBreakpoints = [];            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});            await helper.dispose();
         }
     });
 
@@ -155,6 +155,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         addBreakpoint(scriptPath, BP_CALL); // line 31: compute_outer calls compute_inner
 
         try {
+            await lifecycle.startManagerByNum(STEP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: step-into'), 25_000);
 
             const stop1 = await helper.waitForEvent('stopped', 20_000);
@@ -194,6 +195,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
@@ -210,6 +212,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         addBreakpoint(scriptPath, BP_DEEP); // line 19: deepest frame
 
         try {
+            await lifecycle.startManagerByNum(STEP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: step-out'), 25_000);
 
             const stop1 = await helper.waitForEvent('stopped', 20_000);
@@ -251,8 +254,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
-            addedBreakpoints = [];
-            await helper.dispose();
+            addedBreakpoints = [];            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});            await helper.dispose();
         }
     });
 
@@ -266,6 +268,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         const helper = new DebugSessionHelper('winccoa');
 
         try {
+            await lifecycle.startManagerByNum(STEP_MANAGER);
             await helper.startSession(undefined, buildLaunchConfig('E2E: pause'), 25_000);
 
             // Give script time to reach its loop
@@ -290,6 +293,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             const stoppedLine = st.stackFrames[0].line;
             assert.ok(stoppedLine > 0, `stopped line must be positive, got ${stoppedLine}`);
         } finally {
+            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
