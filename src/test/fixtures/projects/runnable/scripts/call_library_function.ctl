@@ -9,10 +9,11 @@ main()
 {
   int counter = 0;
   int sum = 0;
+
   while (true)
   {
     sum = add_two_integers(counter, 10);  // line 14 — BP_MAIN_LINE
-    DebugN("call_library_function: sum = " + sum);
+    //DebugN("call_library_function: sum = " + sum);
     counter++;
     delay(1);
   }

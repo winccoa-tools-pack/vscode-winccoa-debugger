@@ -1,4 +1,4 @@
-.PHONY: help install build clean watch package test test-local
+.PHONY: help install build clean watch package test test-local register-project unregister-project
 
 # Variables
 EXTENSION_NAME := vscode-winccoa-debugger
@@ -38,13 +38,15 @@ endif
 # Default target
 help:
 	@echo "Available targets:"
-	@echo "  make install     - Install all dependencies"
-	@echo "  make build       - Build extension"
-	@echo "  make clean       - Remove build artifacts"
-	@echo "  make watch       - Watch mode for development"
-	@echo "  make package     - Package extension as .vsix"
-	@echo "  make test        - Run tests"
-	@echo "  make test-local  - Build, package with local stamp, install in VS Code, open workspace"
+	@echo "  make install          - Install all dependencies"
+	@echo "  make build            - Build extension"
+	@echo "  make clean            - Remove build artifacts"
+	@echo "  make watch            - Watch mode for development"
+	@echo "  make package          - Package extension as .vsix"
+	@echo "  make test             - Run tests"
+	@echo "  make test-local       - Build, package with local stamp, install in VS Code, open workspace"
+	@echo "  make register-project - Register fixture project in pvssInst.conf (for manual VS Code testing)"
+	@echo "  make unregister-project - Remove fixture project from pvssInst.conf"
 	@echo ""
 	@echo "Local Test Configuration:"
 	@echo "  TEST_WORKSPACE        - Path to test workspace (default: DevEnv.code-workspace)"
@@ -91,3 +93,15 @@ test:
 # Local test target - Build, package with local stamp, install in VS Code, open workspace
 test-local: build
 	@node scripts/test-local.js $(BIN_DIR) $(EXTENSION_NAME) $(VERSION) $(EXT_ID) $(CODE_BIN) $(TEST_WORKSPACE)
+
+# Register the "runnable" fixture project in pvssInst.conf so it appears in
+# the VS Code Project Admin extension and can be launched manually with F5.
+# Run 'npm run compile' first if out/test/fixtures/ is missing.
+register-project: build
+	@echo "Registering WinCC OA fixture project 'runnable'…"
+	@node scripts/register-project.js
+
+# Remove the "runnable" fixture project from pvssInst.conf.
+unregister-project:
+	@echo "Unregistering WinCC OA fixture project 'runnable'…"
+	@node scripts/unregister-project.js

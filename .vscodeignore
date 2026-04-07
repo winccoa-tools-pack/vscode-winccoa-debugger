@@ -14,6 +14,8 @@
 *.map
 Makefile
 .markdownlint.json
+out/**
+dist/adapter
 
 # Source and configs
 src/**
