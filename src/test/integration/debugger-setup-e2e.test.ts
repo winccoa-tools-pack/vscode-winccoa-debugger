@@ -226,13 +226,29 @@ suite('WinCC OA Debugger — E2E Setup Verification', function () {
                 `Check that pvssInst.conf contains the fixture project path.`,
         );
 
-        // The Project Admin stores the project ID — for our fixture it is the
-        // project directory name ('runnable') or whatever pmon reports.
-        const target = runningProjects[0] as Record<string, unknown>;
+        console.log(
+            `[setup-e2e] All running projects: ${JSON.stringify(runningProjects.map((p) => ({ id: (p as Record<string, unknown>)['id'], name: (p as Record<string, unknown>)['name'] })))}`,
+        );
+
+        // Find the fixture project by name — do NOT just take [0] because
+        // other WinCC OA projects (e.g. testproject20) may appear first in the list.
+        const target = (runningProjects as Record<string, unknown>[]).find(
+            (p) =>
+                (p['name'] as string | undefined)?.toLowerCase() === projectName.toLowerCase() ||
+                (p['id'] as string | undefined)?.toLowerCase() === projectName.toLowerCase(),
+        );
+
+        assert.ok(
+            target !== undefined,
+            `Could not find fixture project "${projectName}" in running projects: ` +
+                `[${(runningProjects as Record<string, unknown>[]).map((p) => p['name'] ?? p['id']).join(', ')}]. ` +
+                `Ensure the runnable fixture project is started.`,
+        );
+
         const targetId = target['id'] as string | undefined;
 
         console.log(
-            `[setup-e2e] Found running project: id="${targetId}" name="${target['name']}"`,
+            `[setup-e2e] Found fixture project: id="${targetId}" name="${target['name']}"`,
         );
 
         assert.ok(targetId, 'Running project must have a string "id" field');
