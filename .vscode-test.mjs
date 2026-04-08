@@ -41,6 +41,19 @@ export default defineConfig({
             }
         },
         {
+            // Foundation setup test — must pass before any feature test.
+            // workspaceFolder points to the compiled fixture project so VS Code
+            // Explorer shows scripts/, config/ etc. during the test run.
+            label: 'debuggerSetupE2e',
+            files: 'out/test/integration/debugger-setup-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './out/test/fixtures/projects/runnable',
+            mocha: {
+                ui: 'tdd',
+                timeout: 180000
+            }
+        },
+        {
             // E2E breakpoint-cycle tests: vscode-dbg fixture project, manager 91.
             label: 'debuggerBpCycleE2e',
             files: 'out/test/integration/debugger-bp-cycle-e2e.test.js',

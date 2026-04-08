@@ -303,6 +303,7 @@
     "test:integration": "vscode-test --label integrationTests",
     "setup:e2e-links": "node scripts/setup-e2e-links.mjs",
     "test:e2e": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerE2eTests",
+    "test:e2e:setup": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSetupE2e",
     "test:e2e:bpcycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e",
     "test:e2e:step": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStepCommandsE2e",
     "test:e2e:libbp": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLibraryBpE2e",
