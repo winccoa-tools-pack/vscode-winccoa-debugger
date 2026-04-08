@@ -62,7 +62,7 @@ const BP_LINE = 13;
 /** call_library_function.ctl: `int result = callLib()` */
 const LIB_CALL_LINE = 14;
 /** CTRL manager running bp_basic_loop.ctl (always-running) */
-const BP_MANAGER = 1;
+const BP_MANAGER = 2;
 
 /**
  * Minimum expected time (ms) between `continue` and the NEXT legitimate stop.

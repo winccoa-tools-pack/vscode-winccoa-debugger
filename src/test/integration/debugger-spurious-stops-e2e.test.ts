@@ -51,7 +51,7 @@ import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
 /** bp_basic_loop.ctl: `counter++` in the while loop */
 const BP_LINE = 13;
 /** CTRL manager running bp_basic_loop.ctl (always-running) */
-const BP_MANAGER = 1;
+const BP_MANAGER = 2;
 
 /**
  * Window in which we check for spurious stops after context requests.

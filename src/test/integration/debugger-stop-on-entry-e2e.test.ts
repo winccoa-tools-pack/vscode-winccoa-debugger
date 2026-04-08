@@ -31,7 +31,7 @@ import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
 // ─── constants ───────────────────────────────────────────────────────────────
 
 const STOP_LINE = 22;
-const STOP_ENTRY_MANAGER = 2;
+const STOP_ENTRY_MANAGER = 3;
 
 /** ms to wait for DebugBreak() to fire before attaching */
 const DEBUGBREAK_SETTLE_MS = 2_000;

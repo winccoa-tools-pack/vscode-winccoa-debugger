@@ -26,7 +26,7 @@ const BP_DEEP = 19;   // Inside multiply_and_add — deepest frame
 const BP_CALL = 31;   // compute_outer: call to compute_inner
 
 /** CTRL manager number for callstack_depth3.ctl */
-const STEP_MANAGER = 4;
+const STEP_MANAGER = 5;
 
 const lifecycle = new WinccoaProjectLifecycle();
 

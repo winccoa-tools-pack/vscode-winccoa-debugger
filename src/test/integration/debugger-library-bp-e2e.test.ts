@@ -35,7 +35,7 @@ const BP_MAIN_LINE = 14;
 const BP_LIB_LINE = 7;
 
 /** CTRL manager number for call_library_function.ctl */
-const LIB_MANAGER = 3;
+const LIB_MANAGER = 4;
 
 const lifecycle = new WinccoaProjectLifecycle();
 

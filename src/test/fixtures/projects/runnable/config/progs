@@ -5,8 +5,8 @@ auth "" ""
 WCCILpmon        | manual |      30 |        3 |        1 |
 WCCILdataSQLite  | always |      30 |        3 |        1 |
 WCCILevent       | always |      30 |        3 |        1 |
-WCCOActrl        | manual |      30 |        3 |        1 | -num 1 bp_basic_loop.ctl
-WCCOActrl        | manual |      30 |        3 |        1 | -num 2 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
-WCCOActrl        | manual |      30 |        3 |        1 | -num 3 call_library_function.ctl
-WCCOActrl        | manual |      30 |        3 |        1 | -num 4 callstack_depth3.ctl
+WCCOActrl        | once   |      30 |        3 |        1 | -num 2 bp_basic_loop.ctl
+WCCOActrl        | once   |      30 |        3 |        1 | -num 3 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
+WCCOActrl        | once   |      30 |        3 |        1 | -num 4 call_library_function.ctl
+WCCOActrl        | once   |      30 |        3 |        1 | -num 5 callstack_depth3.ctl
 node             | once   |      30 |        1 |        0 |debugAdapter.js

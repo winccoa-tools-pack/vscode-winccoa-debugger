@@ -39,6 +39,8 @@
 import * as fs from 'fs';
 import * as net from 'net';
 import * as path from 'path';
+import { execSync } from 'child_process';
+import * as vscode from 'vscode';
 import {
     PmonComponent,
     getAvailableWinCCOAVersions,
@@ -157,7 +159,8 @@ export class WinccoaProjectLifecycle {
 
     /**
      * Prepare config, restore DB from seeds, register and start the WinCC OA project.
-     * Idempotent: if WinCC OA is already reachable, startup is skipped.
+     * Idempotent: if both the pmon port AND the debug-adapter port are reachable,
+     * the project is considered fully running and startup is skipped.
      */
     public async start(): Promise<void> {
         if (process.env['WINCCOA_EXTERNAL'] === '1') return;
@@ -165,18 +168,16 @@ export class WinccoaProjectLifecycle {
         this.requireAvailable();
         this.substituteConfigPlaceholders();
 
-        if (await isTcpReachable(this.host, this.port)) {
-            console.log(
-                `[WinccoaProjectLifecycle] WinCC OA already reachable at ${this.host}:${this.port} — skipping start`,
-            );
-            return;
-        }
-
         const info = this.resolveInstallation()!;
         const pmon = new PmonComponent();
         pmon.setVersion(info.version);
 
         const configFilePath = path.join(PROJ_PATH, 'config', 'config');
+
+        // Always ensure the project is registered in pvssInst.conf BEFORE doing any
+        // port checks or pmon commands.  If pmon is running (e.g. an orphan from a
+        // previous test run) but "runnable" is absent from pvssInst.conf, every
+        // `WCCILpmon -proj runnable` command will fail with "not registered".
         if (this.isProjectRegisteredInPvssConf()) {
             console.log(
                 `[WinccoaProjectLifecycle] Project "${PROJECT_NAME}" already registered — skipping registration`,
@@ -187,7 +188,25 @@ export class WinccoaProjectLifecycle {
             this.didRegisterProject = true;
         }
 
+        // Check if *this* fixture project is fully running.
+        // A plain port-4999 check is not enough: any WinCC OA project (e.g. DevEnv3.21)
+        // uses that default port.  We verify BOTH the pmon port AND the debug-adapter port
+        // — only "runnable" (which starts the debugAdapter.js manager) has both.
+        if (
+            await isTcpReachable(this.host, this.port) &&
+            await isTcpReachable('127.0.0.1', ADAPTER_PORT)
+        ) {
+            console.log(
+                `[WinccoaProjectLifecycle] WinCC OA already running at ${this.host}:${this.port} ` +
+                    `and adapter at 127.0.0.1:${ADAPTER_PORT} — skipping start`,
+            );
+            return;
+        }
+
         this.restoreDbFromSeed();
+
+        // Kill any orphan processes from previous test runs before starting fresh
+        this.killOrphanProcesses();
 
         console.log(`[WinccoaProjectLifecycle] Starting WinCC OA project "${PROJECT_NAME}" …`);
         await pmon.startProject(PROJECT_NAME, false);
@@ -238,6 +257,9 @@ export class WinccoaProjectLifecycle {
         await waitForPortClosed(this.host, this.port, STOP_TIMEOUT_MS);
         console.log('[WinccoaProjectLifecycle] WinCC OA stopped');
 
+        // Kill any orphan processes that pmon may have left behind
+        this.killOrphanProcesses();
+
         if (this.didRegisterProject) {
             console.log(`[WinccoaProjectLifecycle] Unregistering project "${PROJECT_NAME}" …`);
             await pmon.unregisterProject(PROJECT_NAME);
@@ -271,8 +293,8 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx}) …`);
-        await pmon.startManager(PROJECT_NAME, idx);
+        console.log(`[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx}) via Project Admin command…`);
+        await vscode.commands.executeCommand('winccoa.manager.start', { managerData: { idx, info: {} } });
     }
 
     /**
@@ -291,8 +313,8 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx}) …`);
-        await pmon.stopManager(PROJECT_NAME, idx);
+        console.log(`[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx}) via Project Admin command…`);
+        await vscode.commands.executeCommand('winccoa.manager.stop', { managerData: { idx, info: {} } });
     }
 
     // ─── private: adapter manager ──────────────────────────────────────────────
@@ -334,6 +356,29 @@ export class WinccoaProjectLifecycle {
         }
         console.log(`[WinccoaProjectLifecycle] Stopping debugAdapter.js manager (index ${idx}) …`);
         await pmon.stopManager(PROJECT_NAME, idx);
+    }
+
+    /**
+     * Kills any orphan WinCC OA processes for the fixture project that may have been
+     * left behind by a previous test run (e.g. after Ctrl-C or timeout).
+     * Uses pkill to match processes by project name in their arguments.
+     */
+    private killOrphanProcesses(): void {
+        const patterns = [
+            `WCCILpmon.*${PROJECT_NAME}`,
+            `WCCILdata.*${PROJECT_NAME}`,
+            `WCCILevent.*${PROJECT_NAME}`,
+            `WCCOActrl.*${PROJECT_NAME}`,
+            `bootstrap\\.js.*${PROJECT_NAME}`,
+        ];
+        for (const pattern of patterns) {
+            try {
+                execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
+            } catch {
+                // pkill exits with 1 when no process matched — that is fine
+            }
+        }
+        console.log(`[WinccoaProjectLifecycle] Orphan processes for "${PROJECT_NAME}" killed (if any)`);
     }
 
     /**
