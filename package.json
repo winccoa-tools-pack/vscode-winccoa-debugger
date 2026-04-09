@@ -310,6 +310,7 @@
     "test:e2e:soe": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStopOnEntryE2e",
     "test:e2e:spuriousstops": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSpuriousStopsE2e",
     "test:e2e:racecondition": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerRaceConditionE2e",
+    "test:e2e:variables": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerVariablesE2e",
     "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e && vscode-test --label debuggerSpuriousStopsE2e && vscode-test --label debuggerRaceConditionE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",

@@ -118,6 +118,17 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 90000
             }
+        },
+        {
+            // E2E variable display: all WinCC OA CTRL data types in the sidebar.
+            label: 'debuggerVariablesE2e',
+            files: 'out/test/integration/debugger-variables-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
         }
     ]
 });
