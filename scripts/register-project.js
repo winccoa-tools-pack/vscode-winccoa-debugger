@@ -19,6 +19,7 @@ const fs = require('fs');
 const {
     PmonComponent,
     getAvailableWinCCOAVersions,
+    getWinCCOAInstallationPathByVersion,
 } = require('@winccoa-tools-pack/npm-winccoa-core');
 
 async function main() {
@@ -41,6 +42,33 @@ async function main() {
     }
 
     const version = versions[versions.length - 1]; // use latest
+    const installPath = getWinCCOAInstallationPathByVersion(version);
+    if (!installPath) {
+        console.error(`Cannot resolve install path for WinCC OA ${version}.`);
+        process.exit(1);
+    }
+
+    // Substitute placeholders in all config files (config, progs, …)
+    const configDir = path.join(projPath, 'config');
+    for (const file of fs.readdirSync(configDir)) {
+        const filePath = path.join(configDir, file);
+        if (!fs.statSync(filePath).isFile()) continue;
+        let content = fs.readFileSync(filePath, 'utf-8');
+        if (
+            !content.includes('<WinCC_OA_PATH>') &&
+            !content.includes('<WinCC_OA_VERSION>') &&
+            !content.includes('<PROJ_DIR>')
+        ) {
+            continue;
+        }
+        content = content
+            .replace(/<WinCC_OA_PATH>/g, installPath)
+            .replace(/<WinCC_OA_VERSION>/g, version)
+            .replace(/<PROJ_DIR>/g, projPath);
+        fs.writeFileSync(filePath, content, 'utf-8');
+        console.log(`  Substituted placeholders in: ${file}`);
+    }
+
     const pmon = new PmonComponent();
     pmon.setVersion(version);
 
