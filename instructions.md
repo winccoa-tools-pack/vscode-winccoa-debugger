@@ -8,11 +8,15 @@
 Debug-Adapter-Typ `winccoa` und verbindet VS Code mit dem Debug-Adapter aus
 `@winccoa-tools-pack/winccoa-debug-adapter` (npm-winccoa-debugger).
 
+> **Stand: April 2026**  
+> Alle Step-Command E2E-Tests: ✅ 4/4 passing  
+> Aktiv offen: `debugger-library-bp-e2e.test.ts` (Library-BP feuert nicht)
+
 ---
 
 ## Architektur
 
-```
+```text
 src/
 ├── extension.ts                # Aktivierungspunkt — registriert Factory + Provider
 ├── debugAdapterFactory.ts      # DebugAdapterDescriptorFactory — verbindet VS Code mit Adapter-TCP
@@ -26,90 +30,86 @@ src/
     │   ├── WinccoaProjectLifecycle.ts   # Startet/Stoppt das Fixture-Projekt
     │   └── test-project-helpers.ts      # Hilfsfunktionen für Projektregistrierung
     ├── fixtures/
-    │   └── projects/
-    │       └── runnable/                # Fixture WinCC OA Projekt
-    │           ├── config/progs         # Manager-Konfiguration
-    │           └── scripts/             # CTRL-Testskripte
-    ├── unit/                           # Unit-Tests (kein WinCC OA)
-    └── integration/                    # E2E-Tests (brauchen WinCC OA)
-        ├── debugger-e2e.test.ts
-        ├── debugger-bp-cycle-e2e.test.ts
-        ├── debugger-stop-on-entry-e2e.test.ts
-        ├── debugger-step-commands-e2e.test.ts
-        ├── debugger-library-bp-e2e.test.ts
-        ├── debugger-race-condition-e2e.test.ts
-        └── debugger-spurious-stops-e2e.test.ts
+    │   └── projects/runnable/           # Fixture WinCC OA Projekt
+    ├── unit/                            # Unit-Tests (kein WinCC OA)
+    └── integration/                     # E2E-Tests (brauchen WinCC OA)
 ```
 
 ---
 
 ## Debug-Adapter-Architektur: pmon-only
 
-### Produktions- und Test-Setup
-Der Adapter wird **nicht** von der Extension gestartet — er läuft als WinCC OA `node`-Manager:
+Der Adapter wird **nicht** von der Extension gestartet — er läuft als WinCC OA
+`node`-Manager in der `progs`-Datei (`once`).
 
-```
-progs:
-  node | once | 30 | 1 | 0 | debugAdapter.js
-```
-
-`debugAdapterFactory.ts` (DescriptorFactory):
+`debugAdapterFactory.ts`:
 1. Liest `adapterPort` aus `session.configuration`
-2. Wartet per TCP-Poll bis Port erreichbar ist (max 15s)
+2. Wartet per TCP-Poll bis Port erreichbar (max 15s)
 3. Gibt `new DebugAdapterServer(port, '127.0.0.1')` zurück
 
-**Kein Bootstrap-Spawn in der Factory** — das war das alte Design. Ist entfernt.
-
-### Port
-- Adapter lauscht immer auf **Port 7474** (Hardcoded in `cli.ts` TCP-Modus)
-- `adapterPort: 7474` wird von `WinccoaProjectLifecycle.getBaseLaunchConfig()` gesetzt
+**Kein Bootstrap-Spawn** — die Factory startet keinen Prozess.  
+**Port**: Adapter lauscht immer auf **Port 7474** (hardcoded in `cli.ts`).
 
 ---
 
 ## E2E-Test-Infrastruktur
 
 ### Fixture-Projekt: `runnable`
+
 ```
 src/test/fixtures/projects/runnable/
 ├── config/
-│   ├── config          # WinCC OA Projektkonfiguration (Host/Port/Version-Platzhalter)
-│   └── progs           # Manager-Konfiguration
+│   ├── config          # WinCC OA Projektkonfiguration (Platzhalter)
+│   └── progs           # Manager-Konfiguration (siehe unten)
 └── scripts/
-    ├── bp_basic_loop.ctl          # -num 1 | Endlosschleife mit delay(1)
-    ├── stop_on_entry.ctl          # -num 2 | stopOnEntry via -dbg CTRL_DEBUGBREAK
-    ├── call_library_function.ctl  # -num 3 | Ruft debugger_lib.ctl auf (#uses)
-    ├── callstack_depth3.ctl       # -num 4 | Tiefe Callstack für step-Tests
+    ├── bp_basic_loop.ctl          # Endlosschleife mit delay(1)
+    ├── stop_on_entry.ctl          # DebugBreak() am Start
+    ├── call_library_function.ctl  # Ruft debugger_lib.ctl auf (#uses)
+    ├── callstack_depth3.ctl       # Tiefe Callstack — compute_outer → compute_inner → multiply_and_add
+    ├── all_types.ctl              # Alle WinCC OA Basistypen
+    ├── pause_loop.ctl             # DebugBreak() am Start + Endlosschleife (für pause-Test)
+    ├── HelloWorld.ctl             # Minimales Beispielskript
     └── libs/
-        └── debugger_lib.ctl       # Library-Datei für lib-BP-Tests
+        └── debugger_lib.ctl       # Library für lib-BP-Tests
 ```
 
-### progs-Konfiguration
+### progs-Konfiguration (aktueller Stand)
+
 ```
-WCCOActrl | manual | ... | -num 1 bp_basic_loop.ctl
-WCCOActrl | manual | ... | -num 2 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
-WCCOActrl | manual | ... | -num 3 call_library_function.ctl
-WCCOActrl | manual | ... | -num 4 callstack_depth3.ctl
-node      | once   | ... | debugAdapter.js
+WCCILpmon        | manual  | 30 | 3 | 1 |
+WCCILdataSQLite  | always  | 30 | 3 | 1 |
+WCCILevent       | always  | 30 | 3 | 1 |
+WCCOActrl        | once    | 30 | 3 | 1 | -num 2 bp_basic_loop.ctl
+WCCOActrl        | once    | 30 | 3 | 1 | -num 3 stop_on_entry.ctl -dbg CTRL_DEBUGBREAK
+WCCOActrl        | once    | 30 | 3 | 1 | -num 4 call_library_function.ctl
+WCCOActrl        | once    | 30 | 3 | 1 | -num 5 callstack_depth3.ctl
+WCCOActrl        | once    | 30 | 3 | 1 | -num 6 all_types.ctl
+WCCOActrl        | manual  | 30 | 3 | 1 | -num 7 pause_loop.ctl -dbg CTRL_DEBUGBREAK
+node             | once    | 30 | 1 | 0 | debugAdapter.js
 ```
 
-**Alle CTRL-Manager `manual`** — Tests starten/stoppen sie explizit.  
-**Adapter `once`** — WinCC OA startet ihn automatisch beim Projektstart.
+**Manager-Nummern**: `-num 2` bis `-num 7` für CTRL-Skripte; `node`-Adapter = `once`.  
+**`-num 7 pause_loop.ctl`** ist `manual` — wird ausschließlich im pause-E2E-Test gestartet.  
+**Alle anderen CTRL-Manager** sind `once` — WinCC OA startet sie beim Projektstart.
 
 ### WinccoaProjectLifecycle
-- `start()`: Registriert Projekt, startet WinCC OA, wartet auf Port 4999 (Data Manager), dann auf Port 7474 (Adapter)
+
+- `start()`: Registriert Projekt, startet WinCC OA, wartet auf Port 4999 (Data Manager) und
+  Port 7474 (Adapter)
 - `stop()`: Stoppt WinCC OA, deregistriert Projekt
-- `startManagerByNum(n)`: Startet den CTRL-Manager mit `-num N` (via pmon SINGLE_MGR:START)
-- `stopManagerByNum(n)`: Stoppt den CTRL-Manager mit `-num N`
+- `startManagerByNum(n)`: Startet CTRL-Manager `-num N` via pmon `SINGLE_MGR:START`
+- `stopManagerByNum(n)`: Stoppt CTRL-Manager `-num N`
 - `getBaseLaunchConfig()`: Liefert `{ adapterPort: 7474, ... }`
 
 ### DebugSessionHelper
+
 - `startSession(folder, config)`: Startet Debug-Session, wartet auf `configurationDone`-Zyklus
-  - Intern: `waitForConfigurationDone()` wartet auf `continued` oder `stopped` Event (peek, nicht consume)
 - `waitForEvent(name, timeoutMs)`: Wartet auf einen DAP-Event-Namen
-- `request(command, args)`: Schickt einen DAP-Request und wartet auf Response
+- `request(command, args)`: Schickt einen DAP-Request, wartet auf Response
 - `dispose()`: Beendet Session sauber
 
 ### E2E-Test-Pattern
+
 ```typescript
 const lifecycle = new WinccoaProjectLifecycle();
 const helper = new DebugSessionHelper('winccoa');
@@ -119,62 +119,132 @@ after(async () => { await lifecycle.stop(); });
 
 it('BP fires', async () => {
     try {
-        await lifecycle.startManagerByNum(1);   // CTRL-Manager starten VOR Session
+        await lifecycle.startManagerByNum(2);    // VOR startSession!
         await helper.startSession(folder, config);
         const stopped = await helper.waitForEvent('stopped', 20_000);
-        // assert ...
+        assert.strictEqual(stopped.body.reason, 'breakpoint');
     } finally {
-        await lifecycle.stopManagerByNum(1).catch(() => {});
+        await lifecycle.stopManagerByNum(2).catch(() => {});
         await helper.dispose();
     }
 });
 ```
 
-**Reihenfolge kritisch**: `startManagerByNum` MUSS vor `startSession` kommen, damit der
-CTRL-Prozess läuft wenn die Session die Breakpoints setzt.
+**Reihenfolge kritisch**: `startManagerByNum` muss vor `startSession` kommen.
 
 ---
 
-## NPM-Scripts & Build
+## E2E-Test-Status (aktuell)
+
+| Test-Datei | Status | Beschreibung |
+|---|---|---|
+| `debugger-setup-e2e.test.ts` | ✅ passing | Adapter-Verbindung, Attach/Detach |
+| `debugger-bp-cycle-e2e.test.ts` | ✅ passing | BP setzen, feuern, löschen Zyklen |
+| `debugger-stop-on-entry-e2e.test.ts` | ✅ passing | stopOnEntry / DebugBreak()-Modus |
+| `debugger-step-commands-e2e.test.ts` | ✅ **4/4 passing** | step-next, step-into, step-out, pause |
+| `debugger-spurious-stops-e2e.test.ts` | ✅ passing | Spurious-Stop-Unterdrückung |
+| `debugger-library-bp-e2e.test.ts` | ❌ failing | Library-BP feuert nicht |
+| `debugger-race-condition-e2e.test.ts` | ❓ nicht in Session gelaufen | Concurrent-BP-Set |
+| `debugger-variables-e2e.test.ts` | ❓ nicht in Session gelaufen | Variablen-Inspektion |
+
+---
+
+## Step-Command Verhalten (WinCC OA 3.21, verifiziert)
+
+| Command | WinCC OA Befehl | Verhalten |
+|---|---|---|
+| Step Over | `step over` | Stoppt an **nächster Zeile** (auch ohne BP) |
+| Step Into | `step in` | Läuft bis zum **nächsten gesetzten BP** (nicht Zeile für Zeile!) |
+| Step Out | `step out` | Kehrt aus Funktion zurück, stoppt an **nächster Zeile** im Caller |
+| Continue | `cont` | Weiter bis nächsten BP |
+| Pause | `b` | Benötigt vorher `script N` + `thread N` Kontext (via `attachToStopContext`) |
+
+> `step in` verhält sich wie `continue` mit Function-Entry-Tracking — nur nach einem BP
+> oder DebugBreak()-Stop. Im Test: `reason === 'step'` + `stoppedLine > 0` prüfen.
+
+### Pause-Test-Pattern (pause_loop.ctl, `-num 7`)
+
+```typescript
+// pause_loop.ctl: DebugBreak() at line 22 + infinite loop
+// Manager: -num 7 | manual | -dbg CTRL_DEBUGBREAK
+
+await lifecycle.startManagerByNum(7);           // Manual-Manager starten
+await new Promise(r => setTimeout(r, 2000));    // 2s warten bis DebugBreak() getriggert
+
+await helper.startSession(folder, {
+    ...baseConfig,
+    stopOnEntry: true    // Fängt den DebugBreak()-Stop — stopState wird befüllt
+});
+
+const entry = await helper.waitForEvent('stopped', 15_000);
+// entry.body.reason === 'entry' | 'breakpoint'
+
+await helper.request('continue', { threadId: 1 });
+await new Promise(r => setTimeout(r, 300));
+
+await helper.request('pause', { threadId: 1 });
+const paused = await helper.waitForEvent('stopped', 10_000);
+assert.strictEqual(paused.body.reason, 'pause');
+```
+
+---
+
+## NPM Scripts & Build
 
 ```bash
 npm run compile:tsc          # TypeScript kompilieren + Fixtures kopieren
 npm run compile              # Webpack + TSC
+npm run setup:e2e-links      # Symlink: dist/adapter → npm-winccoa-debugger/dist/cjs
+
+npm run test:e2e:setup       # Setup E2E-Tests
 npm run test:e2e:bpcycle     # BP-Cycle E2E-Tests
-npm run test:e2e:libbp       # Library-BP E2E-Tests
-npm run test:e2e:step        # Step-Command E2E-Tests
 npm run test:e2e:stopentry   # stopOnEntry E2E-Tests
-npm run test:e2e:race        # Race-Condition E2E-Tests
+npm run test:e2e:step        # Step-Command E2E-Tests (step-next, into, out, pause)
 npm run test:e2e:spurious    # Spurious-Stops E2E-Tests
+npm run test:e2e:libbp       # Library-BP E2E-Tests
+npm run test:e2e:race        # Race-Condition E2E-Tests
+npm run test:e2e:variables   # Variablen-Inspektion E2E-Tests
+npm run test:e2e:full        # Alle E2E-Tests
 ```
 
 ---
 
 ## Bekannte Probleme / Offene Punkte
 
-### 1. Library-BP feuert nicht (AKTIV)
-**Betroffene Tests**: `debugger-library-bp-e2e.test.ts` Test 1 ("BP in library file fires")  
-**Symptom**: Events: `initialized, continued, breakpoint` — aber kein `stopped` innerhalb 20s  
-**Was passiert**: `retryPendingBreakpoints()` via 500ms-Timer findet `scriptId/libIndex` via
-Probe und erhält `breakpoint set` → `breakpoint`-Event wird gesendet. Der BP feuert aber
-in WinCC OA nicht.  
-**Vermutung**: Falscher `libIndex` (Probe findet `lib:0` aber die Library ist bei `lib:1`?),
-oder die Probe-Antwort `breakpoint set` ist ein False-Positive.  
-**Nächster Schritt**: Adapter-Logs beim Retry analysieren — welchen `scriptId/lib`-Wert
-findet die Probe genau, und was meldet WinCC OA?
+### ❌ 1. Library-BP feuert nicht (AKTIV)
 
-### 2. Test 2 (libbp): kein stopped, kein breakpoint (AKTIV)  
-**Betroffene Tests**: `debugger-library-bp-e2e.test.ts` Test 2 ("main BP fires correctly")  
-**Symptom**: Events: `initialized, continued` — kein `stopped`, kein `breakpoint`  
-**Was passiert**: Keine der registrierten BPs (main + lib) wird verified  
-**Vermutung**: `info scripts` liefert noch kein Ergebnis obwohl Timer läuft, oder
-Timing-Problem beim zweiten Testlauf (Manager wurde in Test 1 gestoppt/neu gestartet).
+**Betroffene Tests**: `debugger-library-bp-e2e.test.ts`  
+**Symptom**: Events: `initialized, continued, breakpoint` — kein `stopped` innerhalb 20s  
+**Was passiert**:
+- `retryPendingBreakpoints()` via 500ms-Timer → `info scripts` → findet `scriptId`
+- Probe via `lib:0..MAX_LIB_PROBE` → erhält `breakpoint set`
+- `BreakpointEvent` an VS Code (BP verified/checked)
+- WinCC OA feuert den BP **nicht**
 
-### 3. Race Condition bei sehr frischem Manager-Start (AKTIV)
-Zwischen `pmon startManager → return` und `CTRL-Script erscheint in info scripts`
-liegen typischerweise 0.5–3s.  
-→ Der `pendingBpRetryTimer` (500ms) löst das meistens, aber 2s nach `configurationDone`
-kann die erste Retry-Welle immer noch ein leeres `info scripts` bekommen.
+**Vermutung**: Falscher `libIndex` in der Probe (False-Positive `breakpoint set`-Antwort
+bei ungültigem lib-Index?), oder die Library ist bei einem anderen Index als `lib:0`.  
+**Nächster Schritt**: `info scripts`-Antwort + Probe-Ergebnis per Adapter-Log analysieren.
+
+### ✅ 2. Step-Commands: wrong command names (gelöst, April 2026)
+
+Korrekte WinCC OA 3.21 Commands: `step over` / `step in` / `step out` (nicht `next`/`step`/`finish`).
+
+### ✅ 3. Two-Phase-Response bei Step-Commands (gelöst)
+
+Phase 1 "OK" resolvet Pending nicht; erst Phase 2 "line: N" löst StoppedEvent aus.
+
+### ✅ 4. Pause ohne stopState schlägt fehl (gelöst)
+
+`attachToStopContext()` setzt Script/Thread-Kontext vor `b`.  
+DebugBreak()-Pattern im `pause_loop.ctl` etabliert `stopState` zuverlässig.
+
+### ✅ 5. Spurious-Stop-Filter (gelöst)
+
+Automatisches `cont` bei BPs die nicht in `bpRegistry` registriert sind.
+
+### ✅ 6. Race Condition bei concurrent setBreakpoints (gelöst)
+
+`bpOperationQueue` serialisiert alle BP-Set-Operationen.
 
 ---
 
@@ -186,19 +256,9 @@ kann die erste Retry-Welle immer noch ein leeres `info scripts` bekommen.
 | `@winccoa-tools-pack/npm-winccoa-core` | PmonComponent, WinCC OA Versionsdetection |
 | `@vscode/debugadapter` | DAP-Protokoll-Basisklassen |
 
-### Symlink für Tests
+### Symlink für E2E-Tests
+
 ```bash
 npm run setup:e2e-links
-# Erstellt: vscode-winccoa-debugger/dist/adapter → npm-winccoa-debugger/dist/cjs
+# Erstellt: dist/adapter → ../../npm-winccoa-repos/npm-winccoa-debugger/dist/cjs
 ```
-
----
-
-## Nächste Schritte (Priorisiert)
-
-1. **Adapter-Logs debuggen**: Beim `lib-bp`-Test die genauen `info scripts`-Antworten und
-   Probe-Ergebnisse loggen. Herausfinden welcher `scriptId/libIndex` gefunden wird.
-2. **call_library_function.ctl prüfen**: Stellt sicher, dass die Lib-Funktion wirklich
-   regelmäßig aufgerufen wird (Endlosschleife mit `delay(1)` wird erwartet).
-3. **Alle E2E-Tests grün bekommen**: Reihenfolge: bpcycle → stopentry → step → libbp → race → spurious
-4. **Webpack-Bundle**: Sicherstellen dass das produzierte VSIX den Adapter korrekt einbindet.

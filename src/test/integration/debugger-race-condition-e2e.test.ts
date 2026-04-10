@@ -54,6 +54,11 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { DebugSessionHelper } from '../debugSessionHelper';
 import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
+import { waitForCoreApi } from '../../otherExtensions';
+
+type CoreApi = {
+    setCurrentProject?: (id: string) => void | Promise<void>;
+};
 
 // ─── constants ───────────────────────────────────────────────────────────────
 
@@ -87,22 +92,45 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
     let addedBreakpoints: vscode.Breakpoint[] = [];
 
     suiteSetup(async function () {
-        this.timeout(60_000);
+        this.timeout(180_000);
 
         if (!lifecycle.isWinccoaAvailable()) {
             console.log('[race-condition-e2e] WinCC OA not available — skipping');
             return;
         }
 
+        console.log('[race-condition-e2e] Step 1: Registering and starting fixture project…');
         try {
             await lifecycle.start();
         } catch (err) {
-            console.error(`[race-condition-e2e] Could not start WinCC OA: ${(err as Error).message}`);
+            console.error(`[race-condition-e2e] Project startup failed: ${(err as Error).message}`);
             return;
         }
+        console.log('[race-condition-e2e] Project started');
 
+        console.log('[race-condition-e2e] Step 2: Waiting for services to stabilize…');
+        await new Promise((r) => setTimeout(r, 3_000));
+
+        console.log('[race-condition-e2e] Step 3: Opening bp_basic_loop.ctl in editor…');
+        const scriptUri = vscode.Uri.file(lifecycle.getScriptPath('bp_basic_loop.ctl'));
+        const doc = await vscode.workspace.openTextDocument(scriptUri);
+        await vscode.window.showTextDocument(doc, { preview: false });
+
+        console.log('[race-condition-e2e] Step 4: Setting active project in Core extension…');
+        try {
+            const coreApi = (await waitForCoreApi(15_000)) as CoreApi | null;
+            if (coreApi && typeof coreApi.setCurrentProject === 'function') {
+                await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
+                console.log('[race-condition-e2e] Active project set to "runnable"');
+            } else {
+                console.warn('[race-condition-e2e] Core API not available — continuing without setCurrentProject');
+            }
+        } catch (err) {
+            console.warn(`[race-condition-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+        }
+
+        console.log('[race-condition-e2e] ✓ Setup complete — ready to run tests');
         canRun = true;
-        console.log('[race-condition-e2e] Prerequisites met — tests will run');
     });
 
     suiteTeardown(async function () {

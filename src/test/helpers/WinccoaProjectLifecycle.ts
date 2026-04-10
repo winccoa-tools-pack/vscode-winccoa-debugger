@@ -293,8 +293,8 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx}) via Project Admin command…`);
-        await vscode.commands.executeCommand('winccoa.manager.start', { managerData: { idx, info: {} } });
+        console.log(`[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx})…`);
+        await pmon.startManager(PROJECT_NAME, idx);
     }
 
     /**
@@ -313,8 +313,8 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx}) via Project Admin command…`);
-        await vscode.commands.executeCommand('winccoa.manager.stop', { managerData: { idx, info: {} } });
+        console.log(`[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx})…`);
+        await pmon.stopManager(PROJECT_NAME, idx);
     }
 
     // ─── private: adapter manager ──────────────────────────────────────────────

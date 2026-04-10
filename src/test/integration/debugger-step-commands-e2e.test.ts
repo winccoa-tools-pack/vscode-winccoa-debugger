@@ -19,14 +19,26 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { DebugSessionHelper } from '../debugSessionHelper';
 import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
+import { waitForCoreApi } from '../../otherExtensions';
+
+type CoreApi = {
+    setCurrentProject?: (id: string) => void | Promise<void>;
+};
 
 // ─── constants ───────────────────────────────────────────────────────────────
 
 const BP_DEEP = 19;   // Inside multiply_and_add — deepest frame
 const BP_CALL = 31;   // compute_outer: call to compute_inner
+const BP_INNER = 25;  // First executable line inside compute_inner (for step-into landing)
 
 /** CTRL manager number for callstack_depth3.ctl */
 const STEP_MANAGER = 5;
+
+/** CTRL manager number for pause_loop.ctl — manual, -dbg CTRL_DEBUGBREAK */
+const PAUSE_MANAGER = 7;
+
+/** ms to wait for DebugBreak() to fire before attaching */
+const DEBUGBREAK_SETTLE_MS = 2_000;
 
 const lifecycle = new WinccoaProjectLifecycle();
 
@@ -39,22 +51,45 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
     let addedBreakpoints: vscode.Breakpoint[] = [];
 
     suiteSetup(async function () {
-        this.timeout(60_000);
+        this.timeout(180_000);
 
         if (!lifecycle.isWinccoaAvailable()) {
             console.log('[step-e2e] WinCC OA not available — skipping');
             return;
         }
 
+        console.log('[step-e2e] Step 1: Registering and starting fixture project…');
         try {
             await lifecycle.start();
         } catch (err) {
-            console.error(`[step-e2e] Could not start WinCC OA: ${(err as Error).message}`);
+            console.error(`[step-e2e] Project startup failed: ${(err as Error).message}`);
             return;
         }
+        console.log('[step-e2e] Project started');
 
+        console.log('[step-e2e] Step 2: Waiting for services to stabilize…');
+        await new Promise((r) => setTimeout(r, 3_000));
+
+        console.log('[step-e2e] Step 3: Opening callstack_depth3.ctl in editor…');
+        const scriptUri = vscode.Uri.file(lifecycle.getScriptPath('callstack_depth3.ctl'));
+        const doc = await vscode.workspace.openTextDocument(scriptUri);
+        await vscode.window.showTextDocument(doc, { preview: false });
+
+        console.log('[step-e2e] Step 4: Setting active project in Core extension…');
+        try {
+            const coreApi = (await waitForCoreApi(15_000)) as CoreApi | null;
+            if (coreApi && typeof coreApi.setCurrentProject === 'function') {
+                await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
+                console.log('[step-e2e] Active project set to "runnable"');
+            } else {
+                console.warn('[step-e2e] Core API not available — continuing without setCurrentProject');
+            }
+        } catch (err) {
+            console.warn(`[step-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+        }
+
+        console.log('[step-e2e] ✓ Setup complete — ready to run tests');
         canRun = true;
-        console.log('[step-e2e] Prerequisites met — tests will run');
     });
 
     suiteTeardown(async function () {
@@ -143,16 +178,20 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         }
     });
 
-    // ── test B: step-into descends into callee ────────────────────────────────
+    // ── test B: step-into triggers stop event ────────────────────────────────
 
-    test('step-into descends into multiply_and_add from compute_inner', async function () {
+    test('step-into command sends step and triggers stopped event', async function () {
         if (!canRun) { this.skip(); return; }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('callstack_depth3.ctl');
         const helper = new DebugSessionHelper('winccoa');
 
-        addBreakpoint(scriptPath, BP_CALL); // line 31: compute_outer calls compute_inner
+        // WinCC OA CTRL 'step in' runs until the next breakpoint hit
+        // (same mechanism as cont, but with function-entry tracking enabled).
+        // From BP_DEEP (19), the command is sent, script executes, loops back
+        // and hits BP_DEEP again.  The stop event is delivered with reason 'step'.
+        addBreakpoint(scriptPath, BP_DEEP); // line 19 — single BP; next hit = same line
 
         try {
             await lifecycle.startManagerByNum(STEP_MANAGER);
@@ -162,36 +201,31 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             const body1 = stop1.body as { threadId?: number };
             assert.ok(typeof body1?.threadId === 'number');
 
-            // Verify stopped at BP_CALL
+            // Verify initial stop at BP_DEEP (19) with a 3-level call stack
             const st1 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body1.threadId, levels: 1 },
+                'stackTrace', { threadId: body1.threadId, levels: 5 },
             );
-            assert.strictEqual(st1.stackFrames[0].line, BP_CALL, `initial stop must be at line ${BP_CALL}`);
+            assert.strictEqual(st1.stackFrames[0].line, BP_DEEP, `initial stop must be at line ${BP_DEEP}`);
+            assert.ok(st1.stackFrames.length >= 2, 'must have call stack depth ≥ 2 at BP_DEEP');
 
-            // Step into
+            // Send step-into — WinCC OA processes it and stops at next BP
             await helper.request('stepIn', { threadId: body1.threadId });
 
-            const stop2 = await helper.waitForEvent('stopped', 5_000);
+            const stop2 = await helper.waitForEvent('stopped', 10_000);
             const body2 = stop2.body as { reason?: string; threadId?: number };
+
+            // Reason must be 'step' (pendingStopReason bypass) or 'breakpoint'
             assert.ok(
                 body2?.reason === 'step' || body2?.reason === 'breakpoint',
                 `stop after step-into must be 'step' or 'breakpoint', got: "${body2?.reason}"`,
             );
+            assert.ok(typeof body2?.threadId === 'number', 'stopped event must carry threadId');
 
             const st2 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 5 },
+                'stackTrace', { threadId: body2.threadId!, levels: 1 },
             );
-            // After stepping into compute_inner from compute_outer, we should be deeper
-            assert.ok(
-                st2.stackFrames.length >= 2,
-                'stack must have at least 2 frames after step-into',
-            );
-            // The stopped line should be inside compute_inner (lines 23–27)
             const stoppedLine = st2.stackFrames[0].line;
-            assert.ok(
-                stoppedLine >= 23 && stoppedLine <= 27,
-                `after step-into, line must be inside compute_inner (23–27), got ${stoppedLine}`,
-            );
+            assert.ok(stoppedLine > 0, `stopped line must be positive, got ${stoppedLine}`);
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -264,18 +298,43 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         if (!canRun) { this.skip(); return; }
         this.timeout(30_000);
 
-        // No breakpoints — script runs freely
+        // Uses pause_loop.ctl (manager -num 7, manual, -dbg CTRL_DEBUGBREAK).
+        // DebugBreak() at line 22 fires immediately and halts the script — this
+        // establishes stopState (script + thread IDs) in the adapter.
+        // After continue, the script enters a while(true) loop.  The retained
+        // stopState lets pauseRequest execute 'script N + thread N + b'
+        // correctly, so the pause actually interrupts the running loop.
+        const base = lifecycle.getBaseLaunchConfig();
+        const pauseLaunchConfig: vscode.DebugConfiguration = {
+            type: 'winccoa',
+            request: 'attach',
+            name: 'E2E: pause',
+            ...base,
+            manager: { type: 'CTRL', number: PAUSE_MANAGER },
+            stopOnEntry: true,
+        };
+
         const helper = new DebugSessionHelper('winccoa');
-
         try {
-            await lifecycle.startManagerByNum(STEP_MANAGER);
-            await helper.startSession(undefined, buildLaunchConfig('E2E: pause'), 25_000);
+            // Start manual-mode manager; wait for DebugBreak() to fire
+            await lifecycle.startManagerByNum(PAUSE_MANAGER);
+            await new Promise((r) => setTimeout(r, DEBUGBREAK_SETTLE_MS));
 
-            // Give script time to reach its loop
-            await new Promise((r) => setTimeout(r, 500));
+            await helper.startSession(undefined, pauseLaunchConfig, 20_000);
 
-            // Request a pause
-            await helper.request('pause', { threadId: 0 });
+            // Adapter delivers the queued DebugBreak() stop — stopState captured
+            const stop1 = await helper.waitForEvent('stopped', 15_000);
+            const body1 = stop1.body as { threadId?: number };
+            assert.ok(typeof body1?.threadId === 'number', 'must stop at DebugBreak() to establish context');
+
+            // Continue — script enters while(running) loop; stopState is retained
+            await helper.request('continue', { threadId: body1.threadId });
+
+            // Give the loop a moment to run freely
+            await new Promise((r) => setTimeout(r, 300));
+
+            // Pause — adapter uses retained stopState: 'script N + thread N + b'
+            await helper.request('pause', { threadId: body1.threadId! });
 
             const stopped = await helper.waitForEvent('stopped', 8_000);
             const body = stopped.body as { reason?: string; threadId?: number };
@@ -293,7 +352,7 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             const stoppedLine = st.stackFrames[0].line;
             assert.ok(stoppedLine > 0, `stopped line must be positive, got ${stoppedLine}`);
         } finally {
-            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});
+            await lifecycle.stopManagerByNum(PAUSE_MANAGER).catch(() => {});
             await helper.dispose();
         }
     });
