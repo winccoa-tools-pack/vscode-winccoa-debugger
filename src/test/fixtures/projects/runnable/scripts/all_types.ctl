@@ -6,7 +6,7 @@
 // values.  A breakpoint at BP_LINE lets the E2E test verify that the debugger
 // sidebar (variablesRequest) shows correct values for every type.
 //
-// BP_LINE = 55  (DebugN "inspect here")
+// BP_LINE = 69  (DebugN "inspect here")
 //
 // Known values at BP_LINE:
 //   vi=42        vui=100      vf=3.14     vd=2.718     vb=true    vs="hello"
@@ -15,6 +15,14 @@
 //   vddi=[[1,2],[3,4]]        vdds=[["aa","bb"],["cc","dd"]]
 //   vm={"key1":"value1","num":99}
 //   vany=42
+//   vst.x=10  vst.label="test"  vst.active=true
+
+struct MyStruct
+{
+  int    x;
+  string label;
+  bool   active;
+};
 
 main()
 {
@@ -46,13 +54,19 @@ main()
   vm["key1"] = "value1";
   vm["num"]  = 99;
 
+  // ── struct ────────────────────────────────────────────────────────────────
+  MyStruct vst;
+  vst.x      = 10;
+  vst.label  = "test";
+  vst.active = true;
+
   // ── anytype ───────────────────────────────────────────────────────────────
   anytype vany = 42;
 
   // ── BP target: all vars initialised, inspect here ──────────────────────────
   while (true)
   {
-    DebugN("all_types: inspect here");  // line 55 — BP_LINE
+    DebugN("all_types: inspect here");  // line 69 — BP_LINE
     delay(1);
   }
 }

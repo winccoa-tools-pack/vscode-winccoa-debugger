@@ -57,7 +57,7 @@ type CoreApi = {
 // ─── constants ───────────────────────────────────────────────────────────────
 
 /** Line of DebugN("all_types: inspect here") — all vars are initialised here */
-const BP_LINE = 55;
+const BP_LINE = 69;
 /** CTRL manager number for all_types.ctl */
 const TYPES_MANAGER = 6;
 
@@ -452,6 +452,55 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.ok(vany, '"vany" (anytype) must be present');
             assert.strictEqual(vany!.value, '42', 'anytype containing int 42 must display "42"');
             assert.strictEqual(vany!.variablesReference, 0, 'scalar anytype must not be expandable');
+
+        } finally {
+            vscode.debug.removeBreakpoints(addedBreakpoints);
+            addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(TYPES_MANAGER).catch(() => {});
+            await helper.dispose();
+        }
+    });
+
+    // ── test 6: struct (user-defined type) ────────────────────────────────────
+
+    test('struct — shows field count, children are named fields with correct values', async function () {
+        if (!canRun) { this.skip(); return; }
+        this.timeout(60_000);
+
+        const scriptPath = lifecycle.getScriptPath('all_types.ctl');
+        const helper = new DebugSessionHelper('winccoa');
+
+        addBreakpoint(scriptPath, BP_LINE);
+
+        try {
+            await lifecycle.startManagerByNum(TYPES_MANAGER);
+            const vars = await hitBpAndGetLocals(helper);
+
+            const vst = vars.find((v) => v.name === 'vst');
+            assert.ok(vst, '"vst" (MyStruct) must be present in Locals');
+            assert.strictEqual(vst!.value, '{3}', 'struct with 3 fields must show "{3}"');
+            assert.ok(vst!.variablesReference > 0, 'struct must be expandable');
+
+            const children = await helper.request<{ variables: DapVariable[] }>(
+                'variables', { variablesReference: vst!.variablesReference },
+            );
+            assert.strictEqual(children.variables.length, 3);
+
+            const x      = children.variables.find((c) => c.name === 'x');
+            const label  = children.variables.find((c) => c.name === 'label');
+            const active = children.variables.find((c) => c.name === 'active');
+
+            assert.ok(x,      '"x" field must be present');
+            assert.strictEqual(x!.value, '10',      'int field x must display "10"');
+            assert.strictEqual(x!.variablesReference, 0);
+
+            assert.ok(label,  '"label" field must be present');
+            assert.strictEqual(label!.value, '"test"', 'string field label must be quoted');
+            assert.strictEqual(label!.variablesReference, 0);
+
+            assert.ok(active, '"active" field must be present');
+            assert.strictEqual(active!.value, 'true',  'bool field active must display "true"');
+            assert.strictEqual(active!.variablesReference, 0);
 
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
