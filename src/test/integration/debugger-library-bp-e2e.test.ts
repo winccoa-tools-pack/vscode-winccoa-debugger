@@ -7,8 +7,8 @@
  * which imports `libs/debugger_lib.ctl` via `#uses "debugger_lib"`.
  *
  * Key line numbers:
- *   call_library_function.ctl, line 11: DebugBreak()       (WinCC OA reports stop at line 12)
- *   call_library_function.ctl, line 14: sum = add_two_integers(...)  ← BP_MAIN_LINE
+ *   call_library_function.ctl, line 11: DebugBreak()       (WinCC OA reports stop at line 13)
+ *   call_library_function.ctl, line 15: sum = add_two_integers(...)  ← BP_MAIN_LINE
  *   libs/debugger_lib.ctl, line 7:      int sum = a + b;              ← BP_LIB_LINE
  *
  * Why DebugBreak() is needed (test 1 only):
@@ -17,21 +17,21 @@
  *   stopOnEntry=true and set all BPs while the script is paused. At that point
  *   `debugger_lib` is already loaded via `#uses`, so `info libs` returns its LibId
  *   and the adapter can set the lib BP immediately (verified=true).
- *   WinCC OA reports the stop at the NEXT statement after DebugBreak (line 12).
+ *   WinCC OA reports the stop at the NEXT statement after DebugBreak (line 13).
  *
  * Test 1 flow (lib BP fires):
  *   1. Start manager 4 (manual) → #uses loads debugger_lib → DebugBreak() fires
  *   2. Session attaches with stopOnEntry=true → adapter sets all BPs (both verified)
- *   3. StoppedEvent(entry) at line 12 (while — WinCC OA PC after DebugBreak)
- *   4. continue → loop starts → hit BP_MAIN_LINE 14 (before entering lib)
- *   5. continue → may hit BP_MAIN_LINE 14 again (WinCC OA "double-click" behavior,
+ *   3. StoppedEvent(entry) at line 13 (while — WinCC OA PC after DebugBreak)
+ *   4. continue → loop starts → hit BP_MAIN_LINE 15 (before entering lib)
+ *   5. continue → may hit BP_MAIN_LINE 15 again (WinCC OA "double-click" behavior,
  *      possibly a WinCC OA quirk — unknown if feature or bug)
  *   6. continue → hit BP_LIB_LINE 7 (inside add_two_integers)
  *
  * Test 2 flow (main BP, normal attach):
  *   1. Start manager 4 (manual) → DebugBreak() fires, CTRL pauses
  *   2. Session attaches WITHOUT stopOnEntry → adapter sends 'cont' → CTRL resumes
- *   3. CTRL enters while loop → main BP fires at line 14
+ *   3. CTRL enters while loop → main BP fires at line 15
  */
 
 import { suite, test, suiteSetup, suiteTeardown } from 'mocha';
@@ -49,11 +49,12 @@ type CoreApi = {
 
 /**
  * WinCC OA reports the stop at the NEXT statement after DebugBreak() —
- * line 12 (`while (true)`) rather than line 11 (DebugBreak itself).
+ * line 13 (`while (true)`) rather than line 11 (DebugBreak itself).
+ * (line 12 is blank)
  */
-const STOP_LINE = 12;
-/** Line in call_library_function.ctl — `sum = add_two_integers(a, b);` */
-const BP_MAIN_LINE = 14;
+const STOP_LINE = 13;
+/** Line in call_library_function.ctl — `sum = add_two_integers(a, b);` (line 15) */
+const BP_MAIN_LINE = 15;
 const BP_LIB_LINE = 7;
 
 /** CTRL manager number for call_library_function.ctl */

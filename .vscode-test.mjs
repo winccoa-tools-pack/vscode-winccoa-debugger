@@ -87,6 +87,17 @@ export default defineConfig({
             }
         },
         {
+            // E2E multi-library BP tests: multiple libs + nested depth (lib calls lib).
+            label: 'debuggerMultiLibBpE2e',
+            files: 'out/test/integration/debugger-multi-lib-bp-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
+        },
+        {
             // E2E stop-on-entry tests: vscode-dbg fixture project, manager 94 (manual).
             label: 'debuggerStopOnEntryE2e',
             files: 'out/test/integration/debugger-stop-on-entry-e2e.test.js',

@@ -4,52 +4,28 @@
     {
       "type": "winccoa",
       "request": "attach",
-      "name": "Attach to bp_basic_loop.ctl (CTRL 1)",
+      "name": "CTRL 2 — bp_basic_loop.ctl",
       "host": "localhost",
       "port": 4999,
       "project": "runnable",
       "system": "System1",
       "adapterPort": 7474,
-      "manager": {
-        "type": "CTRL",
-        "number": 1
-      },
+      "manager": { "type": "CTRL", "number": 2 },
       "pathMappings": {
         "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
       },
-      "trace": false
+      "trace": true
     },
     {
       "type": "winccoa",
       "request": "attach",
-      "name": "Attach to bp_basic_loop.ctl (CTRL 2)",
+      "name": "CTRL 3 — stop_on_entry.ctl (stopOnEntry + DEBUGBREAK)",
       "host": "localhost",
       "port": 4999,
       "project": "runnable",
       "system": "System1",
       "adapterPort": 7474,
-      "manager": {
-        "type": "CTRL",
-        "number": 2
-      },
-      "pathMappings": {
-        "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
-      },
-      "trace": false
-    },
-    {
-      "type": "winccoa",
-      "request": "attach",
-      "name": "Attach to stop_on_entry.ctl (CTRL 3)",
-      "host": "localhost",
-      "port": 4999,
-      "project": "runnable",
-      "system": "System1",
-      "adapterPort": 7474,
-      "manager": {
-        "type": "CTRL",
-        "number": 3
-      },
+      "manager": { "type": "CTRL", "number": 3 },
       "stopOnEntry": true,
       "pathMappings": {
         "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
@@ -59,16 +35,13 @@
     {
       "type": "winccoa",
       "request": "attach",
-      "name": "Attach to call_library_function.ctl (CTRL 4)",
+      "name": "CTRL 4 — call_library_function.ctl (stopOnEntry + DEBUGBREAK)",
       "host": "localhost",
       "port": 4999,
       "project": "runnable",
       "system": "System1",
       "adapterPort": 7474,
-      "manager": {
-        "type": "CTRL",
-        "number": 4
-      },
+      "manager": { "type": "CTRL", "number": 4 },
       "stopOnEntry": true,
       "pathMappings": {
         "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
@@ -78,20 +51,64 @@
     {
       "type": "winccoa",
       "request": "attach",
-      "name": "Attach to callstack_depth3.ctl (CTRL 5)",
+      "name": "CTRL 5 — callstack_depth3.ctl",
       "host": "localhost",
       "port": 4999,
       "project": "runnable",
       "system": "System1",
       "adapterPort": 7474,
-      "manager": {
-        "type": "CTRL",
-        "number": 5
-      },
+      "manager": { "type": "CTRL", "number": 5 },
       "pathMappings": {
         "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
       },
-      "trace": false
+      "trace": true
+    },
+    {
+      "type": "winccoa",
+      "request": "attach",
+      "name": "CTRL 6 — all_types.ctl",
+      "host": "localhost",
+      "port": 4999,
+      "project": "runnable",
+      "system": "System1",
+      "adapterPort": 7474,
+      "manager": { "type": "CTRL", "number": 6 },
+      "pathMappings": {
+        "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
+      },
+      "trace": true
+    },
+    {
+      "type": "winccoa",
+      "request": "attach",
+      "name": "CTRL 7 — pause_loop.ctl (manual + DEBUGBREAK)",
+      "host": "localhost",
+      "port": 4999,
+      "project": "runnable",
+      "system": "System1",
+      "adapterPort": 7474,
+      "manager": { "type": "CTRL", "number": 7 },
+      "stopOnEntry": true,
+      "pathMappings": {
+        "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
+      },
+      "trace": true
+    },
+    {
+      "type": "winccoa",
+      "request": "attach",
+      "name": "CTRL 8 — call_multi_libs.ctl (manual + DEBUGBREAK)",
+      "host": "localhost",
+      "port": 4999,
+      "project": "runnable",
+      "system": "System1",
+      "adapterPort": 7474,
+      "manager": { "type": "CTRL", "number": 8 },
+      "stopOnEntry": true,
+      "pathMappings": {
+        "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
+      },
+      "trace": true
     }
   ]
 }

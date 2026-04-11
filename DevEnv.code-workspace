@@ -13,7 +13,8 @@
       "path": "../../wincc_proj/DevEnv3.21"
     },
     {
-      "path": "src/test/fixtures/projects/runnable"
+      "name": "runnable",
+      "path": "out/test/fixtures/projects/runnable"
     }
   ],
   "settings": {
