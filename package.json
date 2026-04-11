@@ -121,6 +121,11 @@
                 "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
                 "default": 99
               },
+              "adapterPort": {
+                "type": "number",
+                "description": "TCP port the debug adapter listens on. Auto-injected (default: 7474) — normally no need to change.",
+                "default": 7474
+              },
               "trace": {
                 "type": "boolean",
                 "description": "Enable trace logging",
@@ -194,6 +199,11 @@
                 "type": "number",
                 "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
                 "default": 99
+              },
+              "adapterPort": {
+                "type": "number",
+                "description": "TCP port the debug adapter listens on. Auto-injected (default: 7474) — normally no need to change.",
+                "default": 7474
               },
               "trace": {
                 "type": "boolean",
@@ -279,7 +289,9 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "webpack",
+    "compile": "webpack && webpack --config webpack.adapter.config.js",
+    "compile:extension": "webpack",
+    "compile:adapter": "webpack --config webpack.adapter.config.js",
     "clean:out": "node -e \"require('fs').rmSync('out',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
     "clean:out-tests": "node -e \"try{require('fs').rmSync('out/test',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })}catch(e){console.warn('clean:out-tests skipped:', e.message)}\"",
     "clean:coverage": "node -e \"require('fs').rmSync('coverage',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
@@ -311,6 +323,7 @@
     "test:e2e:spuriousstops": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSpuriousStopsE2e",
     "test:e2e:racecondition": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerRaceConditionE2e",
     "test:e2e:variables": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerVariablesE2e",
+    "test:e2e:lifecycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLifecycleE2e",
     "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e && vscode-test --label debuggerSpuriousStopsE2e && vscode-test --label debuggerRaceConditionE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",

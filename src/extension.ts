@@ -14,11 +14,13 @@ import * as vscode from 'vscode';
 import { WinCCDebugAdapterDescriptorFactory } from './debugAdapterFactory';
 import { WinCCConfigurationProvider } from './configurationProvider';
 import { ProjectDetector, ProjectDetectionResult } from './projectDetector';
+import { AdapterDeployer, ManagerLifecycle } from './lifecycle';
 
 let outputChannel: vscode.OutputChannel;
 let statusBarItem: vscode.StatusBarItem;
 let projectDetector: ProjectDetector;
 let configProvider: WinCCConfigurationProvider;
+let managerLifecycle: ManagerLifecycle;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     outputChannel = vscode.window.createOutputChannel('WinCC OA Debugger');
@@ -30,8 +32,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     statusBarItem.command = 'winccoa.debugger.showStatus';
     context.subscriptions.push(statusBarItem);
 
+    // ── Lifecycle management ──────────────────────────────────────────────────
+    const deployer = new AdapterDeployer(context);
+    managerLifecycle = new ManagerLifecycle(deployer, outputChannel);
+    context.subscriptions.push(managerLifecycle);
+
     // ── Debug adapter components ──────────────────────────────────────────────
     const factory = new WinCCDebugAdapterDescriptorFactory(context);
+    factory.setLifecycle(managerLifecycle);
     configProvider = new WinCCConfigurationProvider();
 
     context.subscriptions.push(
@@ -46,13 +54,32 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     // Initial detection
     const initial = await projectDetector.detectProject();
-    applyDetectionResult(initial);
+    applyDetectionResult(initial, factory);
 
     // Subscribe to future project changes
     await projectDetector.subscribeToProjectChanges();
     context.subscriptions.push(
         projectDetector.onDidChangeProject((result) => {
-            applyDetectionResult(result);
+            applyDetectionResult(result, factory);
+        }),
+    );
+
+    // ── Debug session cleanup ─────────────────────────────────────────────────
+    context.subscriptions.push(
+        vscode.debug.onDidTerminateDebugSession(async (session) => {
+            if (session.type !== 'winccoa') {
+                return;
+            }
+            const project = projectDetector.getCachedResult()?.project;
+            if (project) {
+                try {
+                    await managerLifecycle.cleanupScriptManager(project, session.id);
+                } catch (e: any) {
+                    outputChannel.appendLine(
+                        `[lifecycle] Cleanup warning: ${e.message}`,
+                    );
+                }
+            }
         }),
     );
 
@@ -93,11 +120,17 @@ export function getOutputChannel(): vscode.OutputChannel {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function applyDetectionResult(result: ProjectDetectionResult): void {
+function applyDetectionResult(
+    result: ProjectDetectionResult,
+    factory: WinCCDebugAdapterDescriptorFactory,
+): void {
     const { project, readiness } = result;
 
     // Update configuration provider so new debug sessions use the current project
     configProvider.setActiveProject(project);
+
+    // Update factory so it can auto-start the adapter for the current project
+    factory.setProject(project);
 
     // Update status bar
     switch (readiness) {

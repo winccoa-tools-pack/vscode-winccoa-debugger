@@ -151,6 +151,17 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 90000
             }
+        },
+        {
+            // E2E lifecycle: ManagerLifecycle adds/starts/stops managers at runtime.
+            label: 'debuggerLifecycleE2e',
+            files: 'out/test/integration/debugger-lifecycle-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 180000
+            }
         }
     ]
 });

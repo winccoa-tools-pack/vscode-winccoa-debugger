@@ -397,6 +397,21 @@ export class WinccoaProjectLifecycle {
     }
 
     /**
+     * Returns the absolute path to the WinCC OA installation directory.
+     * Only valid after isWinccoaAvailable() returned true.
+     */
+    public getInstallDir(): string {
+        return this.resolveInstallation()?.installPath ?? `/opt/WinCC_OA/${this.getVersion()}`;
+    }
+
+    /**
+     * Returns the absolute path to the fixture project directory.
+     */
+    public getProjectDir(): string {
+        return path.resolve(__dirname, '..', 'fixtures', 'projects', PROJECT_NAME);
+    }
+
+    /**
      * Returns the base set of debug launch configuration parameters shared by all
      * vscode-dbg test suites.  Merge with script-specific fields before passing to
      * `vscode.debug.startDebugging()`.

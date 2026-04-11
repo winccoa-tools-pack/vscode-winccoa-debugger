@@ -7,13 +7,14 @@
  * manager entry in the project's progs file.  The adapter listens on a fixed
  * TCP port (default 7474) and VS Code connects via DebugAdapterServer.
  *
- * The launch configuration must contain `adapterPort: <number>` — this is
- * populated by WinccoaProjectLifecycle (tests) or the extension's launch
- * provider (production).
+ * On first use the factory calls ManagerLifecycle.ensureAdapter() to deploy
+ * the adapter JS file and register+start it via pmon automatically.
  */
 
 import * as net from 'net';
 import * as vscode from 'vscode';
+import { ManagerLifecycle, ADAPTER_PORT } from './lifecycle';
+import { WinccoaProject } from './projectDetector';
 
 /** Milliseconds to wait for the adapter's TCP server to become available. */
 const ADAPTER_READY_TIMEOUT_MS = 15_000;
@@ -23,8 +24,19 @@ const ADAPTER_READY_POLL_MS = 100;
 export class WinCCDebugAdapterDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory, vscode.Disposable
 {
+  private lifecycle: ManagerLifecycle | null = null;
+  private project: WinccoaProject | null = null;
+
   constructor(_context: vscode.ExtensionContext) {
-    // Adapter lifecycle is managed by pmon — nothing to subscribe to.
+    // lifecycle and project are injected after construction via setters.
+  }
+
+  setLifecycle(lifecycle: ManagerLifecycle): void {
+    this.lifecycle = lifecycle;
+  }
+
+  setProject(project: WinccoaProject | null): void {
+    this.project = project;
   }
 
   dispose(): void {
@@ -39,12 +51,11 @@ export class WinCCDebugAdapterDescriptorFactory
       adapterPort?: number;
     };
 
-    const port = config.adapterPort;
-    if (!port) {
-      throw new Error(
-        'WinCC OA debug adapter: adapterPort is required in launch configuration.\n' +
-        'The adapter must be started as a pmon-managed node manager before debugging.',
-      );
+    const port = config.adapterPort ?? ADAPTER_PORT;
+
+    // Auto-start the adapter if lifecycle management is available
+    if (this.lifecycle && this.project) {
+      await this.lifecycle.ensureAdapter(this.project);
     }
 
     await this.waitForPort(port);

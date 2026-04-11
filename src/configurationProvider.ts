@@ -12,6 +12,7 @@
 
 import * as vscode from 'vscode';
 import { WinccoaProject } from './projectDetector';
+import { ADAPTER_PORT } from './lifecycle';
 
 export interface WinCCDebugConfiguration extends vscode.DebugConfiguration {
   /** Request type */
@@ -137,6 +138,11 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
     // Set default path mappings if not provided
     if (!config.pathMappings) {
       config.pathMappings = {};
+    }
+
+    // Auto-inject adapterPort so the debug adapter factory knows where to connect
+    if (!config.adapterPort) {
+      config.adapterPort = ADAPTER_PORT;
     }
 
     return config;
