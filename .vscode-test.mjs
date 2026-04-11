@@ -140,6 +140,17 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 90000
             }
+        },
+        {
+            // E2E class debugging: CTRL classes (base + derived), member vars, method BPs.
+            label: 'debuggerClassE2e',
+            files: 'out/test/integration/debugger-class-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
         }
     ]
 });

@@ -12,4 +12,5 @@ WCCOActrl        | once   |      30 |        3 |        1 | -num 5 callstack_dep
 WCCOActrl        | once   |      30 |        3 |        1 | -num 6 all_types.ctl
 WCCOActrl        | manual |      30 |        3 |        1 | -num 7 pause_loop.ctl -dbg CTRL_DEBUGBREAK
 WCCOActrl        | manual |      30 |        3 |        1 | -num 8 call_multi_libs.ctl -dbg CTRL_DEBUGBREAK
+WCCOActrl        | manual |      30 |        3 |        1 | -num 9 debug_classes.ctl -dbg CTRL_DEBUGBREAK
 node             | once   |      30 |        1 |        0 |debugAdapter.js

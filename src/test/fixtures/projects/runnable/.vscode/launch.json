@@ -109,6 +109,22 @@
         "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
       },
       "trace": true
+    },
+    {
+      "type": "winccoa",
+      "request": "attach",
+      "name": "CTRL 9 — debug_classes.ctl (manual + DEBUGBREAK)",
+      "host": "localhost",
+      "port": 4999,
+      "project": "runnable",
+      "system": "System1",
+      "adapterPort": 7474,
+      "manager": { "type": "CTRL", "number": 9 },
+      "stopOnEntry": true,
+      "pathMappings": {
+        "/home/testus/vscode_wincc_extenssion/vscode-winccoa-debugger/out/test/fixtures/projects/runnable/scripts": ""
+      },
+      "trace": true
     }
   ]
 }
