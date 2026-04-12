@@ -27,12 +27,16 @@ ifeq ($(OS),Windows_NT)
     RMDIR := rmdir /S /Q
     MKDIR := mkdir
     KILL_CODE := taskkill /IM Code.exe /F 2>nul || echo "No VS Code process found"
+    DEVNULL := nul
+    TRUE := echo.
 else
     DETECTED_OS := $(shell uname -s)
     RM := rm -f
     RMDIR := rm -rf
     MKDIR := mkdir -p
     KILL_CODE := pkill -f "$(CODE_BIN)" 2>/dev/null || echo "No VS Code process found"
+    DEVNULL := /dev/null
+    TRUE := true
 endif
 
 # Default target
@@ -81,8 +85,8 @@ watch:
 # Package extension
 package: build
 	@echo "Packaging production release..."
-	@-$(MKDIR) $(BIN_DIR) 2>/dev/null || true
-	$(VSCE) package -o $(BIN_DIR)/$(EXTENSION_NAME)-$(VERSION).vsix
+	@-$(MKDIR) $(BIN_DIR) 2>$(DEVNULL) || $(TRUE)
+	$(VSCE) package --no-dependencies -o $(BIN_DIR)/$(EXTENSION_NAME)-$(VERSION).vsix
 	@echo "Extension packaged to $(BIN_DIR)/$(EXTENSION_NAME)-$(VERSION).vsix"
 
 # Run tests

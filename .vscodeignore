@@ -2,6 +2,7 @@
 # VS Code settings and tests
 .vscode/**
 .vscode-test/**
+.vscode-test.mjs
 
 # Git and CI
 .gitignore
@@ -16,15 +17,35 @@ Makefile
 .markdownlint.json
 out/**
 dist/adapter
+coverage/**
+bin/**
 
 # Source and configs
 src/**
 tsconfig.json
+tsconfig.webpack.json
 tsconfig.tsbuildinfo
+webpack.config.js
+webpack.adapter.config.js
+eslint.config.*
 
 # Node modules (safe because we bundle)
 node_modules/**
 
+# Dev/docs
+docs/**
+scripts/**
+test-workspace/**
+instructions.md
+CONTRIBUTING.md
+FUNDING.yml
+SECURITY.md
+DevEnv.code-workspace
+.prettierignore
+.prettierrc*
+
 # Exceptions for assets
+!dist/extension.js
+!dist/extension.js.LICENSE.txt
 !resources/**
 !images/**
