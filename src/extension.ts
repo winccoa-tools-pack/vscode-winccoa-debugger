@@ -85,6 +85,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
                     `[lifecycle] Cleanup warning: ${e.message}`,
                 );
             }
+            try {
+                const autoStop = session.configuration?.autoStopOnDisconnect ?? false;
+                await managerLifecycle.cleanupAttachManager(project, session.id, autoStop);
+            } catch (e: any) {
+                outputChannel.appendLine(
+                    `[lifecycle] Attach cleanup warning: ${e.message}`,
+                );
+            }
         }),
     );
 

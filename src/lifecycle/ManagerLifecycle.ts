@@ -17,6 +17,7 @@ import {
     PmonComponent,
     ProjEnvManagerOptions,
     ProjEnvManagerStartMode,
+    ProjEnvManagerState,
 } from '@winccoa-tools-pack/npm-winccoa-core';
 import { WinccoaProject } from '../projectDetector';
 import { AdapterDeployer } from './AdapterDeployer';
@@ -38,12 +39,25 @@ export interface ScriptManagerHandle {
     version: string;
 }
 
+export interface AttachManagerHandle {
+    /** Index in pmon's manager list (needed for stop) */
+    index: number;
+    /** The project ID used with PmonComponent */
+    projectId: string;
+    /** WinCC OA version (needed to create PmonComponent during cleanup) */
+    version: string;
+    /** Whether the manager was started by us (only stop if we started it) */
+    wasStartedByUs: boolean;
+}
+
 export class ManagerLifecycle implements vscode.Disposable {
     private readonly deployer: AdapterDeployer;
     private readonly outputChannel: vscode.OutputChannel | null;
 
     /** Tracks script managers added during debug sessions → cleaned up on terminate */
     private activeScriptManagers = new Map<string, ScriptManagerHandle>();
+    /** Tracks attach managers started via autoStartManager → stopped on terminate */
+    private activeAttachManagers = new Map<string, AttachManagerHandle>();
 
     constructor(deployer: AdapterDeployer, outputChannel?: vscode.OutputChannel | null) {
         this.deployer = deployer;
@@ -52,6 +66,7 @@ export class ManagerLifecycle implements vscode.Disposable {
 
     dispose(): void {
         this.activeScriptManagers.clear();
+        this.activeAttachManagers.clear();
     }
 
     // ─── Adapter lifecycle ─────────────────────────────────────────────────────
@@ -107,6 +122,104 @@ export class ManagerLifecycle implements vscode.Disposable {
         if (startCode !== 0) {
             this.log(`Warning: pmon startManager returned ${startCode} (may already be running)`);
         }
+    }
+
+    // ─── Attach manager lifecycle (autoStartManager) ────────────────────────
+
+    /**
+     * Ensure a specific manager (identified by manager number) is running.
+     * Used by the `autoStartManager` attach flag.
+     *
+     * Looks through the pmon manager list to find a WCCOActrl entry with the
+     * matching `-num` flag. If found and not running, starts it via pmon.
+     *
+     * @param project       Current WinCC OA project
+     * @param managerNumber Manager number to look for (-num flag value)
+     * @param sessionId     Debug session ID (used for cleanup tracking)
+     * @returns Handle for cleanup, or null if manager was already running
+     */
+    async ensureManagerRunning(
+        project: WinccoaProject,
+        managerNumber: number,
+        sessionId: string,
+    ): Promise<AttachManagerHandle | null> {
+        const pmon = this.createPmon(project.version);
+        const projectId = this.getProjectId(project);
+
+        // Get status of all managers
+        const status = await pmon.getProjectStatus(projectId);
+        const managers = await pmon.getManagerOptionsList(projectId);
+
+        // Find the manager entry with matching -num
+        const targetIndex = managers.findIndex(
+            (m) => m.startOptions?.includes(`-num ${managerNumber}`),
+        );
+
+        if (targetIndex < 0) {
+            throw new Error(
+                `Manager with -num ${managerNumber} not found in pmon config. ` +
+                `Add it to the progs file first, or use request "launch" to create a temporary one.`,
+            );
+        }
+
+        const managerInfo = status.managers[targetIndex];
+        const isRunning = managerInfo &&
+            (managerInfo.state === ProjEnvManagerState.Running ||
+             managerInfo.state === ProjEnvManagerState.Init);
+
+        const handle: AttachManagerHandle = {
+            index: targetIndex,
+            projectId,
+            version: project.version,
+            wasStartedByUs: false,
+        };
+
+        if (isRunning) {
+            this.log(`Manager -num ${managerNumber} already running at index ${targetIndex}`);
+            this.activeAttachManagers.set(sessionId, handle);
+            return handle;
+        }
+
+        // Start the manager
+        this.log(`Starting manager -num ${managerNumber} at index ${targetIndex}...`);
+        const startCode = await pmon.startManager(projectId, targetIndex);
+        if (startCode !== 0) {
+            throw new Error(
+                `Failed to start manager -num ${managerNumber} (pmon exit code ${startCode})`,
+            );
+        }
+
+        handle.wasStartedByUs = true;
+        this.activeAttachManagers.set(sessionId, handle);
+        this.log(`Manager -num ${managerNumber} started successfully`);
+        return handle;
+    }
+
+    /**
+     * Stop a manager that was started via autoStartManager.
+     * Only stops it if `autoStopOnDisconnect` was set and we actually started it.
+     */
+    async cleanupAttachManager(
+        project: WinccoaProject | null,
+        sessionId: string,
+        autoStopOnDisconnect: boolean,
+    ): Promise<void> {
+        const handle = this.activeAttachManagers.get(sessionId);
+        if (!handle) {
+            return;
+        }
+
+        if (autoStopOnDisconnect && handle.wasStartedByUs) {
+            const pmon = this.createPmon(project?.version ?? handle.version);
+            try {
+                this.log(`Stopping attach manager at index ${handle.index}...`);
+                await pmon.stopManager(handle.projectId, handle.index);
+            } catch (e: any) {
+                this.log(`Warning: stop attach manager failed: ${e.message}`);
+            }
+        }
+
+        this.activeAttachManagers.delete(sessionId);
     }
 
     // ─── Script manager lifecycle ──────────────────────────────────────────────
@@ -205,11 +318,14 @@ export class ManagerLifecycle implements vscode.Disposable {
     }
 
     /**
-     * Clean up all tracked script managers (e.g. on extension deactivation).
+     * Clean up all tracked managers (e.g. on extension deactivation).
      */
     async cleanupAll(project: WinccoaProject | null): Promise<void> {
         for (const sessionId of [...this.activeScriptManagers.keys()]) {
             await this.cleanupScriptManager(project, sessionId);
+        }
+        for (const sessionId of [...this.activeAttachManagers.keys()]) {
+            await this.cleanupAttachManager(project, sessionId, true);
         }
     }
 

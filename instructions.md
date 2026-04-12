@@ -285,6 +285,157 @@ Variablen-Name darf NICHT gleich dem Klassennamen sein (case-insensitive Kollisi
 
 ---
 
+## launch.json — Alle Flags
+
+### Request-Typen
+
+| Request | Zweck |
+|---------|-------|
+| `launch` | Startet einen **temporären** WCCOActrl Manager mit `-dbg CTRL_DEBUGBREAK`. Manager wird nach Session-Ende automatisch aus pmon entfernt. |
+| `attach` | Verbindet sich mit einem **bestehenden** Manager. Optional mit `autoStartManager` um gestoppte Manager vorher zu starten. |
+
+### Gemeinsame Flags (launch + attach)
+
+| Flag | Typ | Default | Beschreibung |
+|------|-----|---------|-------------|
+| `host` | string | `"localhost"` | Host auf dem WinCC OA läuft |
+| `port` | number | `4999` | Port für die Datenpunkt-Verbindung |
+| `project` | string | *(auto)* | Projektname für `-proj` Argument (z.B. `"DevEnv3.21"`). Auto-filled vom Project Admin. |
+| `system` | string | **required** | WinCC OA Systemname als DP-Prefix (z.B. `"System1"`). Leer-String für Single-System. |
+| `manager` | object | `{ type: "CTRL", number: 1 }` | Manager-Typ und -Nummer. **Required** bei attach. |
+| `manager.type` | enum | `"CTRL"` | `CTRL`, `UI`, `EVENT`, `ASCII`, `DEVICE`, `API`, `DRIVER` |
+| `manager.number` | number | `1` | Manager-Nummer (`-num` Flag) |
+| `pathMappings` | object | `{}` | Pfad-Mappings local → remote |
+| `adapterManagerNumber` | number | `99` | Manager-Nummer für den Debug-Adapter selbst. Darf nicht mit anderen kollidieren. |
+| `adapterPort` | number | `7474` | TCP Port des Debug-Adapters. Normalerweise nicht ändern. |
+| `trace` | boolean | `false` | Aktiviert Trace-Logging im Debug-Adapter |
+| `stopOnEntry` | boolean | *(siehe unten)* | Pausiert die Ausführung an der ersten Zeile |
+
+### Launch-spezifische Flags
+
+| Flag | Typ | Default | Beschreibung |
+|------|-----|---------|-------------|
+| `script` | string | `"${file}"` | Pfad zum CTRL-Script. Relativ zum scripts/-Verzeichnis. |
+| `scriptManagerNum` | number | `98` | Manager-Nummer für den temporären Script-Manager |
+
+> **Hinweis**: Bei `launch` wird `stopOnEntry` automatisch auf `true` gesetzt, da der Manager mit `-dbg CTRL_DEBUGBREAK` startet.
+
+### Attach-spezifische Flags
+
+| Flag | Typ | Default | Beschreibung |
+|------|-----|---------|-------------|
+| `autoStartManager` | boolean | `false` | Startet den Ziel-Manager automatisch via pmon, wenn er nicht läuft. Manager muss bereits in der progs-Datei existieren. |
+| `autoStopOnDisconnect` | boolean | `false` | Stoppt den Manager nach Session-Ende. Nur wenn `autoStartManager` aktiv **und** der Manager von uns gestartet wurde. Stellt den Original-Zustand wieder her. |
+
+### Beispiel: launch.json mit allen Varianten
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Quick Debug — einfach F5 drücken auf einer .ctl Datei
+      "type": "winccoa",
+      "request": "launch",
+      "name": "Debug CTRL Script",
+      "script": "${file}"
+    },
+    {
+      // Attach an laufenden Manager
+      "type": "winccoa",
+      "request": "attach",
+      "name": "Attach to CTRL 1",
+      "system": "System1",
+      "manager": { "type": "CTRL", "number": 1 }
+    },
+    {
+      // Attach mit Auto-Start — Manager wird gestartet falls gestoppt
+      "type": "winccoa",
+      "request": "attach",
+      "name": "Attach with Auto-Start",
+      "system": "System1",
+      "manager": { "type": "CTRL", "number": 5 },
+      "autoStartManager": true,
+      "autoStopOnDisconnect": true
+    },
+    {
+      // Launch mit preLaunchTask (siehe tasks.json Integration)
+      "type": "winccoa",
+      "request": "launch",
+      "name": "Build & Debug",
+      "script": "${file}",
+      "preLaunchTask": "winccoa-build"
+    }
+  ]
+}
+```
+
+---
+
+## tasks.json Integration (preLaunchTask)
+
+VS Code unterstützt `preLaunchTask` in jeder launch.json-Konfiguration. Damit können
+vor dem Debug-Start beliebige Aufgaben ausgeführt werden.
+
+### Anwendungsfälle
+
+| Use Case | Task-Typ | Beschreibung |
+|----------|----------|-------------|
+| **CTRL Syntax-Check** | shell | `WCCOActrl -syntax scripts/myScript.ctl` vor dem Debugging |
+| **Script Actions** | shell | Script-Action über CLI ausführen |
+| **dpCreate** | shell | Datapoints erstellen bevor Manager startet |
+| **Build** | npm | TypeScript/JS Build vor dem Debugging |
+| **Config-Check** | shell | Prüfen ob config/progs korrekt ist |
+
+### Beispiel: tasks.json
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "winccoa-syntax-check",
+      "type": "shell",
+      "command": "WCCOActrl",
+      "args": ["-syntax", "${file}"],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "winccoa-build",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Pre-build step done"],
+      "problemMatcher": []
+    }
+  ]
+}
+```
+
+### Verwendung in launch.json
+
+```json
+{
+  "type": "winccoa",
+  "request": "launch",
+  "name": "Check & Debug",
+  "script": "${file}",
+  "preLaunchTask": "winccoa-syntax-check"
+}
+```
+
+> **Hinweis**: `preLaunchTask` ist ein VS Code Standard-Feature. Wenn der Task fehlschlägt
+> (Exit-Code != 0), wird der Debug-Start abgebrochen. Das ist ideal für Syntax-Checks.
+
+### Einschränkungen
+
+- Tasks laufen **vor** dem Debug-Adapter — d.h. vor `ensureAdapter()` und `startScriptManager()`
+- Tasks haben keinen Zugriff auf die Debug-Session (kein sessionId etc.)
+- Für Manager-spezifische Pre-Jobs ist `autoStartManager` besser geeignet
+- `preLaunchTask` blockiert den Debug-Start bis der Task beendet ist
+
+---
+
 ## Abhängigkeiten
 
 | Paket | Verwendung |

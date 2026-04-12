@@ -57,6 +57,9 @@ export class WinCCDebugAdapterDescriptorFactory
       host?: string;
       port?: number;
       winCCOAVersion?: string;
+      autoStartManager?: boolean;
+      autoStopOnDisconnect?: boolean;
+      manager?: { type: string; number: number };
     };
 
     const port = config.adapterPort ?? ADAPTER_PORT;
@@ -77,6 +80,17 @@ export class WinCCDebugAdapterDescriptorFactory
           session.id,
         );
         // Give the CTRL manager time to initialise debug DPs
+        await new Promise((r) => setTimeout(r, 2_000));
+      }
+
+      // autoStartManager: start an existing pmon manager if not running
+      if (config.autoStartManager && !config.script && config.manager?.number) {
+        await this.lifecycle.ensureManagerRunning(
+          project,
+          config.manager.number,
+          session.id,
+        );
+        // Give the manager time to initialise debug DPs
         await new Promise((r) => setTimeout(r, 2_000));
       }
     }

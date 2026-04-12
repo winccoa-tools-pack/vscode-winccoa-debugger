@@ -50,6 +50,12 @@ export interface WinCCDebugConfiguration extends vscode.DebugConfiguration {
   pathMappings?: Record<string, string>;
   /** Enable trace logging */
   trace?: boolean;
+  /** Auto-start the target manager via pmon if not running (attach only) */
+  autoStartManager?: boolean;
+  /** Stop the target manager when the debug session ends (attach only) */
+  autoStopOnDisconnect?: boolean;
+  /** Pause execution at the first line */
+  stopOnEntry?: boolean;
 }
 
 export class WinCCConfigurationProvider implements vscode.DebugConfigurationProvider {
