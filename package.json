@@ -5,7 +5,7 @@
   "publisher": "winccoa-tools-pack",
   "version": "0.1.0",
   "author": "winccoa-tools-pack",
-  "license": "MIT",
+  "license": "BUSL-1.1",
   "icon": "resources/winccoa-debugger-512.png",
   "repository": {
     "type": "git",
@@ -193,21 +193,6 @@
                   "number"
                 ]
               },
-              "autoStartManager": {
-                "type": "boolean",
-                "description": "Automatically start the target manager via pmon if it is not running. Only works when the manager already exists in the pmon config (progs file).",
-                "default": false
-              },
-              "autoStopOnDisconnect": {
-                "type": "boolean",
-                "description": "Automatically stop the target manager via pmon when the debug session ends. Useful together with autoStartManager to restore the original state.",
-                "default": false
-              },
-              "stopOnEntry": {
-                "type": "boolean",
-                "description": "Pause execution at the first line after attaching. Requires the manager to be started with -dbg flag.",
-                "default": false
-              },
               "pathMappings": {
                 "type": "object",
                 "description": "Path mappings from local to remote",
@@ -279,24 +264,6 @@
               "pathMappings": {
                 "/opt/WinCC_OA/3.21/scripts": "^\"\\${workspaceFolder}/scripts\""
               }
-            }
-          },
-          {
-            "label": "WinCC OA: Attach with Auto-Start",
-            "description": "Attach to a WinCC OA manager, auto-starting it via pmon if not running",
-            "body": {
-              "type": "winccoa",
-              "request": "attach",
-              "name": "Attach (Auto-Start)",
-              "host": "localhost",
-              "port": 4999,
-              "system": "^\"\\${1:System1}\"",
-              "manager": {
-                "type": "^\"\\${2:CTRL}\"",
-                "number": "^\"\\${3:1}\""
-              },
-              "autoStartManager": true,
-              "autoStopOnDisconnect": true
             }
           }
         ],
@@ -374,7 +341,6 @@
     "test:e2e:variables": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerVariablesE2e",
     "test:e2e:lifecycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLifecycleE2e",
     "test:e2e:quickdebug": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerQuickDebugE2e",
-    "test:e2e:subproject": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSubprojectLibE2e",
     "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e && vscode-test --label debuggerSpuriousStopsE2e && vscode-test --label debuggerRaceConditionE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
