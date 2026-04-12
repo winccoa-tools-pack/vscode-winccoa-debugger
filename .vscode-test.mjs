@@ -162,6 +162,28 @@ export default defineConfig({
                 ui: 'tdd',
                 timeout: 180000
             }
+        },
+        {
+            // E2E quick debug: F5 without launch.json auto-starts script manager.
+            label: 'debuggerQuickDebugE2e',
+            files: 'out/test/integration/debugger-quick-debug-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 180000
+            }
+        },
+        {
+            // E2E sub-project library: BP in lib from pvss_path sub-project, manager 10 (dpCreate).
+            label: 'debuggerSubprojectLibE2e',
+            files: 'out/test/integration/debugger-subproject-lib-e2e.test.js',
+            version: 'stable',
+            workspaceFolder: './test-workspace',
+            mocha: {
+                ui: 'tdd',
+                timeout: 90000
+            }
         }
     ]
 });

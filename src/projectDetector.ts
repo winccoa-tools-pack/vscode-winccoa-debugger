@@ -128,7 +128,7 @@ export class ProjectDetector implements vscode.Disposable {
         const project: WinccoaProject = {
             name: raw.name,
             projectDir: raw.projectDir,
-            system: raw.systemName ?? raw.name,
+            system: raw.systemName ?? 'System1',
             host: 'localhost',
             port: 4999,
             version,
@@ -207,7 +207,7 @@ interface RawProject {
  *   2. /opt/WinCC_OA/<major>.<minor>     (numeric match fallback)
  *   3. /opt/pvss                          (legacy)
  */
-function resolveInstallDir(version: string): string | null {
+export function resolveInstallDir(version: string): string | null {
     const candidates = [
         `/opt/WinCC_OA/${version}`,
         `/opt/WinCC_OA/${version.split('.').slice(0, 2).join('.')}`,

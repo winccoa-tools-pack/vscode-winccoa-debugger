@@ -13,8 +13,9 @@
 
 import * as net from 'net';
 import * as vscode from 'vscode';
+import { getRegisteredProjects } from '@winccoa-tools-pack/npm-winccoa-core';
 import { ManagerLifecycle, ADAPTER_PORT } from './lifecycle';
-import { WinccoaProject } from './projectDetector';
+import { WinccoaProject, resolveInstallDir } from './projectDetector';
 
 /** Milliseconds to wait for the adapter's TCP server to become available. */
 const ADAPTER_READY_TIMEOUT_MS = 15_000;
@@ -49,17 +50,86 @@ export class WinCCDebugAdapterDescriptorFactory
   ): Promise<vscode.DebugAdapterDescriptor> {
     const config = session.configuration as {
       adapterPort?: number;
+      script?: string;
+      scriptManagerNum?: number;
+      project?: string;
+      system?: string;
+      host?: string;
+      port?: number;
+      winCCOAVersion?: string;
     };
 
     const port = config.adapterPort ?? ADAPTER_PORT;
 
+    // Resolve the project: prefer the injected project, fall back to pvssInst.conf
+    const project = this.project ?? await this.resolveProjectFromConfig(config);
+
     // Auto-start the adapter if lifecycle management is available
-    if (this.lifecycle && this.project) {
-      await this.lifecycle.ensureAdapter(this.project);
+    if (this.lifecycle && project) {
+      await this.lifecycle.ensureAdapter(project);
+
+      // Quick debug: start a temporary script manager for the .ctl file
+      if (config.script && config.scriptManagerNum) {
+        await this.lifecycle.startScriptManager(
+          project,
+          config.script,
+          config.scriptManagerNum,
+          session.id,
+        );
+        // Give the CTRL manager time to initialise debug DPs
+        await new Promise((r) => setTimeout(r, 2_000));
+      }
     }
 
     await this.waitForPort(port);
     return new vscode.DebugAdapterServer(port, '127.0.0.1');
+  }
+
+  /**
+   * Fallback project resolution from the debug config + pvssInst.conf.
+   * Used when ProjectDetector did not detect a project (e.g. Project Admin
+   * extension not installed).
+   */
+  private async resolveProjectFromConfig(config: {
+    project?: string;
+    system?: string;
+    host?: string;
+    port?: number;
+    winCCOAVersion?: string;
+  }): Promise<WinccoaProject | null> {
+    const projectName = config.project;
+    if (!projectName) {
+      return null;
+    }
+
+    try {
+      const projects = await getRegisteredProjects();
+      const registered = projects.find((p) => p.getId() === projectName);
+      if (!registered) {
+        return null;
+      }
+
+      const version = config.winCCOAVersion ?? registered.getVersion() ?? '3.21';
+      const installDir = resolveInstallDir(version);
+      if (!installDir) {
+        return null;
+      }
+
+      // getDir() returns the full project path (installDir + id + /)
+      const projectDir = registered.getDir().replace(/\/+$/, '');
+
+      return {
+        name: projectName,
+        projectDir,
+        system: config.system ?? 'System1',
+        host: config.host ?? 'localhost',
+        port: config.port ?? 4999,
+        version,
+        installDir,
+      };
+    } catch {
+      return null;
+    }
   }
 
   private waitForPort(port: number): Promise<void> {

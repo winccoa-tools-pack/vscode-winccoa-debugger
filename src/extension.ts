@@ -46,6 +46,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         factory,
         vscode.debug.registerDebugAdapterDescriptorFactory('winccoa', factory),
         vscode.debug.registerDebugConfigurationProvider('winccoa', configProvider),
+        // Register as dynamic provider so "Debug CTRL Script" appears in the
+        // Run and Debug dropdown even without a launch.json
+        vscode.debug.registerDebugConfigurationProvider(
+            'winccoa',
+            configProvider,
+            vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+        ),
     );
 
     // ── Project detection ─────────────────────────────────────────────────────
@@ -70,15 +77,13 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             if (session.type !== 'winccoa') {
                 return;
             }
-            const project = projectDetector.getCachedResult()?.project;
-            if (project) {
-                try {
-                    await managerLifecycle.cleanupScriptManager(project, session.id);
-                } catch (e: any) {
-                    outputChannel.appendLine(
-                        `[lifecycle] Cleanup warning: ${e.message}`,
-                    );
-                }
+            const project = projectDetector.getCachedResult()?.project ?? null;
+            try {
+                await managerLifecycle.cleanupScriptManager(project, session.id);
+            } catch (e: any) {
+                outputChannel.appendLine(
+                    `[lifecycle] Cleanup warning: ${e.message}`,
+                );
             }
         }),
     );

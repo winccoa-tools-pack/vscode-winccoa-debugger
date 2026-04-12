@@ -34,6 +34,8 @@ export interface ScriptManagerHandle {
     index: number;
     /** The project ID used with PmonComponent */
     projectId: string;
+    /** WinCC OA version (needed to create PmonComponent during cleanup) */
+    version: string;
 }
 
 export class ManagerLifecycle implements vscode.Disposable {
@@ -158,6 +160,7 @@ export class ManagerLifecycle implements vscode.Disposable {
         const handle: ScriptManagerHandle = {
             index: insertPosition,
             projectId,
+            version: project.version,
         };
         this.activeScriptManagers.set(sessionId, handle);
         return handle;
@@ -165,9 +168,12 @@ export class ManagerLifecycle implements vscode.Disposable {
 
     /**
      * Stop and remove the script manager that was added for a debug session.
+     * The project parameter is optional — when omitted, the version stored in
+     * the handle is used.  This allows cleanup even when ProjectDetector
+     * did not detect a project (e.g. Project Admin extension not installed).
      */
     async cleanupScriptManager(
-        project: WinccoaProject,
+        project: WinccoaProject | null,
         sessionId: string,
     ): Promise<void> {
         const handle = this.activeScriptManagers.get(sessionId);
@@ -176,7 +182,7 @@ export class ManagerLifecycle implements vscode.Disposable {
             return;
         }
 
-        const pmon = this.createPmon(project.version);
+        const pmon = this.createPmon(project?.version ?? handle.version);
 
         try {
             this.log(`Stopping script manager at index ${handle.index}...`);
@@ -201,7 +207,7 @@ export class ManagerLifecycle implements vscode.Disposable {
     /**
      * Clean up all tracked script managers (e.g. on extension deactivation).
      */
-    async cleanupAll(project: WinccoaProject): Promise<void> {
+    async cleanupAll(project: WinccoaProject | null): Promise<void> {
         for (const sessionId of [...this.activeScriptManagers.keys()]) {
             await this.cleanupScriptManager(project, sessionId);
         }

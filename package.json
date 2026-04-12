@@ -55,12 +55,18 @@
         ],
         "configurationAttributes": {
           "launch": {
-            "required": [
-              "host",
-              "system",
-              "manager"
-            ],
+            "required": [],
             "properties": {
+              "script": {
+                "type": "string",
+                "description": "Path to the CTRL script to debug. When set, a temporary WCCOActrl manager is started automatically and removed after the session.",
+                "default": "${file}"
+              },
+              "scriptManagerNum": {
+                "type": "number",
+                "description": "Manager number (-num) for the auto-started script manager.",
+                "default": 98
+              },
               "host": {
                 "type": "string",
                 "description": "Host where WinCC OA is running",
@@ -232,6 +238,16 @@
         ],
         "configurationSnippets": [
           {
+            "label": "WinCC OA: Debug CTRL Script",
+            "description": "Launch and debug the active CTRL script (auto-starts a temporary manager)",
+            "body": {
+              "type": "winccoa",
+              "request": "launch",
+              "name": "Debug CTRL Script",
+              "script": "^\"\\${file}\""
+            }
+          },
+          {
             "label": "WinCC OA: Attach to Manager",
             "description": "Attach to a running WinCC OA manager",
             "body": {
@@ -324,6 +340,8 @@
     "test:e2e:racecondition": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerRaceConditionE2e",
     "test:e2e:variables": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerVariablesE2e",
     "test:e2e:lifecycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLifecycleE2e",
+    "test:e2e:quickdebug": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerQuickDebugE2e",
+    "test:e2e:subproject": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSubprojectLibE2e",
     "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e && vscode-test --label debuggerSpuriousStopsE2e && vscode-test --label debuggerRaceConditionE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",

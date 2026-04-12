@@ -446,6 +446,14 @@ export class WinccoaProjectLifecycle {
         return path.join(PROJ_PATH, 'scripts', relPath);
     }
 
+    /**
+     * Returns the absolute path to a CTL script inside the sub-project fixture directory.
+     * @param relPath  e.g. 'libs/sub_math.ctl'
+     */
+    public getSubProjectScriptPath(relPath: string): string {
+        return path.join(SUB_PROJ_PATH, 'scripts', relPath);
+    }
+
     // ─── internal ──────────────────────────────────────────────────────────────
 
     private requireAvailable(): void {

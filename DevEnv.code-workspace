@@ -15,6 +15,13 @@
     {
       "name": "runnable",
       "path": "out/test/fixtures/projects/runnable"
+    },
+    {
+      "path": "../../repos/simaris-control"
+    },
+    {
+      "name": "sub-proj",
+      "path": "src/test/fixtures/projects/sub-proj"
     }
   ],
   "settings": {
