@@ -40,7 +40,6 @@ import * as fs from 'fs';
 import * as net from 'net';
 import * as path from 'path';
 import { execSync } from 'child_process';
-import * as vscode from 'vscode';
 import {
     PmonComponent,
     getAvailableWinCCOAVersions,
@@ -375,11 +374,26 @@ export class WinccoaProjectLifecycle {
             `WCCOActrl.*${PROJECT_NAME}`,
             `bootstrap\\.js.*${PROJECT_NAME}`,
         ];
-        for (const pattern of patterns) {
-            try {
-                execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
-            } catch {
-                // pkill exits with 1 when no process matched — that is fine
+        if (process.platform === 'win32') {
+            // On Windows use taskkill with /F (force) and /FI (filter) by window title,
+            // or wmic. Since we cannot filter by cmdline with taskkill, use wmic.
+            for (const pattern of patterns) {
+                try {
+                    execSync(
+                        `wmic process where "commandline like '%${pattern.replace(/\\/g, '').replace(/\./g, '_')}%'" call terminate`,
+                        { stdio: 'ignore' },
+                    );
+                } catch {
+                    // No matching process — that is fine
+                }
+            }
+        } else {
+            for (const pattern of patterns) {
+                try {
+                    execSync(`pkill -f "${pattern}"`, { stdio: 'ignore' });
+                } catch {
+                    // pkill exits with 1 when no process matched — that is fine
+                }
             }
         }
         console.log(`[WinccoaProjectLifecycle] Orphan processes for "${PROJECT_NAME}" killed (if any)`);
@@ -405,7 +419,10 @@ export class WinccoaProjectLifecycle {
      * Only valid after isWinccoaAvailable() returned true.
      */
     public getInstallDir(): string {
-        return this.resolveInstallation()?.installPath ?? `/opt/WinCC_OA/${this.getVersion()}`;
+        const fallback = process.platform === 'win32'
+            ? `C:\\Siemens\\Automation\\WinCC_OA\\${this.getVersion()}`
+            : `/opt/WinCC_OA/${this.getVersion()}`;
+        return this.resolveInstallation()?.installPath ?? fallback;
     }
 
     /**
@@ -577,7 +594,7 @@ export class WinccoaProjectLifecycle {
     private isProjectRegisteredInPvssConf(): boolean {
         const pvssInstConfPath =
             process.platform === 'win32'
-                ? 'C:\\ProgramData\\Siemens\\WinCC_OA\\pvssInst.conf'
+                ? path.join(process.env['ProgramData'] ?? 'C:\\ProgramData', 'Siemens', 'WinCC_OA', 'pvssInst.conf')
                 : '/etc/opt/pvss/pvssInst.conf';
         try {
             const content = fs.readFileSync(pvssInstConfPath, 'utf-8');

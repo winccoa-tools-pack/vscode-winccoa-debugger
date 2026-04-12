@@ -46,6 +46,7 @@ import * as fs from 'fs';
 import * as net from 'net';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { getWinCCOAInstallationPathByVersion } from '@winccoa-tools-pack/npm-winccoa-core';
 import { DebugSessionHelper } from '../debugSessionHelper';
 
 // ─── constants / env ─────────────────────────────────────────────────────────
@@ -58,9 +59,17 @@ const PORT = Number(process.env['WINCCOA_E2E_PORT'] ?? 4999);
 const MGR_NUM = Number(process.env['WINCCOA_E2E_MGR_NUM'] ?? 98);
 
 const IS_WINDOWS = process.platform === 'win32';
-const WCCOA_EXE = IS_WINDOWS
-    ? `C:\\Siemens\\WinCC_OA\\${VERSION}\\bin\\WCCOActrl.exe`
-    : `/opt/WinCC_OA/${VERSION}/bin/WCCOActrl`;
+const WCCOA_EXE = (() => {
+    try {
+        const installDir = getWinCCOAInstallationPathByVersion(VERSION);
+        if (installDir) {
+            return path.join(installDir, 'bin', IS_WINDOWS ? 'WCCOActrl.exe' : 'WCCOActrl');
+        }
+    } catch { /* fallback below */ }
+    return IS_WINDOWS
+        ? path.join('C:', 'Siemens', 'Automation', 'WinCC_OA', VERSION, 'bin', 'WCCOActrl.exe')
+        : `/opt/WinCC_OA/${VERSION}/bin/WCCOActrl`;
+})();
 
 /**
  * Absolute path to the test CTL script (copied to `out/test/fixtures/scripts/`

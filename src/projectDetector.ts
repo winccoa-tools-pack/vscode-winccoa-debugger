@@ -13,9 +13,8 @@
  *   3. Fire onDidChangeProject so extension.ts / configurationProvider can react
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
+import { getWinCCOAInstallationPathByVersion } from '@winccoa-tools-pack/npm-winccoa-core';
 
 /** Extension ID of the WinCC OA Project Admin extension */
 const PROJECT_ADMIN_EXT_ID = 'RichardJanisch.winccoa-project-admin';
@@ -202,30 +201,25 @@ interface RawProject {
 /**
  * Return the best-match WinCC OA installation directory for the given version.
  *
- * Search order:
- *   1. /opt/WinCC_OA/<version>           (Linux standard)
- *   2. /opt/WinCC_OA/<major>.<minor>     (numeric match fallback)
- *   3. /opt/pvss                          (legacy)
+ * Delegates to npm-winccoa-core's cross-platform resolution which uses:
+ *   - Windows: Registry query at HKLM\Software\ETM\WinCC_OA\<version>
+ *   - Linux:   /opt/WinCC_OA/<version> filesystem check
+ *
+ * Falls back to major.minor version matching if exact version is not found.
  */
 export function resolveInstallDir(version: string): string | null {
-    const candidates = [
-        `/opt/WinCC_OA/${version}`,
-        `/opt/WinCC_OA/${version.split('.').slice(0, 2).join('.')}`,
-        '/opt/pvss',
-    ];
-
-    for (const dir of candidates) {
-        const managerPath = path.join(dir, 'javascript', 'winccoa-manager');
-        if (fs.existsSync(managerPath)) {
-            return dir;
-        }
+    // Try exact version first
+    const exact = getWinCCOAInstallationPathByVersion(version);
+    if (exact) {
+        return exact;
     }
 
-    // Accept the directory even without the winccoa-manager package —
-    // maybe it's a different install layout.
-    for (const dir of candidates) {
-        if (fs.existsSync(dir)) {
-            return dir;
+    // Try major.minor fallback (e.g. "3.21" from "3.21.1")
+    const majorMinor = version.split('.').slice(0, 2).join('.');
+    if (majorMinor !== version) {
+        const fallback = getWinCCOAInstallationPathByVersion(majorMinor);
+        if (fallback) {
+            return fallback;
         }
     }
 

@@ -50,9 +50,13 @@ export class AdapterDeployer {
         }
 
         // Never overwrite symlinks (used by test fixtures pointing to un-bundled sources)
-        const isSymlink = fs.existsSync(targetPath) && fs.lstatSync(targetPath).isSymbolicLink();
-        if (isSymlink) {
-            return targetPath;
+        try {
+            const isSymlink = fs.existsSync(targetPath) && fs.lstatSync(targetPath).isSymbolicLink();
+            if (isSymlink) {
+                return targetPath;
+            }
+        } catch {
+            // lstatSync can fail on some platforms with restricted permissions — treat as non-symlink
         }
 
         // Copy if target missing or source is newer

@@ -139,10 +139,14 @@ export class WinCCConfigurationProvider implements vscode.DebugConfigurationProv
       // e.g.  /opt/projects/DevEnv/scripts/test.ctl  →  test.ctl
       // The project's scripts dir is <projectDir>/scripts/
       if (p && path.isAbsolute(config.script)) {
-        const scriptsDir = path.join(p.projectDir, 'scripts') + path.sep;
-        if (config.script.startsWith(scriptsDir)) {
+        const scriptsDir = path.normalize(path.join(p.projectDir, 'scripts')) + path.sep;
+        const normalizedScript = path.normalize(config.script);
+        const match = process.platform === 'win32'
+          ? normalizedScript.toLowerCase().startsWith(scriptsDir.toLowerCase())
+          : normalizedScript.startsWith(scriptsDir);
+        if (match) {
           config._absoluteScriptPath = config.script;
-          config.script = config.script.slice(scriptsDir.length);
+          config.script = normalizedScript.slice(scriptsDir.length);
         }
       }
 
