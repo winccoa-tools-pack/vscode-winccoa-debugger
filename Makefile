@@ -1,4 +1,4 @@
-.PHONY: help install build clean watch package test test-local register-project unregister-project
+.PHONY: help install build build-deps clean watch package test test-local register-project unregister-project
 
 # Variables
 EXTENSION_NAME := vscode-winccoa-debugger
@@ -9,6 +9,9 @@ EXT_NAME := vscode-winccoa-debugger
 EXT_ID := $(EXT_PUBLISHER).$(EXT_NAME)
 NPM := npm
 VSCE := npx vsce
+
+# npm-linked dependency that must be rebuilt before webpack bundles it
+NPM_DEBUGGER_DIR := $(shell node -e "try{console.log(require('fs').realpathSync('node_modules/@winccoa-tools-pack/winccoa-debug-adapter'))}catch(e){console.log('')}")
 
 # Test workspace configuration
 TEST_WORKSPACE ?= DevEnv.code-workspace
@@ -66,10 +69,20 @@ install:
 	@echo "Dependencies installed successfully!"
 
 # Build everything
-build:
+build: build-deps
 	@echo "Building extension..."
 	npm run compile
 	@echo "Build completed successfully!"
+
+# Rebuild npm-linked dependencies (npm-winccoa-debugger) so webpack picks up changes
+build-deps:
+ifneq ($(NPM_DEBUGGER_DIR),)
+	@echo "Rebuilding npm-winccoa-debugger ($(NPM_DEBUGGER_DIR))..."
+	@cd "$(NPM_DEBUGGER_DIR)" && npm run build
+	@echo "npm-winccoa-debugger rebuilt."
+else
+	@echo "npm-winccoa-debugger not npm-linked, skipping rebuild."
+endif
 
 # Clean build artifacts
 clean:

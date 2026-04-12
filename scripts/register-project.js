@@ -2,14 +2,15 @@
 /**
  * register-project.js
  *
- * Registers the "runnable" fixture project in pvssInst.conf so it appears in
- * the WinCC OA Project Admin and can be launched manually via VS Code (F5).
+ * Registers the "runnable" and "sub-proj" fixture projects in pvssInst.conf
+ * so they appear in the WinCC OA Project Admin and can be launched manually
+ * via VS Code (F5).
  *
  * Usage (via Makefile):
  *   node scripts/register-project.js
  *
- * The project config is read from out/test/fixtures/projects/runnable/config/config
- * which is populated by `npm run compile` (via scripts/copy-fixtures.mjs).
+ * The project configs are read from out/test/fixtures/projects/{runnable,sub-proj}/config/config
+ * which are populated by `npm run compile` (via scripts/copy-fixtures.mjs).
  */
 
 'use strict';
@@ -24,15 +25,25 @@ const {
 
 async function main() {
     const projectRoot = path.resolve(__dirname, '..');
-    const projPath = path.join(projectRoot, 'out', 'test', 'fixtures', 'projects', 'runnable');
-    const configFile = path.join(projPath, 'config', 'config');
+    const fixturesDir = path.join(projectRoot, 'out', 'test', 'fixtures', 'projects');
+    const runnablePath = path.join(fixturesDir, 'runnable');
+    const subProjPath = path.join(fixturesDir, 'sub-proj');
 
-    if (!fs.existsSync(configFile)) {
-        console.error(
-            `Project config not found: ${configFile}\n` +
-            `Run 'npm run compile' first to populate out/test/fixtures/.`,
-        );
-        process.exit(1);
+    const projects = [
+        { name: 'runnable', path: runnablePath },
+        { name: 'sub-proj', path: subProjPath },
+    ];
+
+    // Verify all config files exist
+    for (const proj of projects) {
+        const configFile = path.join(proj.path, 'config', 'config');
+        if (!fs.existsSync(configFile)) {
+            console.error(
+                `Project config not found: ${configFile}\n` +
+                `Run 'npm run compile' first to populate out/test/fixtures/.`,
+            );
+            process.exit(1);
+        }
     }
 
     const versions = getAvailableWinCCOAVersions();
@@ -48,42 +59,51 @@ async function main() {
         process.exit(1);
     }
 
-    // Substitute placeholders in all config files (config, progs, …)
-    const configDir = path.join(projPath, 'config');
-    for (const file of fs.readdirSync(configDir)) {
-        const filePath = path.join(configDir, file);
-        if (!fs.statSync(filePath).isFile()) continue;
-        let content = fs.readFileSync(filePath, 'utf-8');
-        if (
-            !content.includes('<WinCC_OA_PATH>') &&
-            !content.includes('<WinCC_OA_VERSION>') &&
-            !content.includes('<PROJ_DIR>')
-        ) {
-            continue;
+    // Substitute placeholders in all config files for all projects
+    for (const proj of projects) {
+        const configDir = path.join(proj.path, 'config');
+        console.log(`Processing config for '${proj.name}'…`);
+        for (const file of fs.readdirSync(configDir)) {
+            const filePath = path.join(configDir, file);
+            if (!fs.statSync(filePath).isFile()) continue;
+            let content = fs.readFileSync(filePath, 'utf-8');
+            if (
+                !content.includes('<WinCC_OA_PATH>') &&
+                !content.includes('<WinCC_OA_VERSION>') &&
+                !content.includes('<PROJ_DIR>') &&
+                !content.includes('<SUB_PROJ_DIR>')
+            ) {
+                continue;
+            }
+            content = content
+                .replace(/<WinCC_OA_PATH>/g, installPath)
+                .replace(/<WinCC_OA_VERSION>/g, version)
+                .replace(/<PROJ_DIR>/g, runnablePath)
+                .replace(/<SUB_PROJ_DIR>/g, subProjPath);
+            fs.writeFileSync(filePath, content, 'utf-8');
+            console.log(`  Substituted placeholders in: ${proj.name}/config/${file}`);
         }
-        content = content
-            .replace(/<WinCC_OA_PATH>/g, installPath)
-            .replace(/<WinCC_OA_VERSION>/g, version)
-            .replace(/<PROJ_DIR>/g, projPath);
-        fs.writeFileSync(filePath, content, 'utf-8');
-        console.log(`  Substituted placeholders in: ${file}`);
     }
 
+    // Register all projects in pvssInst.conf
     const pmon = new PmonComponent();
     pmon.setVersion(version);
 
-    console.log(`Registering project 'runnable' (WinCC OA ${version})…`);
-    console.log(`  Config: ${configFile}`);
+    for (const proj of projects) {
+        const configFile = path.join(proj.path, 'config', 'config');
+        console.log(`Registering project '${proj.name}' (WinCC OA ${version})…`);
+        console.log(`  Config: ${configFile}`);
 
-    try {
-        await pmon.registerProject(configFile, version);
-        console.log(`Done. Project 'runnable' is now registered in pvssInst.conf.`);
-    } catch (err) {
-        if (err.message && err.message.includes('already registered')) {
-            console.log(`Project 'runnable' is already registered.`);
-        } else {
-            console.error(`Registration failed: ${err.message}`);
-            process.exit(1);
+        try {
+            await pmon.registerProject(configFile, version);
+            console.log(`  Done. Project '${proj.name}' is now registered in pvssInst.conf.`);
+        } catch (err) {
+            if (err.message && err.message.includes('already registered')) {
+                console.log(`  Project '${proj.name}' is already registered.`);
+            } else {
+                console.error(`  Registration failed for '${proj.name}': ${err.message}`);
+                process.exit(1);
+            }
         }
     }
 }
