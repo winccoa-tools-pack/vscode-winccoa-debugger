@@ -83,27 +83,29 @@ console.log('\nLinking debug adapter into installed extension...');
 const os = require('os');
 const installedExtDir = path.join(os.homedir(), '.vscode', 'extensions', `${extId}-${version}`);
 const adapterLinkDir = path.join(installedExtDir, 'dist', 'adapter');
-const adapterSrcDir = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  'npm-winccoa-repos',
-  'npm-winccoa-debugger',
-  'dist',
-  'cjs',
-);
 
-if (!fs.existsSync(adapterSrcDir)) {
+// Resolve the adapter source directory dynamically via the npm-linked package
+// instead of relying on a hardcoded relative path that varies across OS/layouts.
+let adapterSrcDir;
+try {
+  const pkgDir = fs.realpathSync(path.resolve(__dirname, '..', 'node_modules', '@winccoa-tools-pack', 'winccoa-debug-adapter'));
+  adapterSrcDir = path.join(pkgDir, 'dist', 'cjs');
+} catch {
+  adapterSrcDir = null;
+}
+
+if (!adapterSrcDir || !fs.existsSync(adapterSrcDir)) {
   console.warn(
-    `WARNING: Adapter source not found at ${adapterSrcDir}.\n` +
-    `  Run: (cd ../npm-winccoa-repos/npm-winccoa-debugger && npm run build) then re-run make test-local`,
+    `WARNING: Adapter source not found.\n` +
+    `  Ensure @winccoa-tools-pack/winccoa-debug-adapter is npm-linked and built:\n` +
+    `    cd <npm-winccoa-debugger> && npm run build\n` +
+    `    cd <vscode-winccoa-debugger> && npm link @winccoa-tools-pack/winccoa-debug-adapter`,
   );
 } else {
   if (fs.existsSync(adapterLinkDir)) {
     fs.rmSync(adapterLinkDir, { recursive: true, force: true });
   }
-  fs.symlinkSync(adapterSrcDir, adapterLinkDir, 'dir');
+  fs.symlinkSync(adapterSrcDir, adapterLinkDir, process.platform === 'win32' ? 'junction' : 'dir');
   console.log(`  Linked: ${adapterLinkDir} -> ${adapterSrcDir}`);
 }
 
