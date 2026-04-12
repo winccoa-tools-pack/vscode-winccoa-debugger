@@ -61,6 +61,9 @@ const DEFAULT_PORT = 4999;
  */
 const PROJ_PATH = path.resolve(__dirname, '..', 'fixtures', 'projects', PROJECT_NAME);
 
+/** Absolute path to the sub-project fixture (referenced as pvss_path in runnable). */
+const SUB_PROJ_PATH = path.resolve(__dirname, '..', 'fixtures', 'projects', 'sub-proj');
+
 /**
  * SQLite seed files — copied into the project's db/ before each WinCC OA start.
  * At runtime __dirname = out/test/helpers/, seeds live at out/test/fixtures/seeds/sqlite/.
@@ -166,6 +169,7 @@ export class WinccoaProjectLifecycle {
         if (process.env['WINCCOA_EXTERNAL'] === '1') return;
 
         this.requireAvailable();
+        this.restoreProgsFromSource();
         this.substituteConfigPlaceholders();
 
         const info = this.resolveInstallation()!;
@@ -453,29 +457,56 @@ export class WinccoaProjectLifecycle {
         }
     }
 
+    /**
+     * Restore the progs file from the source fixtures.
+     * Pmon modifies the runtime progs (e.g. changing 'once' → 'manual', adding UI
+     * managers).  Without this, subsequent test runs may have a stale progs where
+     * the node debugAdapter entry is 'manual' instead of 'once' and never auto-starts.
+     */
+    private restoreProgsFromSource(): void {
+        // __dirname at runtime: out/test/helpers/
+        // source fixtures:      src/test/fixtures/projects/<name>/config/progs
+        const srcRoot = path.resolve(__dirname, '..', '..', '..', 'src');
+        const srcProgs = path.join(srcRoot, 'test', 'fixtures', 'projects', PROJECT_NAME, 'config', 'progs');
+        const dstProgs = path.join(PROJ_PATH, 'config', 'progs');
+
+        if (fs.existsSync(srcProgs)) {
+            fs.copyFileSync(srcProgs, dstProgs);
+            console.log('[WinccoaProjectLifecycle] Restored progs from source fixtures');
+        }
+    }
+
     private substituteConfigPlaceholders(): void {
         const info = this.resolveInstallation();
         if (!info) return;
 
-        const configDir = path.join(PROJ_PATH, 'config');
-        if (!fs.existsSync(configDir)) return;
+        const configDirs = [
+            path.join(PROJ_PATH, 'config'),
+            path.join(SUB_PROJ_PATH, 'config'),
+        ];
 
-        for (const file of fs.readdirSync(configDir)) {
-            const filePath = path.join(configDir, file);
-            if (!fs.statSync(filePath).isFile()) continue;
-            let content = fs.readFileSync(filePath, 'utf-8');
-            if (
-                !content.includes('<WinCC_OA_PATH>') &&
-                !content.includes('<WinCC_OA_VERSION>') &&
-                !content.includes('<PROJ_DIR>')
-            ) {
-                continue;
+        for (const configDir of configDirs) {
+            if (!fs.existsSync(configDir)) continue;
+
+            for (const file of fs.readdirSync(configDir)) {
+                const filePath = path.join(configDir, file);
+                if (!fs.statSync(filePath).isFile()) continue;
+                let content = fs.readFileSync(filePath, 'utf-8');
+                if (
+                    !content.includes('<WinCC_OA_PATH>') &&
+                    !content.includes('<WinCC_OA_VERSION>') &&
+                    !content.includes('<PROJ_DIR>') &&
+                    !content.includes('<SUB_PROJ_DIR>')
+                ) {
+                    continue;
+                }
+                content = content
+                    .replace(/<WinCC_OA_PATH>/g, info.installPath)
+                    .replace(/<WinCC_OA_VERSION>/g, info.version)
+                    .replace(/<PROJ_DIR>/g, PROJ_PATH)
+                    .replace(/<SUB_PROJ_DIR>/g, SUB_PROJ_PATH);
+                fs.writeFileSync(filePath, content, 'utf-8');
             }
-            content = content
-                .replace(/<WinCC_OA_PATH>/g, info.installPath)
-                .replace(/<WinCC_OA_VERSION>/g, info.version)
-                .replace(/<PROJ_DIR>/g, PROJ_PATH);
-            fs.writeFileSync(filePath, content, 'utf-8');
         }
     }
 
@@ -486,25 +517,33 @@ export class WinccoaProjectLifecycle {
         const info = this.resolveInstallation();
         if (!info) return;
 
-        const configDir = path.join(PROJ_PATH, 'config');
-        if (!fs.existsSync(configDir)) return;
+        const configDirs = [
+            path.join(PROJ_PATH, 'config'),
+            path.join(SUB_PROJ_PATH, 'config'),
+        ];
 
-        for (const file of fs.readdirSync(configDir)) {
-            const filePath = path.join(configDir, file);
-            if (!fs.statSync(filePath).isFile()) continue;
-            let content = fs.readFileSync(filePath, 'utf-8');
-            if (
-                !content.includes(info.installPath) &&
-                !content.includes(info.version) &&
-                !content.includes(PROJ_PATH)
-            ) {
-                continue;
+        for (const configDir of configDirs) {
+            if (!fs.existsSync(configDir)) continue;
+
+            for (const file of fs.readdirSync(configDir)) {
+                const filePath = path.join(configDir, file);
+                if (!fs.statSync(filePath).isFile()) continue;
+                let content = fs.readFileSync(filePath, 'utf-8');
+                if (
+                    !content.includes(info.installPath) &&
+                    !content.includes(info.version) &&
+                    !content.includes(PROJ_PATH) &&
+                    !content.includes(SUB_PROJ_PATH)
+                ) {
+                    continue;
+                }
+                content = content
+                    .replace(new RegExp(escapeRegExp(SUB_PROJ_PATH), 'g'), '<SUB_PROJ_DIR>')
+                    .replace(new RegExp(escapeRegExp(PROJ_PATH), 'g'), '<PROJ_DIR>')
+                    .replace(new RegExp(escapeRegExp(info.installPath), 'g'), '<WinCC_OA_PATH>')
+                    .replace(new RegExp(escapeRegExp(info.version), 'g'), '<WinCC_OA_VERSION>');
+                fs.writeFileSync(filePath, content, 'utf-8');
             }
-            content = content
-                .replace(new RegExp(escapeRegExp(PROJ_PATH), 'g'), '<PROJ_DIR>')
-                .replace(new RegExp(escapeRegExp(info.installPath), 'g'), '<WinCC_OA_PATH>')
-                .replace(new RegExp(escapeRegExp(info.version), 'g'), '<WinCC_OA_VERSION>');
-            fs.writeFileSync(filePath, content, 'utf-8');
         }
     }
 

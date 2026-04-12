@@ -24,10 +24,13 @@ import * as vscode from 'vscode';
 
 export interface DapMessage {
     type: 'event' | 'request' | 'response';
+    seq?: number;
+    request_seq?: number;
     event?: string;
     command?: string;
     body?: unknown;
     success?: boolean;
+    arguments?: unknown;
 }
 
 /**
@@ -37,6 +40,8 @@ export interface DapMessage {
 export class DebugSessionHelper {
     /** All messages received FROM the adapter (events + responses). */
     private readonly received: DapMessage[] = [];
+    /** All messages sent TO the adapter (requests). */
+    private readonly sent: DapMessage[] = [];
     /** Pending waiters: functions to call when a new message arrives. */
     private readonly waiters: Array<() => void> = [];
 
@@ -73,6 +78,9 @@ export class DebugSessionHelper {
             this.debugType,
             {
                 createDebugAdapterTracker: (_s) => ({
+                    onWillReceiveMessage: (msg: DapMessage) => {
+                        this.sent.push(msg);
+                    },
                     onDidSendMessage: (msg: DapMessage) => {
                         this.received.push(msg);
                         // Notify all pending waiters
@@ -210,6 +218,55 @@ export class DebugSessionHelper {
             throw new Error('No active debug session — call startSession() first');
         }
         return this.session.customRequest(command, args) as Promise<T>;
+    }
+
+    /**
+     * Returns the final verified state for breakpoints set in a given source file.
+     * Combines initial `setBreakpoints` responses and any subsequent `breakpoint`
+     * changed events.  Returns `undefined` if no setBreakpoints response was found
+     * for the given file.
+     *
+     * @param sourceFile  Substring to match against the source path in the
+     *                    outgoing setBreakpoints request (e.g. `'debugger_lib.ctl'`).
+     */
+    getBreakpointVerification(sourceFile: string): Array<{ line: number; verified: boolean }> | undefined {
+        // Find the last setBreakpoints request whose source.path contains sourceFile,
+        // then find the response with matching request_seq.
+        let lastReqSeq: number | undefined;
+        for (const msg of this.sent) {
+            if (msg.type === 'request' && msg.command === 'setBreakpoints') {
+                const args = msg.arguments as { source?: { path?: string } } | undefined;
+                const srcPath = args?.source?.path ?? '';
+                if (srcPath.includes(sourceFile)) {
+                    lastReqSeq = msg.seq;
+                }
+            }
+        }
+        if (lastReqSeq === undefined) return undefined;
+
+        // Find response matching this request
+        for (const msg of this.received) {
+            if (msg.type === 'response' && msg.command === 'setBreakpoints' && msg.request_seq === lastReqSeq) {
+                const body = msg.body as { breakpoints?: Array<{ line: number; verified: boolean; id?: number }> } | undefined;
+                if (!body?.breakpoints) return [];
+                // Start with response values, then overlay breakpoint events
+                const result = body.breakpoints.map(bp => ({ line: bp.line, verified: bp.verified, id: bp.id }));
+                // Check for breakpoint changed events that update verification
+                for (const ev of this.received) {
+                    if (ev.type === 'event' && ev.event === 'breakpoint') {
+                        const evBody = ev.body as { reason?: string; breakpoint?: { id?: number; verified?: boolean; line?: number } } | undefined;
+                        if (evBody?.reason === 'changed' && evBody.breakpoint) {
+                            const match = result.find(r => r.id !== undefined && r.id === evBody.breakpoint!.id);
+                            if (match && evBody.breakpoint.verified !== undefined) {
+                                match.verified = evBody.breakpoint.verified;
+                            }
+                        }
+                    }
+                }
+                return result.map(r => ({ line: r.line, verified: r.verified }));
+            }
+        }
+        return undefined;
     }
 
     /**

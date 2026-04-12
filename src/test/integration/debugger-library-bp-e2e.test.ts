@@ -194,6 +194,23 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
             );
             console.log(`[lib-bp-e2e] DebugBreak stop: reason="${entryBody.reason}" ✔`);
 
+            // ── Verify: BPs must be reported as verified (not grayed out) ─────
+            const mainBpState = helper.getBreakpointVerification('call_library_function.ctl');
+            console.log(`[lib-bp-e2e] Main BP verification: ${JSON.stringify(mainBpState)}`);
+            assert.ok(mainBpState, 'setBreakpoints response for main script must exist');
+            assert.ok(
+                mainBpState.every(bp => bp.verified),
+                `All main-script BPs must be verified, got: ${JSON.stringify(mainBpState)}`,
+            );
+
+            const libBpState = helper.getBreakpointVerification('debugger_lib.ctl');
+            console.log(`[lib-bp-e2e] Lib BP verification: ${JSON.stringify(libBpState)}`);
+            assert.ok(libBpState, 'setBreakpoints response for library file must exist');
+            assert.ok(
+                libBpState.every(bp => bp.verified),
+                `All library BPs must be verified (not grayed out), got: ${JSON.stringify(libBpState)}`,
+            );
+
             const entryThreadId = entryBody.threadId!;
             const entrySt = await helper.request<{ stackFrames: Array<{ line: number }> }>(
                 'stackTrace', { threadId: entryThreadId, levels: 1 },
@@ -259,6 +276,15 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
 
             const srcName = 'debugger_lib'; // already validated inside loop
             console.log(`[lib-bp-e2e] Library BP confirmed at ${srcName}:${BP_LIB_LINE} ✔`);
+
+            // ── Verify: after multiple reapply cycles, lib BPs still verified ─
+            const libBpAfter = helper.getBreakpointVerification('debugger_lib.ctl');
+            console.log(`[lib-bp-e2e] Lib BP verification after reapply: ${JSON.stringify(libBpAfter)}`);
+            assert.ok(libBpAfter, 'setBreakpoints response for library must still exist');
+            assert.ok(
+                libBpAfter.every(bp => bp.verified),
+                `Library BPs must remain verified after reapply cycles, got: ${JSON.stringify(libBpAfter)}`,
+            );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
