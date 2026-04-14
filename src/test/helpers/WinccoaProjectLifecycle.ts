@@ -85,7 +85,10 @@ const ADAPTER_READY_TIMEOUT_MS = 10_000;
 function isTcpReachable(host: string, port: number, timeoutMs = 1000): Promise<boolean> {
     return new Promise((resolve) => {
         const socket = new net.Socket();
-        const cleanup = (result: boolean) => { socket.destroy(); resolve(result); };
+        const cleanup = (result: boolean) => {
+            socket.destroy();
+            resolve(result);
+        };
         socket.setTimeout(timeoutMs);
         socket.once('connect', () => cleanup(true));
         socket.once('error', () => cleanup(false));
@@ -196,8 +199,8 @@ export class WinccoaProjectLifecycle {
         // uses that default port.  We verify BOTH the pmon port AND the debug-adapter port
         // — only "runnable" (which starts the debugAdapter.js manager) has both.
         if (
-            await isTcpReachable(this.host, this.port) &&
-            await isTcpReachable('127.0.0.1', ADAPTER_PORT)
+            (await isTcpReachable(this.host, this.port)) &&
+            (await isTcpReachable('127.0.0.1', ADAPTER_PORT))
         ) {
             console.log(
                 `[WinccoaProjectLifecycle] WinCC OA already running at ${this.host}:${this.port} ` +
@@ -218,7 +221,7 @@ export class WinccoaProjectLifecycle {
         if (!ready) {
             throw new Error(
                 `[WinccoaProjectLifecycle] WinCC OA did not become reachable on ` +
-                `${this.host}:${this.port} within ${STARTUP_TIMEOUT_MS / 1000}s`,
+                    `${this.host}:${this.port} within ${STARTUP_TIMEOUT_MS / 1000}s`,
             );
         }
         console.log(`[WinccoaProjectLifecycle] WinCC OA ready at ${this.host}:${this.port}`);
@@ -229,7 +232,7 @@ export class WinccoaProjectLifecycle {
         if (!adapterReady) {
             throw new Error(
                 `[WinccoaProjectLifecycle] Debug adapter did not become reachable on ` +
-                `127.0.0.1:${ADAPTER_PORT} within ${ADAPTER_READY_TIMEOUT_MS / 1000}s`,
+                    `127.0.0.1:${ADAPTER_PORT} within ${ADAPTER_READY_TIMEOUT_MS / 1000}s`,
             );
         }
         console.log(`[WinccoaProjectLifecycle] Debug adapter ready on port ${ADAPTER_PORT}`);
@@ -296,7 +299,9 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx})…`);
+        console.log(
+            `[WinccoaProjectLifecycle] Starting manager -num ${managerNum} (index ${idx})…`,
+        );
         await pmon.startManager(PROJECT_NAME, idx);
     }
 
@@ -316,7 +321,9 @@ export class WinccoaProjectLifecycle {
                 `[WinccoaProjectLifecycle] No manager with -num ${managerNum} found in manager list`,
             );
         }
-        console.log(`[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx})…`);
+        console.log(
+            `[WinccoaProjectLifecycle] Stopping manager -num ${managerNum} (index ${idx})…`,
+        );
         await pmon.stopManager(PROJECT_NAME, idx);
     }
 
@@ -354,7 +361,9 @@ export class WinccoaProjectLifecycle {
         const list = await pmon.getManagerOptionsList(PROJECT_NAME);
         const idx = list.findIndex((m) => m.startOptions?.includes('debugAdapter.js'));
         if (idx < 0) {
-            console.log(`[WinccoaProjectLifecycle] No debugAdapter.js manager found — skipping stop`);
+            console.log(
+                `[WinccoaProjectLifecycle] No debugAdapter.js manager found — skipping stop`,
+            );
             return;
         }
         console.log(`[WinccoaProjectLifecycle] Stopping debugAdapter.js manager (index ${idx}) …`);
@@ -396,7 +405,9 @@ export class WinccoaProjectLifecycle {
                 }
             }
         }
-        console.log(`[WinccoaProjectLifecycle] Orphan processes for "${PROJECT_NAME}" killed (if any)`);
+        console.log(
+            `[WinccoaProjectLifecycle] Orphan processes for "${PROJECT_NAME}" killed (if any)`,
+        );
     }
 
     /**
@@ -419,9 +430,10 @@ export class WinccoaProjectLifecycle {
      * Only valid after isWinccoaAvailable() returned true.
      */
     public getInstallDir(): string {
-        const fallback = process.platform === 'win32'
-            ? `C:\\Siemens\\Automation\\WinCC_OA\\${this.getVersion()}`
-            : `/opt/WinCC_OA/${this.getVersion()}`;
+        const fallback =
+            process.platform === 'win32'
+                ? `C:\\Siemens\\Automation\\WinCC_OA\\${this.getVersion()}`
+                : `/opt/WinCC_OA/${this.getVersion()}`;
         return this.resolveInstallation()?.installPath ?? fallback;
     }
 
@@ -477,7 +489,7 @@ export class WinccoaProjectLifecycle {
         if (!this.isWinccoaAvailable()) {
             throw new Error(
                 '[WinccoaProjectLifecycle] WinCC OA is not available on this machine. ' +
-                'Set WINCCOA_VSCODE_SKIP=1 to skip.',
+                    'Set WINCCOA_VSCODE_SKIP=1 to skip.',
             );
         }
     }
@@ -492,7 +504,15 @@ export class WinccoaProjectLifecycle {
         // __dirname at runtime: out/test/helpers/
         // source fixtures:      src/test/fixtures/projects/<name>/config/progs
         const srcRoot = path.resolve(__dirname, '..', '..', '..', 'src');
-        const srcProgs = path.join(srcRoot, 'test', 'fixtures', 'projects', PROJECT_NAME, 'config', 'progs');
+        const srcProgs = path.join(
+            srcRoot,
+            'test',
+            'fixtures',
+            'projects',
+            PROJECT_NAME,
+            'config',
+            'progs',
+        );
         const dstProgs = path.join(PROJ_PATH, 'config', 'progs');
 
         if (fs.existsSync(srcProgs)) {
@@ -505,10 +525,7 @@ export class WinccoaProjectLifecycle {
         const info = this.resolveInstallation();
         if (!info) return;
 
-        const configDirs = [
-            path.join(PROJ_PATH, 'config'),
-            path.join(SUB_PROJ_PATH, 'config'),
-        ];
+        const configDirs = [path.join(PROJ_PATH, 'config'), path.join(SUB_PROJ_PATH, 'config')];
 
         for (const configDir of configDirs) {
             if (!fs.existsSync(configDir)) continue;
@@ -542,10 +559,7 @@ export class WinccoaProjectLifecycle {
         const info = this.resolveInstallation();
         if (!info) return;
 
-        const configDirs = [
-            path.join(PROJ_PATH, 'config'),
-            path.join(SUB_PROJ_PATH, 'config'),
-        ];
+        const configDirs = [path.join(PROJ_PATH, 'config'), path.join(SUB_PROJ_PATH, 'config')];
 
         for (const configDir of configDirs) {
             if (!fs.existsSync(configDir)) continue;
@@ -583,10 +597,7 @@ export class WinccoaProjectLifecycle {
         fs.mkdirSync(targetDir, { recursive: true });
         for (const file of fs.readdirSync(SEEDS_SQLITE_DIR)) {
             if (!file.endsWith('.sqlite')) continue;
-            fs.copyFileSync(
-                path.join(SEEDS_SQLITE_DIR, file),
-                path.join(targetDir, file),
-            );
+            fs.copyFileSync(path.join(SEEDS_SQLITE_DIR, file), path.join(targetDir, file));
         }
         console.log(`[WinccoaProjectLifecycle] DB restored from seeds`);
     }
@@ -594,7 +605,12 @@ export class WinccoaProjectLifecycle {
     private isProjectRegisteredInPvssConf(): boolean {
         const pvssInstConfPath =
             process.platform === 'win32'
-                ? path.join(process.env['ProgramData'] ?? 'C:\\ProgramData', 'Siemens', 'WinCC_OA', 'pvssInst.conf')
+                ? path.join(
+                      process.env['ProgramData'] ?? 'C:\\ProgramData',
+                      'Siemens',
+                      'WinCC_OA',
+                      'pvssInst.conf',
+                  )
                 : '/etc/opt/pvss/pvssInst.conf';
         try {
             const content = fs.readFileSync(pvssInstConfPath, 'utf-8');

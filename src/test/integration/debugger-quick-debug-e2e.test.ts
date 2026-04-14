@@ -19,14 +19,12 @@
 
 import { suite, test, suiteSetup, suiteTeardown } from 'mocha';
 import * as assert from 'assert';
-import * as path from 'path';
+// import * as path from 'path';
 import * as vscode from 'vscode';
 import { DebugSessionHelper } from '../debugSessionHelper';
 import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
 import { waitForCoreApi } from '../../otherExtensions';
-import {
-    PmonComponent,
-} from '@winccoa-tools-pack/npm-winccoa-core';
+import { PmonComponent } from '@winccoa-tools-pack/npm-winccoa-core';
 
 type CoreApi = {
     getRunningProjects?: () => Promise<unknown[]>;
@@ -49,7 +47,7 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
 
     let canRun = false;
     let projectName: string;
-    let projectDir: string;
+    let _projectDir: string;
     let version: string;
     let addedBreakpoints: vscode.Breakpoint[] = [];
 
@@ -72,7 +70,7 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
         console.log('[quick-debug-e2e] Project started');
 
         projectName = lifecycle.getProjectName();
-        projectDir = lifecycle.getProjectDir();
+        _projectDir = lifecycle.getProjectDir();
         version = lifecycle.getVersion();
 
         // ── Wait for services to settle ──────────────────────────────────────
@@ -116,7 +114,9 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
                     m.startOptions?.includes(`-num ${SCRIPT_MANAGER_NUM}`),
                 );
                 if (idx >= 0) {
-                    console.log(`[quick-debug-e2e] Force-removing leftover -num ${SCRIPT_MANAGER_NUM} at index ${idx}`);
+                    console.log(
+                        `[quick-debug-e2e] Force-removing leftover -num ${SCRIPT_MANAGER_NUM} at index ${idx}`,
+                    );
                     await pmon.stopManager(projectName, idx).catch(() => {});
                     await new Promise((r) => setTimeout(r, 1000));
                     await pmon.removeManager(projectName, idx).catch(() => {});
@@ -127,9 +127,9 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[quick-debug-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[quick-debug-e2e] stop failed: ${e.message}`));
         }
 
         console.log('[quick-debug-e2e] Teardown complete');
@@ -149,7 +149,10 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
     // ── test 1: quick-debug launch config is auto-generated ──────────────────
 
     test('1 — launch config creates script + scriptManagerNum from active file', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath(SCRIPT_REL_PATH);
@@ -193,7 +196,10 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
     // ── test 2: script manager is cleaned up after session ends ──────────────
 
     test('2 — script manager removed after debug session ends', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         // Wait for the cleanup callback to fire (onDidTerminateDebugSession in extension.ts)
@@ -202,9 +208,7 @@ suite('WinCC OA Debugger — E2E Quick Debug (F5 without launch.json)', function
         const pmon = new PmonComponent();
         pmon.setVersion(version);
         const list = await pmon.getManagerOptionsList(projectName);
-        const exists = list.some(
-            (m) => m.startOptions?.includes(`-num ${SCRIPT_MANAGER_NUM}`),
-        );
+        const exists = list.some((m) => m.startOptions?.includes(`-num ${SCRIPT_MANAGER_NUM}`));
 
         assert.strictEqual(
             exists,

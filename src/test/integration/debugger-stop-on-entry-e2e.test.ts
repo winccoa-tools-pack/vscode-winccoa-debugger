@@ -87,10 +87,14 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[soe-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[soe-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[soe-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[soe-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[soe-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[soe-e2e] ✓ Setup complete — ready to run tests');
@@ -105,9 +109,9 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
             await lifecycle.stopManagerByNum(STOP_ENTRY_MANAGER).catch(() => {
                 /* intentionally ignored */
             });
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[soe-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[soe-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -128,7 +132,10 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
     // ── comprehensive stop-on-entry test ──────────────────────────────────────
 
     test('DebugBreak at line 22, variables a=10 b=32, continue leads to terminate', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         // Start the manual-mode manager (it calls DebugBreak() and halts there)
@@ -137,11 +144,7 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
 
         const helper = new DebugSessionHelper('winccoa');
         try {
-            await helper.startSession(
-                undefined,
-                buildLaunchConfig('E2E: stop on entry'),
-                20_000,
-            );
+            await helper.startSession(undefined, buildLaunchConfig('E2E: stop on entry'), 20_000);
             console.log('[soe-e2e] debug session started');
 
             // ── 1. Expect stopped event ───────────────────────────────────────
@@ -153,7 +156,9 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
             };
 
             assert.ok(
-                stoppedBody?.reason === 'entry' || stoppedBody?.reason === 'pause' || stoppedBody?.reason === 'breakpoint',
+                stoppedBody?.reason === 'entry' ||
+                    stoppedBody?.reason === 'pause' ||
+                    stoppedBody?.reason === 'breakpoint',
                 `expected stopped with reason 'entry'|'pause'|'breakpoint', got: "${stoppedBody?.reason}"`,
             );
             console.log(`[soe-e2e] stopped event: reason="${stoppedBody.reason}" ✔`);
@@ -219,7 +224,10 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
     // ── sanity: stopped reason is not 'exception' ─────────────────────────────
 
     test('DebugBreak stop reason is not exception', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(50_000);
 
         // Restart the manual manager for this independent test
@@ -242,9 +250,7 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
                 'exception',
                 'DebugBreak() must not appear as an exception stop',
             );
-            console.log(
-                `[soe-e2e] stop reason "${body?.reason}" is not "exception" ✔`,
-            );
+            console.log(`[soe-e2e] stop reason "${body?.reason}" is not "exception" ✔`);
         } finally {
             await helper.dispose();
         }

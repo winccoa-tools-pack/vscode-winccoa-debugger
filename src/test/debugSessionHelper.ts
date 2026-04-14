@@ -74,27 +74,27 @@ export class DebugSessionHelper {
         timeoutMs = 20_000,
     ): Promise<void> {
         // Register tracker BEFORE starting the session so we don't miss early events.
-        this.trackerDisposable = vscode.debug.registerDebugAdapterTrackerFactory(
-            this.debugType,
-            {
-                createDebugAdapterTracker: (_s) => ({
-                    onWillReceiveMessage: (msg: DapMessage) => {
-                        this.sent.push(msg);
-                    },
-                    onDidSendMessage: (msg: DapMessage) => {
-                        this.received.push(msg);
-                        // Notify all pending waiters
-                        const waiters = this.waiters.splice(0);
-                        for (const fn of waiters) fn();
-                    },
-                }),
-            },
-        );
+        this.trackerDisposable = vscode.debug.registerDebugAdapterTrackerFactory(this.debugType, {
+            createDebugAdapterTracker: () => ({
+                onWillReceiveMessage: (msg: DapMessage) => {
+                    this.sent.push(msg);
+                },
+                onDidSendMessage: (msg: DapMessage) => {
+                    this.received.push(msg);
+                    // Notify all pending waiters
+                    const waiters = this.waiters.splice(0);
+                    for (const fn of waiters) fn();
+                },
+            }),
+        });
 
         // Track when the session starts so we can hold a reference.
         const startedPromise = new Promise<void>((resolve, reject) => {
             const timer = setTimeout(
-                () => reject(new Error(`Timed out (${timeoutMs}ms) waiting for debug session to start`)),
+                () =>
+                    reject(
+                        new Error(`Timed out (${timeoutMs}ms) waiting for debug session to start`),
+                    ),
                 timeoutMs,
             );
             this.sessionDisposable = vscode.debug.onDidStartDebugSession((s) => {
@@ -148,10 +148,15 @@ export class DebugSessionHelper {
             const timer = setTimeout(() => {
                 const pendingIdx = this.waiters.indexOf(poll);
                 if (pendingIdx !== -1) this.waiters.splice(pendingIdx, 1);
-                reject(new Error(
-                    `Timed out (${timeoutMs}ms) waiting for configurationDone cycle. ` +
-                    `Received: ${this.received.filter(m => m.type === 'event').map(m => m.event).join(', ')}`,
-                ));
+                reject(
+                    new Error(
+                        `Timed out (${timeoutMs}ms) waiting for configurationDone cycle. ` +
+                            `Received: ${this.received
+                                .filter((m) => m.type === 'event')
+                                .map((m) => m.event)
+                                .join(', ')}`,
+                    ),
+                );
             }, deadline - Date.now());
 
             const poll = () => {
@@ -195,7 +200,10 @@ export class DebugSessionHelper {
                 reject(
                     new Error(
                         `Timed out after ${timeoutMs}ms waiting for DAP event "${eventName}". ` +
-                        `Received events: ${this.received.filter(m=>m.type==='event').map(m=>m.event).join(', ')}`,
+                            `Received events: ${this.received
+                                .filter((m) => m.type === 'event')
+                                .map((m) => m.event)
+                                .join(', ')}`,
                     ),
                 );
             }, timeoutMs);
@@ -229,7 +237,9 @@ export class DebugSessionHelper {
      * @param sourceFile  Substring to match against the source path in the
      *                    outgoing setBreakpoints request (e.g. `'debugger_lib.ctl'`).
      */
-    getBreakpointVerification(sourceFile: string): Array<{ line: number; verified: boolean }> | undefined {
+    getBreakpointVerification(
+        sourceFile: string,
+    ): Array<{ line: number; verified: boolean }> | undefined {
         // Find the last setBreakpoints request whose source.path contains sourceFile,
         // then find the response with matching request_seq.
         let lastReqSeq: number | undefined;
@@ -246,24 +256,41 @@ export class DebugSessionHelper {
 
         // Find response matching this request
         for (const msg of this.received) {
-            if (msg.type === 'response' && msg.command === 'setBreakpoints' && msg.request_seq === lastReqSeq) {
-                const body = msg.body as { breakpoints?: Array<{ line: number; verified: boolean; id?: number }> } | undefined;
+            if (
+                msg.type === 'response' &&
+                msg.command === 'setBreakpoints' &&
+                msg.request_seq === lastReqSeq
+            ) {
+                const body = msg.body as
+                    | { breakpoints?: Array<{ line: number; verified: boolean; id?: number }> }
+                    | undefined;
                 if (!body?.breakpoints) return [];
                 // Start with response values, then overlay breakpoint events
-                const result = body.breakpoints.map(bp => ({ line: bp.line, verified: bp.verified, id: bp.id }));
+                const result = body.breakpoints.map((bp) => ({
+                    line: bp.line,
+                    verified: bp.verified,
+                    id: bp.id,
+                }));
                 // Check for breakpoint changed events that update verification
                 for (const ev of this.received) {
                     if (ev.type === 'event' && ev.event === 'breakpoint') {
-                        const evBody = ev.body as { reason?: string; breakpoint?: { id?: number; verified?: boolean; line?: number } } | undefined;
+                        const evBody = ev.body as
+                            | {
+                                  reason?: string;
+                                  breakpoint?: { id?: number; verified?: boolean; line?: number };
+                              }
+                            | undefined;
                         if (evBody?.reason === 'changed' && evBody.breakpoint) {
-                            const match = result.find(r => r.id !== undefined && r.id === evBody.breakpoint!.id);
+                            const match = result.find(
+                                (r) => r.id !== undefined && r.id === evBody.breakpoint!.id,
+                            );
                             if (match && evBody.breakpoint.verified !== undefined) {
                                 match.verified = evBody.breakpoint.verified;
                             }
                         }
                     }
                 }
-                return result.map(r => ({ line: r.line, verified: r.verified }));
+                return result.map((r) => ({ line: r.line, verified: r.verified }));
             }
         }
         return undefined;
@@ -287,6 +314,9 @@ export class DebugSessionHelper {
 
     /** Whether a `terminated` event has been observed. */
     isTerminated(): boolean {
-        return this.terminated || this.received.some((m) => m.type === 'event' && m.event === 'terminated');
+        return (
+            this.terminated ||
+            this.received.some((m) => m.type === 'event' && m.event === 'terminated')
+        );
     }
 }

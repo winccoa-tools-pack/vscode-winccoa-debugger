@@ -75,9 +75,11 @@ export async function setupCoreExtensionIntegration(
             coreProjectChangeUnsubscribe = undefined;
         }
 
-        const maybeUnsubscribe = coreApi.onDidChangeProject((_project: ProjectInfo | undefined) => {
-            // Intentional no-op: callers may override via their own subscriptions.
-        });
+        const maybeUnsubscribe = coreApi.onDidChangeProject(
+            (_project?: ProjectInfo | undefined) => {
+                // Intentional no-op: callers may override via their own subscriptions.
+            },
+        );
 
         if (typeof maybeUnsubscribe === 'function') {
             coreProjectChangeUnsubscribe = maybeUnsubscribe;

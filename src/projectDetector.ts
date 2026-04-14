@@ -36,11 +36,7 @@ export interface WinccoaProject {
     installDir: string;
 }
 
-export type AdapterReadiness =
-    | 'ready'
-    | 'no-project'
-    | 'no-project-admin'
-    | 'winccoa-not-found';
+export type AdapterReadiness = 'ready' | 'no-project' | 'no-project-admin' | 'winccoa-not-found';
 
 export interface ProjectDetectionResult {
     project: WinccoaProject | null;
@@ -162,7 +158,7 @@ export class ProjectDetector implements vscode.Disposable {
             return;
         }
 
-        const disposable = api.onDidChangeProject(async (_project: any) => {
+        const disposable = api.onDidChangeProject(async (_project: unknown) => {
             const result = await this.detectProject();
             this.changeEmitter.fire(result);
         });

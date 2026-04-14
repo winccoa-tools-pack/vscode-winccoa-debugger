@@ -77,9 +77,9 @@ suite('WinCC OA Debugger — E2E Setup Verification', function () {
         this.timeout(30_000);
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[setup-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[setup-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -210,10 +210,9 @@ suite('WinCC OA Debugger — E2E Setup Verification', function () {
             // Retry refresh every 2 s if still empty
             if (Date.now() + 2_000 < deadline) {
                 await new Promise((r) => setTimeout(r, 2_000));
-                await vscode.commands.executeCommand('winccoa.core.refreshProjects').then(
-                    undefined,
-                    () => undefined,
-                );
+                await vscode.commands
+                    .executeCommand('winccoa.core.refreshProjects')
+                    .then(undefined, () => undefined);
             } else {
                 await new Promise((r) => setTimeout(r, 500));
             }
@@ -247,9 +246,7 @@ suite('WinCC OA Debugger — E2E Setup Verification', function () {
 
         const targetId = target['id'] as string | undefined;
 
-        console.log(
-            `[setup-e2e] Found fixture project: id="${targetId}" name="${target['name']}"`,
-        );
+        console.log(`[setup-e2e] Found fixture project: id="${targetId}" name="${target['name']}"`);
 
         assert.ok(targetId, 'Running project must have a string "id" field');
 

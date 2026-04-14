@@ -123,10 +123,14 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[race-condition-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[race-condition-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[race-condition-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[race-condition-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[race-condition-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[race-condition-e2e] ✓ Setup complete — ready to run tests');
@@ -142,9 +146,11 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[race-condition-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) =>
+                    console.error(`[race-condition-e2e] stop failed: ${e.message}`),
+                );
         }
     });
 
@@ -173,7 +179,10 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
     // ── test: concurrent setBreakpoints do not cause duplicate BPs ────────────
 
     test('concurrent setBreakpoints for two files do not produce duplicate BPs', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const bpScriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -237,14 +246,14 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
             assert.ok(
                 deltaMs >= MIN_LEGITIMATE_ITER_MS,
                 `RACE CONDITION DETECTED: next stop arrived after only ${deltaMs}ms ` +
-                `(expected >= ${MIN_LEGITIMATE_ITER_MS}ms == one full loop iteration). ` +
-                `This indicates duplicate breakpoints caused by concurrent setBreakpoints ` +
-                `calls — the bpOperationQueue fix is not working correctly.`,
+                    `(expected >= ${MIN_LEGITIMATE_ITER_MS}ms == one full loop iteration). ` +
+                    `This indicates duplicate breakpoints caused by concurrent setBreakpoints ` +
+                    `calls — the bpOperationQueue fix is not working correctly.`,
             );
 
             console.log(
                 `[race-condition-e2e] ✔ Next stop after ${deltaMs}ms ` +
-                `(>= ${MIN_LEGITIMATE_ITER_MS}ms threshold — no race condition)`,
+                    `(>= ${MIN_LEGITIMATE_ITER_MS}ms threshold — no race condition)`,
             );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
@@ -257,7 +266,10 @@ suite('WinCC OA Debugger — E2E bpOperationQueue race condition (multi-file BPs
     // ── test: second continue also reaches a legitimate stop ──────────────────
 
     test('multiple continues each wait for a full iteration (stable execution)', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const bpScriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');

@@ -27,9 +27,9 @@ type CoreApi = {
 
 // ─── constants ───────────────────────────────────────────────────────────────
 
-const BP_DEEP = 19;   // Inside multiply_and_add — deepest frame
-const BP_CALL = 31;   // compute_outer: call to compute_inner
-const BP_INNER = 25;  // First executable line inside compute_inner (for step-into landing)
+const BP_DEEP = 19; // Inside multiply_and_add — deepest frame
+const _BP_CALL = 31; // compute_outer: call to compute_inner
+const _BP_INNER = 25; // First executable line inside compute_inner (for step-into landing)
 
 /** CTRL manager number for callstack_depth3.ctl */
 const STEP_MANAGER = 5;
@@ -82,10 +82,14 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[step-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[step-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[step-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[step-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[step-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[step-e2e] ✓ Setup complete — ready to run tests');
@@ -101,9 +105,9 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[step-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[step-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -132,7 +136,10 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
     // ── test A: step-next advances past current line ──────────────────────────
 
     test('step-next advances from line 19 to line 20', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('callstack_depth3.ctl');
@@ -150,9 +157,14 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
 
             // Verify stopped at BP_DEEP
             const st1 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body1.threadId, levels: 1 },
+                'stackTrace',
+                { threadId: body1.threadId, levels: 1 },
             );
-            assert.strictEqual(st1.stackFrames[0].line, BP_DEEP, `initial stop must be at line ${BP_DEEP}`);
+            assert.strictEqual(
+                st1.stackFrames[0].line,
+                BP_DEEP,
+                `initial stop must be at line ${BP_DEEP}`,
+            );
 
             // Step over (next)
             await helper.request('next', { threadId: body1.threadId });
@@ -165,7 +177,8 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
 
             const st2 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 1 },
+                'stackTrace',
+                { threadId: body2.threadId!, levels: 1 },
             );
             assert.strictEqual(
                 st2.stackFrames[0].line,
@@ -174,14 +187,19 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
-            addedBreakpoints = [];            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});            await helper.dispose();
+            addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});
+            await helper.dispose();
         }
     });
 
     // ── test B: step-into triggers stop event ────────────────────────────────
 
     test('step-into command sends step and triggers stopped event', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('callstack_depth3.ctl');
@@ -203,9 +221,14 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
 
             // Verify initial stop at BP_DEEP (19) with a 3-level call stack
             const st1 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body1.threadId, levels: 5 },
+                'stackTrace',
+                { threadId: body1.threadId, levels: 5 },
             );
-            assert.strictEqual(st1.stackFrames[0].line, BP_DEEP, `initial stop must be at line ${BP_DEEP}`);
+            assert.strictEqual(
+                st1.stackFrames[0].line,
+                BP_DEEP,
+                `initial stop must be at line ${BP_DEEP}`,
+            );
             assert.ok(st1.stackFrames.length >= 2, 'must have call stack depth ≥ 2 at BP_DEEP');
 
             // Send step-into — WinCC OA processes it and stops at next BP
@@ -222,7 +245,8 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             assert.ok(typeof body2?.threadId === 'number', 'stopped event must carry threadId');
 
             const st2 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 1 },
+                'stackTrace',
+                { threadId: body2.threadId!, levels: 1 },
             );
             const stoppedLine = st2.stackFrames[0].line;
             assert.ok(stoppedLine > 0, `stopped line must be positive, got ${stoppedLine}`);
@@ -237,7 +261,10 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
     // ── test C: step-out returns from deepest frame ───────────────────────────
 
     test('step-out returns from multiply_and_add', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('callstack_depth3.ctl');
@@ -255,7 +282,8 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
 
             // Verify 3-level call stack at BP_DEEP
             const st1 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body1.threadId, levels: 5 },
+                'stackTrace',
+                { threadId: body1.threadId, levels: 5 },
             );
             assert.ok(st1.stackFrames.length >= 2, 'should have at least 2 frames at BP_DEEP');
             assert.strictEqual(st1.stackFrames[0].line, BP_DEEP);
@@ -271,7 +299,8 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
 
             const st2 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 5 },
+                'stackTrace',
+                { threadId: body2.threadId!, levels: 5 },
             );
             const stoppedLine = st2.stackFrames[0].line;
             // After stepping out of multiply_and_add, we should be in compute_inner (lines 23–27)
@@ -282,20 +311,24 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             );
             // Stack should be one level shallower
             assert.ok(
-                st2.stackFrames.length < st1.stackFrames.length ||
-                    st2.stackFrames.length >= 1,
+                st2.stackFrames.length < st1.stackFrames.length || st2.stackFrames.length >= 1,
                 'stack depth should be valid after step-out',
             );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
-            addedBreakpoints = [];            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});            await helper.dispose();
+            addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(STEP_MANAGER).catch(() => {});
+            await helper.dispose();
         }
     });
 
     // ── test D: pause interrupts a running script ─────────────────────────────
 
     test('pause suspends running script at a valid line', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         // Uses pause_loop.ctl (manager -num 7, manual, -dbg CTRL_DEBUGBREAK).
@@ -325,7 +358,10 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             // Adapter delivers the queued DebugBreak() stop — stopState captured
             const stop1 = await helper.waitForEvent('stopped', 15_000);
             const body1 = stop1.body as { threadId?: number };
-            assert.ok(typeof body1?.threadId === 'number', 'must stop at DebugBreak() to establish context');
+            assert.ok(
+                typeof body1?.threadId === 'number',
+                'must stop at DebugBreak() to establish context',
+            );
 
             // Continue — script enters while(running) loop; stopState is retained
             await helper.request('continue', { threadId: body1.threadId });
@@ -340,13 +376,16 @@ suite('WinCC OA Debugger — E2E step commands (callstack_depth3)', function () 
             const body = stopped.body as { reason?: string; threadId?: number };
 
             assert.ok(
-                body?.reason === 'pause' || body?.reason === 'step' || body?.reason === 'breakpoint',
+                body?.reason === 'pause' ||
+                    body?.reason === 'step' ||
+                    body?.reason === 'breakpoint',
                 `pause stop reason must be pause/step/breakpoint, got: "${body?.reason}"`,
             );
             assert.ok(typeof body?.threadId === 'number');
 
             const st = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body.threadId!, levels: 1 },
+                'stackTrace',
+                { threadId: body.threadId!, levels: 1 },
             );
             assert.ok(st.stackFrames.length > 0, 'should have a stack frame after pause');
             const stoppedLine = st.stackFrames[0].line;

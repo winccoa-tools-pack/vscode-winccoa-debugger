@@ -109,10 +109,14 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[lib-bp-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[lib-bp-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[lib-bp-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[lib-bp-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[lib-bp-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[lib-bp-e2e] ✓ Setup complete — ready to run tests');
@@ -128,9 +132,9 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[lib-bp-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[lib-bp-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -152,7 +156,10 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
     // ── test: BP in library file fires with correct source ────────────────────
 
     test('BP in library file fires at lib line 7 with source debugger_lib', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const mainScriptPath = lifecycle.getScriptPath('call_library_function.ctl');
@@ -178,18 +185,16 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
             // Wait for DebugBreak to fire before attaching
             await sleep(DEBUGBREAK_SETTLE_MS);
 
-            await helper.startSession(
-                undefined,
-                buildLaunchConfig('E2E: library BP'),
-                25_000,
-            );
+            await helper.startSession(undefined, buildLaunchConfig('E2E: library BP'), 25_000);
             console.log('[lib-bp-e2e] debug session started');
 
             // ── Step 1: DebugBreak stop (stop-on-entry) ───────────────────────
             const entryStop = await helper.waitForEvent('stopped', 15_000);
             const entryBody = entryStop.body as { reason?: string; threadId?: number };
             assert.ok(
-                entryBody?.reason === 'entry' || entryBody?.reason === 'pause' || entryBody?.reason === 'breakpoint',
+                entryBody?.reason === 'entry' ||
+                    entryBody?.reason === 'pause' ||
+                    entryBody?.reason === 'breakpoint',
                 `entry stop must have reason 'entry'|'pause'|'breakpoint', got: "${entryBody?.reason}"`,
             );
             console.log(`[lib-bp-e2e] DebugBreak stop: reason="${entryBody.reason}" ✔`);
@@ -199,7 +204,7 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
             console.log(`[lib-bp-e2e] Main BP verification: ${JSON.stringify(mainBpState)}`);
             assert.ok(mainBpState, 'setBreakpoints response for main script must exist');
             assert.ok(
-                mainBpState.every(bp => bp.verified),
+                mainBpState.every((bp) => bp.verified),
                 `All main-script BPs must be verified, got: ${JSON.stringify(mainBpState)}`,
             );
 
@@ -207,13 +212,14 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
             console.log(`[lib-bp-e2e] Lib BP verification: ${JSON.stringify(libBpState)}`);
             assert.ok(libBpState, 'setBreakpoints response for library file must exist');
             assert.ok(
-                libBpState.every(bp => bp.verified),
+                libBpState.every((bp) => bp.verified),
                 `All library BPs must be verified (not grayed out), got: ${JSON.stringify(libBpState)}`,
             );
 
             const entryThreadId = entryBody.threadId!;
             const entrySt = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: entryThreadId, levels: 1 },
+                'stackTrace',
+                { threadId: entryThreadId, levels: 1 },
             );
             assert.strictEqual(
                 entrySt.stackFrames[0].line,
@@ -227,11 +233,15 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
 
             const stop2 = await helper.waitForEvent('stopped', 15_000);
             const body2 = stop2.body as { reason?: string; threadId?: number };
-            assert.strictEqual(body2?.reason, 'breakpoint', 'second stop must be a breakpoint (main)');
-
-            const st2 = await helper.request<{ stackFrames: Array<{ line: number; source?: { name?: string } }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 1 },
+            assert.strictEqual(
+                body2?.reason,
+                'breakpoint',
+                'second stop must be a breakpoint (main)',
             );
+
+            const st2 = await helper.request<{
+                stackFrames: Array<{ line: number; source?: { name?: string } }>;
+            }>('stackTrace', { threadId: body2.threadId!, levels: 1 });
             assert.strictEqual(
                 st2.stackFrames[0].line,
                 BP_MAIN_LINE,
@@ -250,17 +260,24 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
 
                 const stopN = await helper.waitForEvent('stopped', 15_000);
                 const bodyN = stopN.body as { reason?: string; threadId?: number };
-                assert.strictEqual(bodyN?.reason, 'breakpoint', `stop #${attempt + 3} must be a breakpoint`);
+                assert.strictEqual(
+                    bodyN?.reason,
+                    'breakpoint',
+                    `stop #${attempt + 3} must be a breakpoint`,
+                );
                 lastThreadId = bodyN.threadId!;
 
-                const stN = await helper.request<{ stackFrames: Array<{ line: number; source?: { name?: string; path?: string } }> }>(
-                    'stackTrace', { threadId: lastThreadId, levels: 3 },
-                );
+                const stN = await helper.request<{
+                    stackFrames: Array<{ line: number; source?: { name?: string; path?: string } }>;
+                }>('stackTrace', { threadId: lastThreadId, levels: 3 });
                 const topLine = stN.stackFrames[0].line;
-                const topSrc = stN.stackFrames[0].source?.name ?? stN.stackFrames[0].source?.path ?? '';
+                const topSrc =
+                    stN.stackFrames[0].source?.name ?? stN.stackFrames[0].source?.path ?? '';
 
                 if (topLine === BP_LIB_LINE && topSrc.toLowerCase().includes('debugger_lib')) {
-                    console.log(`[lib-bp-e2e] Library BP fired at ${topSrc}:${topLine} ✔ (attempt ${attempt + 1})`);
+                    console.log(
+                        `[lib-bp-e2e] Library BP fired at ${topSrc}:${topLine} ✔ (attempt ${attempt + 1})`,
+                    );
                     libReached = true;
                     break;
                 }
@@ -270,7 +287,9 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
                     BP_MAIN_LINE,
                     `expected main BP (${BP_MAIN_LINE}) or lib BP (${BP_LIB_LINE}), got ${topLine}`,
                 );
-                console.log(`[lib-bp-e2e] Still at main BP ${BP_MAIN_LINE}, continuing (attempt ${attempt + 1})…`);
+                console.log(
+                    `[lib-bp-e2e] Still at main BP ${BP_MAIN_LINE}, continuing (attempt ${attempt + 1})…`,
+                );
             }
             assert.ok(libReached, 'lib BP must fire within 3 continue attempts');
 
@@ -279,10 +298,12 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
 
             // ── Verify: after multiple reapply cycles, lib BPs still verified ─
             const libBpAfter = helper.getBreakpointVerification('debugger_lib.ctl');
-            console.log(`[lib-bp-e2e] Lib BP verification after reapply: ${JSON.stringify(libBpAfter)}`);
+            console.log(
+                `[lib-bp-e2e] Lib BP verification after reapply: ${JSON.stringify(libBpAfter)}`,
+            );
             assert.ok(libBpAfter, 'setBreakpoints response for library must still exist');
             assert.ok(
-                libBpAfter.every(bp => bp.verified),
+                libBpAfter.every((bp) => bp.verified),
                 `Library BPs must remain verified after reapply cycles, got: ${JSON.stringify(libBpAfter)}`,
             );
         } finally {
@@ -300,7 +321,10 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
     // initialization sequence for non-stopOnEntry attach sessions.
 
     test.skip('main BP fires correctly even when lib BP is also set', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(45_000);
 
         const mainScriptPath = lifecycle.getScriptPath('call_library_function.ctl');
@@ -340,10 +364,9 @@ suite('WinCC OA Debugger — E2E library breakpoints (call_library_function)', f
             const body = stopped.body as { reason?: string; threadId?: number };
             assert.strictEqual(body?.reason, 'breakpoint');
 
-            const st = await helper.request<{ stackFrames: Array<{ line: number; source?: { name?: string } }> }>(
-                'stackTrace',
-                { threadId: body.threadId!, levels: 1 },
-            );
+            const st = await helper.request<{
+                stackFrames: Array<{ line: number; source?: { name?: string } }>;
+            }>('stackTrace', { threadId: body.threadId!, levels: 1 });
             assert.strictEqual(st.stackFrames[0].line, BP_MAIN_LINE);
 
             const srcName = st.stackFrames[0].source?.name ?? '';

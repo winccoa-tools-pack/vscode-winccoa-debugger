@@ -49,17 +49,17 @@ type DapVariable = {
 // ─── constants ───────────────────────────────────────────────────────────────
 
 /** WinCC OA reports stop at NEXT statement after DebugBreak() — line 16 (while) */
-const STOP_LINE = 16;
+const _STOP_LINE = 16;
 
 /** Lines in debug_classes.ctl (main body) */
-const BP_DESCRIBE_CALL = 18;  // desc = shapeInstant.describe()
-const BP_AREA_CALL = 19;      // circleArea = circleInstant.area()
+const BP_DESCRIBE_CALL = 18; // desc = shapeInstant.describe()
+const BP_AREA_CALL = 19; // circleArea = circleInstant.area()
 
 /** Line in libs/classes/Shape.ctl — body of describe() */
-const BP_DESCRIBE_BODY = 26;  // string result = m_name + " has " + ...
+const BP_DESCRIBE_BODY = 26; // string result = m_name + " has " + ...
 
 /** Line in libs/classes/Circle.ctl — body of area() */
-const BP_AREA_BODY = 22;      // float a = 3.14159 * m_radius * m_radius
+const BP_AREA_BODY = 22; // float a = 3.14159 * m_radius * m_radius
 
 /** CTRL manager number for debug_classes.ctl */
 const CLASS_MANAGER = 9;
@@ -113,7 +113,9 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
                 console.log('[class-e2e] Active project set to "runnable"');
             }
         } catch (err) {
-            console.warn(`[class-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[class-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[class-e2e] ✓ Setup complete');
@@ -128,9 +130,9 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             addedBreakpoints = [];
         }
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[class-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[class-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -168,36 +170,49 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             await helper.request('continue', { threadId: lastThreadId });
             const stopEvent = await helper.waitForEvent('stopped', 15_000);
             const body = stopEvent.body as { reason?: string; threadId?: number };
-            assert.strictEqual(body?.reason, 'breakpoint', `stop must be breakpoint (attempt ${attempt + 1})`);
+            assert.strictEqual(
+                body?.reason,
+                'breakpoint',
+                `stop must be breakpoint (attempt ${attempt + 1})`,
+            );
             lastThreadId = body.threadId!;
 
             const st = await helper.request<{
-                stackFrames: Array<{ id: number; line: number; source?: { name?: string; path?: string } }>;
+                stackFrames: Array<{
+                    id: number;
+                    line: number;
+                    source?: { name?: string; path?: string };
+                }>;
             }>('stackTrace', { threadId: lastThreadId, levels: 5 });
 
             const topLine = st.stackFrames[0].line;
             const topSrc = st.stackFrames[0].source?.name ?? st.stackFrames[0].source?.path ?? '';
 
-            if (topLine === expectedLine && topSrc.toLowerCase().includes(expectedSrcSubstring.toLowerCase())) {
+            if (
+                topLine === expectedLine &&
+                topSrc.toLowerCase().includes(expectedSrcSubstring.toLowerCase())
+            ) {
                 console.log(`[class-e2e] ✔ Hit ${topSrc}:${topLine} (attempt ${attempt + 1})`);
                 return { threadId: lastThreadId, stackFrames: st.stackFrames };
             }
 
-            console.log(`[class-e2e] Stop at ${topSrc}:${topLine}, want ${expectedSrcSubstring}:${expectedLine} — continuing (attempt ${attempt + 1})…`);
+            console.log(
+                `[class-e2e] Stop at ${topSrc}:${topLine}, want ${expectedSrcSubstring}:${expectedLine} — continuing (attempt ${attempt + 1})…`,
+            );
         }
-        assert.fail(`Expected BP at ${expectedSrcSubstring}:${expectedLine} not reached within ${maxAttempts} attempts`);
+        assert.fail(
+            `Expected BP at ${expectedSrcSubstring}:${expectedLine} not reached within ${maxAttempts} attempts`,
+        );
     }
 
     /**
      * Get the Locals scope variables for the current stop.
      */
-    async function getLocals(
-        helper: DebugSessionHelper,
-        threadId: number,
-    ): Promise<DapVariable[]> {
-        const st = await helper.request<{ stackFrames: Array<{ id: number }> }>(
-            'stackTrace', { threadId, levels: 1 },
-        );
+    async function getLocals(helper: DebugSessionHelper, threadId: number): Promise<DapVariable[]> {
+        const st = await helper.request<{ stackFrames: Array<{ id: number }> }>('stackTrace', {
+            threadId,
+            levels: 1,
+        });
         const frameId = st.stackFrames[0].id;
 
         const scopes = await helper.request<{
@@ -205,13 +220,15 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
         }>('scopes', { frameId });
 
         const localsScope = scopes.scopes.find((s) => s.name === 'Locals') ?? scopes.scopes[0];
-        const vars = await helper.request<{ variables: DapVariable[] }>(
-            'variables', { variablesReference: localsScope.variablesReference },
-        );
+        const vars = await helper.request<{ variables: DapVariable[] }>('variables', {
+            variablesReference: localsScope.variablesReference,
+        });
 
         console.log('[class-e2e] === LOCALS ===');
         for (const v of vars.variables) {
-            console.log(`  ${v.name}: ${JSON.stringify(v.value)}  (varRef=${v.variablesReference})`);
+            console.log(
+                `  ${v.name}: ${JSON.stringify(v.value)}  (varRef=${v.variablesReference})`,
+            );
         }
         console.log('[class-e2e] === END ===');
 
@@ -221,7 +238,10 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
     // ── Test 1: Class instance variables visible in locals ───────────────────
 
     test('class instances visible in locals with expandable members', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const mainScriptPath = lifecycle.getScriptPath('debug_classes.ctl');
@@ -241,11 +261,7 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             await lifecycle.startManagerByNum(CLASS_MANAGER);
             await sleep(DEBUGBREAK_SETTLE_MS);
 
-            await helper.startSession(
-                undefined,
-                buildLaunchConfig('E2E: class variables'),
-                25_000,
-            );
+            await helper.startSession(undefined, buildLaunchConfig('E2E: class variables'), 25_000);
             console.log('[class-e2e] debug session started');
 
             // ── DebugBreak entry stop ─────────────────────────────────────────
@@ -267,7 +283,10 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
 
             // ── Continue to BP_DESCRIBE_CALL line ─────────────────────────────
             const result = await continueUntilBp(
-                helper, loopThreadId, BP_DESCRIBE_CALL, 'debug_classes',
+                helper,
+                loopThreadId,
+                BP_DESCRIBE_CALL,
+                'debug_classes',
             );
             console.log(`[class-e2e] Stopped at describe call line ${BP_DESCRIBE_CALL} ✔`);
 
@@ -276,22 +295,32 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
 
             const find = (name: string) => {
                 const v = vars.find((x) => x.name === name);
-                assert.ok(v, `variable "${name}" must be present in Locals (got: ${vars.map((x) => x.name).join(', ')})`);
+                assert.ok(
+                    v,
+                    `variable "${name}" must be present in Locals (got: ${vars.map((x) => x.name).join(', ')})`,
+                );
                 return v!;
             };
 
             // Shape instance: should be expandable
             const shapeVar = find('shapeInstant');
-            assert.ok(shapeVar.variablesReference > 0, 'shapeInstant must be expandable (class instance)');
-            console.log(`[class-e2e] shapeInstant: value="${shapeVar.value}" varRef=${shapeVar.variablesReference}`);
+            assert.ok(
+                shapeVar.variablesReference > 0,
+                'shapeInstant must be expandable (class instance)',
+            );
+            console.log(
+                `[class-e2e] shapeInstant: value="${shapeVar.value}" varRef=${shapeVar.variablesReference}`,
+            );
 
             // Expand shape members
-            const shapeChildren = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: shapeVar.variablesReference },
-            );
+            const shapeChildren = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: shapeVar.variablesReference,
+            });
             console.log('[class-e2e] shapeInstant children:');
             for (const c of shapeChildren.variables) {
-                console.log(`  ${c.name}: ${JSON.stringify(c.value)} (varRef=${c.variablesReference})`);
+                console.log(
+                    `  ${c.name}: ${JSON.stringify(c.value)} (varRef=${c.variablesReference})`,
+                );
             }
 
             // Verify shape members (private m_name, m_sides)
@@ -304,29 +333,43 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
 
             // Circle instance: should be expandable
             const circleVar = find('circleInstant');
-            assert.ok(circleVar.variablesReference > 0, 'circleInstant must be expandable (class instance)');
-            console.log(`[class-e2e] circleInstant: value="${circleVar.value}" varRef=${circleVar.variablesReference}`);
+            assert.ok(
+                circleVar.variablesReference > 0,
+                'circleInstant must be expandable (class instance)',
+            );
+            console.log(
+                `[class-e2e] circleInstant: value="${circleVar.value}" varRef=${circleVar.variablesReference}`,
+            );
 
             // Expand circle members
-            const circleChildren = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: circleVar.variablesReference },
-            );
+            const circleChildren = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: circleVar.variablesReference,
+            });
             console.log('[class-e2e] circleInstant children:');
             for (const c of circleChildren.variables) {
-                console.log(`  ${c.name}: ${JSON.stringify(c.value)} (varRef=${c.variablesReference})`);
+                console.log(
+                    `  ${c.name}: ${JSON.stringify(c.value)} (varRef=${c.variablesReference})`,
+                );
             }
 
             // Verify circle has radius + inherited members (private m_radius, m_name, m_sides)
             const circleRadius = circleChildren.variables.find((c) => c.name === 'm_radius');
             assert.ok(circleRadius, '"m_radius" member must be present in Circle');
-            assert.ok(circleRadius!.value.startsWith('2.5'), `Circle.m_radius must start with "2.5", got ${circleRadius!.value}`);
+            assert.ok(
+                circleRadius!.value.startsWith('2.5'),
+                `Circle.m_radius must start with "2.5", got ${circleRadius!.value}`,
+            );
 
             // Circle inherits from Shape — check inherited members
             const circleName = circleChildren.variables.find((c) => c.name === 'm_name');
             const circleSides = circleChildren.variables.find((c) => c.name === 'm_sides');
             assert.ok(circleName, '"m_name" (inherited) must be present in Circle');
             assert.ok(circleSides, '"m_sides" (inherited) must be present in Circle');
-            assert.strictEqual(circleName!.value, '"Circle"', 'Circle.m_name (inherited) must be "Circle"');
+            assert.strictEqual(
+                circleName!.value,
+                '"Circle"',
+                'Circle.m_name (inherited) must be "Circle"',
+            );
             assert.strictEqual(circleSides!.value, '0', 'Circle.m_sides (inherited) must be 0');
 
             console.log('[class-e2e] ✅ Class instances visible with correct members');
@@ -341,7 +384,10 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
     // ── Test 2: BP in base class method (describe) fires ─────────────────────
 
     test('BP in base class method (Shape.describe) fires with correct stack', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const mainScriptPath = lifecycle.getScriptPath('debug_classes.ctl');
@@ -369,11 +415,7 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             await lifecycle.startManagerByNum(CLASS_MANAGER);
             await sleep(DEBUGBREAK_SETTLE_MS);
 
-            await helper.startSession(
-                undefined,
-                buildLaunchConfig('E2E: class method BP'),
-                25_000,
-            );
+            await helper.startSession(undefined, buildLaunchConfig('E2E: class method BP'), 25_000);
             console.log('[class-e2e] debug session started');
 
             // ── DebugBreak entry stop ─────────────────────────────────────────
@@ -394,21 +436,23 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             console.log('[class-e2e] Stepped past while ✔');
 
             // ── Continue until BP in describe() body ──────────────────────────
-            const result = await continueUntilBp(
-                helper, loopThreadId, BP_DESCRIBE_BODY, 'Shape',
-            );
+            const result = await continueUntilBp(helper, loopThreadId, BP_DESCRIBE_BODY, 'Shape');
 
             // ── Validate stack trace ──────────────────────────────────────────
             const frames = result.stackFrames;
-            assert.ok(frames.length >= 2,
-                `stack must have ≥2 frames (describe → main), got ${frames.length}`);
+            assert.ok(
+                frames.length >= 2,
+                `stack must have ≥2 frames (describe → main), got ${frames.length}`,
+            );
 
             const frame0Src = frames[0].source?.name ?? frames[0].source?.path ?? '';
 
-            assert.ok(frame0Src.includes('Shape'),
-                `frame 0 must be Shape.ctl, got "${frame0Src}"`);
-            assert.strictEqual(frames[0].line, BP_DESCRIBE_BODY,
-                `frame 0 must be line ${BP_DESCRIBE_BODY} (describe body)`);
+            assert.ok(frame0Src.includes('Shape'), `frame 0 must be Shape.ctl, got "${frame0Src}"`);
+            assert.strictEqual(
+                frames[0].line,
+                BP_DESCRIBE_BODY,
+                `frame 0 must be line ${BP_DESCRIBE_BODY} (describe body)`,
+            );
 
             console.log(`[class-e2e] Stack trace:`);
             for (let i = 0; i < Math.min(frames.length, 3); i++) {
@@ -427,7 +471,10 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
     // ── Test 3: BP in derived class method (Circle.area) fires ───────────────
 
     test('BP in derived class method (Circle.area) fires with correct stack', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const mainScriptPath = lifecycle.getScriptPath('debug_classes.ctl');
@@ -480,21 +527,26 @@ suite('WinCC OA Debugger — E2E class debugging (debug_classes)', function () {
             console.log('[class-e2e] Stepped past while ✔');
 
             // ── Continue until BP in area() body ──────────────────────────────
-            const result = await continueUntilBp(
-                helper, loopThreadId, BP_AREA_BODY, 'Circle',
-            );
+            const result = await continueUntilBp(helper, loopThreadId, BP_AREA_BODY, 'Circle');
 
             // ── Validate stack trace ──────────────────────────────────────────
             const frames = result.stackFrames;
-            assert.ok(frames.length >= 2,
-                `stack must have ≥2 frames (area → main), got ${frames.length}`);
+            assert.ok(
+                frames.length >= 2,
+                `stack must have ≥2 frames (area → main), got ${frames.length}`,
+            );
 
             const frame0Src = frames[0].source?.name ?? frames[0].source?.path ?? '';
 
-            assert.ok(frame0Src.includes('Circle'),
-                `frame 0 must be Circle.ctl, got "${frame0Src}"`);
-            assert.strictEqual(frames[0].line, BP_AREA_BODY,
-                `frame 0 must be line ${BP_AREA_BODY} (area body)`);
+            assert.ok(
+                frame0Src.includes('Circle'),
+                `frame 0 must be Circle.ctl, got "${frame0Src}"`,
+            );
+            assert.strictEqual(
+                frames[0].line,
+                BP_AREA_BODY,
+                `frame 0 must be line ${BP_AREA_BODY} (area body)`,
+            );
 
             console.log(`[class-e2e] Stack trace:`);
             for (let i = 0; i < Math.min(frames.length, 3); i++) {

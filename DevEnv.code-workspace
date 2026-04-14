@@ -44,7 +44,7 @@
       "**/out": true,
       "**/bin": true
     },
-    "winccoaLogviewer.autoClearOnScriptExecution": true
+    "winccoaLogviewer.autoClearOnScriptExecution": false
   },
   "launch": {
     "version": "0.2.0",

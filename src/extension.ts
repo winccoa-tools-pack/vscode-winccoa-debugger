@@ -80,17 +80,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
             const project = projectDetector.getCachedResult()?.project ?? null;
             try {
                 await managerLifecycle.cleanupScriptManager(project, session.id);
-            } catch (e: any) {
-                outputChannel.appendLine(
-                    `[lifecycle] Cleanup warning: ${e.message}`,
-                );
+            } catch (e: unknown) {
+                outputChannel.appendLine(`[lifecycle] Cleanup warning: ${(e as Error).message}`);
             }
             try {
                 const autoStop = session.configuration?.autoStopOnDisconnect ?? false;
                 await managerLifecycle.cleanupAttachManager(project, session.id, autoStop);
-            } catch (e: any) {
+            } catch (e: unknown) {
                 outputChannel.appendLine(
-                    `[lifecycle] Attach cleanup warning: ${e.message}`,
+                    `[lifecycle] Attach cleanup warning: ${(e as Error).message}`,
                 );
             }
         }),
@@ -99,22 +97,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // ── Commands ──────────────────────────────────────────────────────────────
     context.subscriptions.push(
         vscode.commands.registerCommand('winccoa.debugger.showStatus', showStatus),
-        vscode.commands.registerCommand('winccoa.debugger.showOutput', () =>
-            outputChannel.show(),
-        ),
+        vscode.commands.registerCommand('winccoa.debugger.showOutput', () => outputChannel.show()),
         // Keep the input variable command for backwards compat with launch.json
-        vscode.commands.registerCommand(
-            'extension.winccoa.debugger.getSystemName',
-            async () => {
-                const current = projectDetector.getCachedResult()?.project?.system;
-                const result = await vscode.window.showInputBox({
-                    prompt: 'Enter WinCC OA System Name',
-                    placeHolder: 'System1',
-                    value: current ?? 'System1',
-                });
-                return result ?? current ?? 'System1';
-            },
-        ),
+        vscode.commands.registerCommand('extension.winccoa.debugger.getSystemName', async () => {
+            const current = projectDetector.getCachedResult()?.project?.system;
+            const result = await vscode.window.showInputBox({
+                prompt: 'Enter WinCC OA System Name',
+                placeHolder: 'System1',
+                value: current ?? 'System1',
+            });
+            return result ?? current ?? 'System1';
+        }),
     );
 
     outputChannel.appendLine('WinCC OA Debugger extension activated');
@@ -170,8 +163,7 @@ function applyDetectionResult(
 
         case 'no-project-admin':
             statusBarItem.text = `$(debug) Project Admin missing`;
-            statusBarItem.tooltip =
-                'WinCC OA Project Admin extension not installed or not active';
+            statusBarItem.tooltip = 'WinCC OA Project Admin extension not installed or not active';
             statusBarItem.backgroundColor = new vscode.ThemeColor(
                 'statusBarItem.warningBackground',
             );
@@ -183,9 +175,7 @@ function applyDetectionResult(
             statusBarItem.text = `$(error) WinCC OA not found`;
             statusBarItem.tooltip =
                 'WinCC OA installation not found on this machine — debug adapter will fail to connect';
-            statusBarItem.backgroundColor = new vscode.ThemeColor(
-                'statusBarItem.errorBackground',
-            );
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
             statusBarItem.show();
             outputChannel.appendLine('WinCC OA installation not found');
             break;
@@ -195,27 +185,30 @@ function applyDetectionResult(
 function showStatus(): void {
     const result = projectDetector.getCachedResult();
     if (!result || !result.project) {
-        vscode.window.showWarningMessage(
-            'No WinCC OA project active. Open Project Admin and select a project, then debugging will auto-configure.',
-            'Open Project Admin',
-        ).then((sel) => {
-            if (sel === 'Open Project Admin') {
-                vscode.commands.executeCommand(
-                    'workbench.view.extension.winccoa-project-admin',
-                );
-            }
-        });
+        vscode.window
+            .showWarningMessage(
+                'No WinCC OA project active. Open Project Admin and select a project, then debugging will auto-configure.',
+                'Open Project Admin',
+            )
+            .then((sel) => {
+                if (sel === 'Open Project Admin') {
+                    vscode.commands.executeCommand(
+                        'workbench.view.extension.winccoa-project-admin',
+                    );
+                }
+            });
         return;
     }
 
     const p = result.project;
-    vscode.window.showInformationMessage(
-        `WinCC OA Debugger — ${p.name} | system: ${p.system} | ${p.host}:${p.port} | v${p.version}`,
-        'Show Output',
-    ).then((sel) => {
-        if (sel === 'Show Output') {
-            outputChannel.show();
-        }
-    });
+    vscode.window
+        .showInformationMessage(
+            `WinCC OA Debugger — ${p.name} | system: ${p.system} | ${p.host}:${p.port} | v${p.version}`,
+            'Show Output',
+        )
+        .then((sel) => {
+            if (sel === 'Show Output') {
+                outputChannel.show();
+            }
+        });
 }
-

@@ -23,7 +23,7 @@
 
 import { suite, test, suiteSetup, suiteTeardown } from 'mocha';
 import * as assert from 'assert';
-import * as path from 'path';
+// import * as path from 'path';
 import * as vscode from 'vscode';
 import { DebugSessionHelper } from '../debugSessionHelper';
 import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
@@ -69,7 +69,9 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
             console.error(`[bp-cycle-e2e] Project startup failed: ${(err as Error).message}`);
             return;
         }
-        console.log('[bp-cycle-e2e] Project started — pmon, Data Manager and debugAdapter are running');
+        console.log(
+            '[bp-cycle-e2e] Project started — pmon, Data Manager and debugAdapter are running',
+        );
 
         // ── Step 2: Let WinCC OA settle before tests ─────────────────────────
         console.log('[bp-cycle-e2e] Step 2: Waiting for services to stabilize…');
@@ -91,10 +93,14 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[bp-cycle-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[bp-cycle-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[bp-cycle-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[bp-cycle-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[bp-cycle-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[bp-cycle-e2e] ✓ Setup complete — ready to run tests');
@@ -116,9 +122,9 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
 
         // Stop project + unregister from pvssInst.conf (clean state for next run)
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[bp-cycle-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[bp-cycle-e2e] stop failed: ${e.message}`));
         }
 
         console.log('[bp-cycle-e2e] Teardown complete');
@@ -149,7 +155,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
     // ── test 1: BP is hit ─────────────────────────────────────────────────────
 
     test('sets BP and stops at line 13', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -177,7 +186,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
     // ── test 2: stack frame at correct line ───────────────────────────────────
 
     test.skip('stack frame points to line 13', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -193,13 +205,16 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
             const body = stopped.body as { threadId?: number };
             assert.ok(typeof body?.threadId === 'number', 'threadId must be a number');
 
-            const st = await helper.request<{ stackFrames: Array<{ line: number; source?: { name?: string } }> }>(
-                'stackTrace',
-                { threadId: body.threadId, levels: 5 },
-            );
+            const st = await helper.request<{
+                stackFrames: Array<{ line: number; source?: { name?: string } }>;
+            }>('stackTrace', { threadId: body.threadId, levels: 5 });
 
             assert.ok(st.stackFrames.length > 0, 'stackTrace should have at least one frame');
-            assert.strictEqual(st.stackFrames[0].line, BP_LINE, `top frame line must be ${BP_LINE}`);
+            assert.strictEqual(
+                st.stackFrames[0].line,
+                BP_LINE,
+                `top frame line must be ${BP_LINE}`,
+            );
 
             const srcName = st.stackFrames[0].source?.name ?? '';
             assert.ok(
@@ -217,7 +232,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
     // ── test 3: local variable 'counter' ─────────────────────────────────────
 
     test.skip('local variable counter is readable at BP', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -233,10 +251,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
             const body = stopped.body as { threadId?: number };
             assert.ok(typeof body?.threadId === 'number');
 
-            const st = await helper.request<{ stackFrames: Array<{ id: number }> }>(
-                'stackTrace',
-                { threadId: body.threadId, levels: 1 },
-            );
+            const st = await helper.request<{ stackFrames: Array<{ id: number }> }>('stackTrace', {
+                threadId: body.threadId,
+                levels: 1,
+            });
             assert.ok(st.stackFrames.length > 0);
             const frameId = st.stackFrames[0].id;
 
@@ -246,10 +264,9 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
             );
             assert.ok(scopes.scopes.length > 0, 'should have at least one scope');
 
-            const vars = await helper.request<{ variables: Array<{ name: string; value: string }> }>(
-                'variables',
-                { variablesReference: scopes.scopes[0].variablesReference },
-            );
+            const vars = await helper.request<{
+                variables: Array<{ name: string; value: string }>;
+            }>('variables', { variablesReference: scopes.scopes[0].variablesReference });
 
             const counter = vars.variables.find((v) => v.name === 'counter');
             assert.ok(counter, 'local variable "counter" must be present');
@@ -268,7 +285,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
     // ── test 4: continue reaches next BP stop ─────────────────────────────────
 
     test.skip('continue triggers next stop at line 13', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -303,7 +323,11 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
                 'stackTrace',
                 { threadId: body2.threadId!, levels: 1 },
             );
-            assert.strictEqual(st2.stackFrames[0].line, BP_LINE, 'second stop must also be at BP_LINE');
+            assert.strictEqual(
+                st2.stackFrames[0].line,
+                BP_LINE,
+                'second stop must also be at BP_LINE',
+            );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -315,7 +339,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
     // ── test 5: no spurious stopped events per single continue ────────────────
 
     test.skip('single continue produces exactly one stopped event', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -333,9 +360,10 @@ suite('WinCC OA Debugger — E2E breakpoint cycle (bp_basic_loop)', function () 
 
             // Issue stack + scopes queries (these internally send 'script N' + 'thread N'
             // context commands which previously triggered spurious 'message' events).
-            const st = await helper.request<{ stackFrames: Array<{ id: number }> }>(
-                'stackTrace', { threadId: body1.threadId, levels: 1 },
-            );
+            const st = await helper.request<{ stackFrames: Array<{ id: number }> }>('stackTrace', {
+                threadId: body1.threadId,
+                levels: 1,
+            });
             await helper.request('scopes', { frameId: st.stackFrames[0].id });
 
             // Now continue — should produce exactly one stop, not multiple.

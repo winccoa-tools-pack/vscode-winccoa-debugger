@@ -114,10 +114,14 @@ suite('WinCC OA Debugger — E2E sub-project debugging (call_subproject_lib)', f
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[sub-proj-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[sub-proj-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[sub-proj-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[sub-proj-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[sub-proj-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[sub-proj-e2e] ✓ Setup complete — ready to run tests');
@@ -133,9 +137,9 @@ suite('WinCC OA Debugger — E2E sub-project debugging (call_subproject_lib)', f
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[sub-proj-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[sub-proj-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -162,7 +166,10 @@ suite('WinCC OA Debugger — E2E sub-project debugging (call_subproject_lib)', f
     // ── test: sub-project library function call via BP ─────────────────────
 
     test('BP at sub_multiply_add call fires and dpCreate auto-creates DP', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(90_000);
 
         const mainScriptPath = lifecycle.getScriptPath('call_subproject_lib.ctl');
@@ -198,7 +205,8 @@ suite('WinCC OA Debugger — E2E sub-project debugging (call_subproject_lib)', f
 
             const entryThreadId = entryBody.threadId!;
             const entrySt = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: entryThreadId, levels: 1 },
+                'stackTrace',
+                { threadId: entryThreadId, levels: 1 },
             );
             assert.strictEqual(
                 entrySt.stackFrames[0].line,
@@ -227,15 +235,17 @@ suite('WinCC OA Debugger — E2E sub-project debugging (call_subproject_lib)', f
             assert.strictEqual(body2?.reason, 'breakpoint', 'second stop must be a breakpoint');
 
             const st2 = await helper.request<{ stackFrames: Array<{ line: number }> }>(
-                'stackTrace', { threadId: body2.threadId!, levels: 1 },
+                'stackTrace',
+                { threadId: body2.threadId!, levels: 1 },
             );
             assert.strictEqual(
                 st2.stackFrames[0].line,
                 BP_MAIN_LINE,
                 `second stop must be at line ${BP_MAIN_LINE}, got ${st2.stackFrames[0].line}`,
             );
-            console.log(`[sub-proj-e2e] BP at line ${BP_MAIN_LINE} (sub_multiply_add call) fired ✔`);
-
+            console.log(
+                `[sub-proj-e2e] BP at line ${BP_MAIN_LINE} (sub_multiply_add call) fired ✔`,
+            );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];

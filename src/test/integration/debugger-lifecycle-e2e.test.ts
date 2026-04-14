@@ -33,9 +33,7 @@ import { WinccoaProjectLifecycle } from '../helpers/WinccoaProjectLifecycle';
 import { waitForCoreApi } from '../../otherExtensions';
 import { ManagerLifecycle, AdapterDeployer } from '../../lifecycle';
 import { WinccoaProject } from '../../projectDetector';
-import {
-    PmonComponent,
-} from '@winccoa-tools-pack/npm-winccoa-core';
+import { PmonComponent } from '@winccoa-tools-pack/npm-winccoa-core';
 
 type CoreApi = {
     getRunningProjects?: () => Promise<unknown[]>;
@@ -148,7 +146,9 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
                     m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
                 );
                 if (idx >= 0) {
-                    console.log(`[lifecycle-e2e] Force-removing leftover -num ${LIFECYCLE_MANAGER_NUM} at index ${idx}`);
+                    console.log(
+                        `[lifecycle-e2e] Force-removing leftover -num ${LIFECYCLE_MANAGER_NUM} at index ${idx}`,
+                    );
                     await pmon.stopManager(project.name, idx).catch(() => {});
                     await pmon.removeManager(project.name, idx);
                 }
@@ -158,9 +158,9 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[lifecycle-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[lifecycle-e2e] stop failed: ${e.message}`));
         }
 
         if (managerLifecycle) {
@@ -195,7 +195,10 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
     // ── test 1: adapter already present in pmon ──────────────────────────────
 
     test('1 — ensureAdapter finds existing adapter manager', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         // The fixture project already has `node | once | debugAdapter.js` in progs.
@@ -225,7 +228,10 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
     // ── test 2: startScriptManager adds + starts a CTRL manager ──────────────
 
     test('2 — startScriptManager inserts and starts -num 98', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const sessionId = 'lifecycle-test-session-1';
@@ -234,8 +240,8 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
         const pmon = new PmonComponent();
         pmon.setVersion(project.version);
         const beforeList = await pmon.getManagerOptionsList(project.name);
-        const existsBefore = beforeList.some(
-            (m) => m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
+        const existsBefore = beforeList.some((m) =>
+            m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
         );
         assert.strictEqual(existsBefore, false, '-num 98 must not exist before startScriptManager');
 
@@ -252,8 +258,8 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
 
         // Verify it exists in the manager list now
         const afterList = await pmon.getManagerOptionsList(project.name);
-        const entry = afterList.find(
-            (m) => m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
+        const entry = afterList.find((m) =>
+            m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
         );
         assert.ok(entry, '-num 98 must exist after startScriptManager');
         assert.strictEqual(entry!.component, 'WCCOActrl');
@@ -264,7 +270,10 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
     // ── test 3: debug session hits BP on lifecycle-managed manager ────────────
 
     test('3 — debug session hits BP at line 13 via lifecycle manager', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath(SCRIPT_REL_PATH);
@@ -292,7 +301,10 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
     // ── test 4: cleanupScriptManager removes the manager ─────────────────────
 
     test('4 — cleanupScriptManager stops and removes -num 98', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const sessionId = 'lifecycle-test-session-1';
@@ -304,8 +316,8 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
         const pmon = new PmonComponent();
         pmon.setVersion(project.version);
         const afterList = await pmon.getManagerOptionsList(project.name);
-        const existsAfter = afterList.some(
-            (m) => m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
+        const existsAfter = afterList.some((m) =>
+            m.startOptions?.includes(`-num ${LIFECYCLE_MANAGER_NUM}`),
         );
         assert.strictEqual(
             existsAfter,
@@ -319,7 +331,10 @@ suite('WinCC OA Debugger — E2E lifecycle (ManagerLifecycle)', function () {
     // ── test 5: second cleanup is a no-op ────────────────────────────────────
 
     test('5 — second cleanup for same session is a no-op', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(10_000);
 
         const sessionId = 'lifecycle-test-session-1';

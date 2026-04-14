@@ -21,9 +21,10 @@ export class AdapterDeployer {
     private readonly bundlePath: string;
 
     constructor(extensionContextOrPath: vscode.ExtensionContext | string) {
-        const extensionPath = typeof extensionContextOrPath === 'string'
-            ? extensionContextOrPath
-            : extensionContextOrPath.extensionPath;
+        const extensionPath =
+            typeof extensionContextOrPath === 'string'
+                ? extensionContextOrPath
+                : extensionContextOrPath.extensionPath;
         this.bundlePath = path.join(extensionPath, 'resources', ADAPTER_FILENAME);
     }
 
@@ -51,7 +52,8 @@ export class AdapterDeployer {
 
         // Never overwrite symlinks (used by test fixtures pointing to un-bundled sources)
         try {
-            const isSymlink = fs.existsSync(targetPath) && fs.lstatSync(targetPath).isSymbolicLink();
+            const isSymlink =
+                fs.existsSync(targetPath) && fs.lstatSync(targetPath).isSymbolicLink();
             if (isSymlink) {
                 return targetPath;
             }

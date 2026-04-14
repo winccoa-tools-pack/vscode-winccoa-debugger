@@ -151,21 +151,22 @@ export class ManagerLifecycle implements vscode.Disposable {
         const managers = await pmon.getManagerOptionsList(projectId);
 
         // Find the manager entry with matching -num
-        const targetIndex = managers.findIndex(
-            (m) => m.startOptions?.includes(`-num ${managerNumber}`),
+        const targetIndex = managers.findIndex((m) =>
+            m.startOptions?.includes(`-num ${managerNumber}`),
         );
 
         if (targetIndex < 0) {
             throw new Error(
                 `Manager with -num ${managerNumber} not found in pmon config. ` +
-                `Add it to the progs file first, or use request "launch" to create a temporary one.`,
+                    `Add it to the progs file first, or use request "launch" to create a temporary one.`,
             );
         }
 
         const managerInfo = status.managers[targetIndex];
-        const isRunning = managerInfo &&
+        const isRunning =
+            managerInfo &&
             (managerInfo.state === ProjEnvManagerState.Running ||
-             managerInfo.state === ProjEnvManagerState.Init);
+                managerInfo.state === ProjEnvManagerState.Init);
 
         const handle: AttachManagerHandle = {
             index: targetIndex,
@@ -214,8 +215,8 @@ export class ManagerLifecycle implements vscode.Disposable {
             try {
                 this.log(`Stopping attach manager at index ${handle.index}...`);
                 await pmon.stopManager(handle.projectId, handle.index);
-            } catch (e: any) {
-                this.log(`Warning: stop attach manager failed: ${e.message}`);
+            } catch (e: unknown) {
+                this.log(`Warning: stop attach manager failed: ${(e as Error).message}`);
             }
         }
 
@@ -285,10 +286,7 @@ export class ManagerLifecycle implements vscode.Disposable {
      * the handle is used.  This allows cleanup even when ProjectDetector
      * did not detect a project (e.g. Project Admin extension not installed).
      */
-    async cleanupScriptManager(
-        project: WinccoaProject | null,
-        sessionId: string,
-    ): Promise<void> {
+    async cleanupScriptManager(project: WinccoaProject | null, sessionId: string): Promise<void> {
         const handle = this.activeScriptManagers.get(sessionId);
         if (!handle) {
             this.log(`No script manager tracked for session ${sessionId}`);
@@ -300,8 +298,8 @@ export class ManagerLifecycle implements vscode.Disposable {
         try {
             this.log(`Stopping script manager at index ${handle.index}...`);
             await pmon.stopManager(handle.projectId, handle.index);
-        } catch (e: any) {
-            this.log(`Warning: stop failed: ${e.message} (may already be stopped)`);
+        } catch (e: unknown) {
+            this.log(`Warning: stop failed: ${(e as Error).message} (may already be stopped)`);
         }
 
         // Wait for pmon to fully process the stop before attempting removal
@@ -310,8 +308,8 @@ export class ManagerLifecycle implements vscode.Disposable {
         try {
             this.log(`Removing script manager at index ${handle.index}...`);
             await pmon.removeManager(handle.projectId, handle.index);
-        } catch (e: any) {
-            this.log(`Warning: remove failed: ${e.message}`);
+        } catch (e: unknown) {
+            this.log(`Warning: remove failed: ${(e as Error).message}`);
         }
 
         this.activeScriptManagers.delete(sessionId);

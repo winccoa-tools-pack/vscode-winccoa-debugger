@@ -65,7 +65,9 @@ const WCCOA_EXE = (() => {
         if (installDir) {
             return path.join(installDir, 'bin', IS_WINDOWS ? 'WCCOActrl.exe' : 'WCCOActrl');
         }
-    } catch { /* fallback below */ }
+    } catch {
+        /* fallback below */
+    }
     return IS_WINDOWS
         ? path.join('C:', 'Siemens', 'Automation', 'WinCC_OA', VERSION, 'bin', 'WCCOActrl.exe')
         : `/opt/WinCC_OA/${VERSION}/bin/WCCOActrl`;
@@ -88,7 +90,10 @@ const BREAKPOINT_LINE = 11;
 function tcpReachable(host: string, port: number, timeoutMs = 1500): Promise<boolean> {
     return new Promise((resolve) => {
         const s = new net.Socket();
-        const done = (v: boolean) => { s.destroy(); resolve(v); };
+        const done = (v: boolean) => {
+            s.destroy();
+            resolve(v);
+        };
         s.setTimeout(timeoutMs);
         s.once('connect', () => done(true));
         s.once('error', () => done(false));
@@ -122,7 +127,7 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
         if (!reachable) {
             console.log(
                 `[e2e] WinCC OA not reachable at localhost:${PORT} ` +
-                `(start project "${PROJECT}" first) → skipping`,
+                    `(start project "${PROJECT}" first) → skipping`,
             );
             return;
         }
@@ -150,7 +155,10 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
     // ── test 1: breakpoint is hit ─────────────────────────────────────────────
 
     test('sets breakpoint and stops at the correct line', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const helper = new DebugSessionHelper('winccoa');
@@ -199,7 +207,10 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
     // ── test 2: stack frame shows correct file + line ─────────────────────────
 
     test('stack frame points to the breakpoint line', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const helper = new DebugSessionHelper('winccoa');
@@ -231,10 +242,9 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
             const stopped = await helper.waitForEvent('stopped', 20_000);
             const threadId = (stopped.body as any)?.threadId ?? 1;
 
-            const stResp = await helper.request<{ stackFrames: Array<{ line: number; source?: { name?: string } }> }>(
-                'stackTrace',
-                { threadId, levels: 1 },
-            );
+            const stResp = await helper.request<{
+                stackFrames: Array<{ line: number; source?: { name?: string } }>;
+            }>('stackTrace', { threadId, levels: 1 });
 
             console.log('[e2e] top frame:', JSON.stringify(stResp.stackFrames[0]));
 
@@ -255,7 +265,10 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
     // ── test 3: local variables have expected values ──────────────────────────
 
     test('local variables are correct when stopped at breakpoint', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const helper = new DebugSessionHelper('winccoa');
@@ -318,12 +331,17 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
             //   before execution: counter=0, i=1
             //   after  execution: counter=1, i=1
             // We accept both; the important thing is that the values are plausible integers.
-            assert.ok(varMap.has('i') || varMap.has('counter') || varMap.size > 0,
-                `expected local variables, got: ${[...varMap.keys()].join(', ')}`);
+            assert.ok(
+                varMap.has('i') || varMap.has('counter') || varMap.size > 0,
+                `expected local variables, got: ${[...varMap.keys()].join(', ')}`,
+            );
 
             if (varMap.has('message')) {
-                assert.equal(varMap.get('message'), '"hello"',
-                    'message variable should be "hello"');
+                assert.equal(
+                    varMap.get('message'),
+                    '"hello"',
+                    'message variable should be "hello"',
+                );
             }
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
@@ -335,7 +353,10 @@ suite('WinCC OA Debugger — E2E breakpoint & variable tests', function () {
     // ── test 4: continue → terminated ────────────────────────────────────────
 
     test('continue resumes execution and script terminates', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(30_000);
 
         const helper = new DebugSessionHelper('winccoa');

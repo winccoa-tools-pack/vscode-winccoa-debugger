@@ -117,7 +117,9 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
                 console.log('[variables-e2e] Active project set to "runnable"');
             }
         } catch (err) {
-            console.warn(`[variables-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[variables-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[variables-e2e] ✓ Setup complete');
@@ -132,9 +134,9 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
         }
         await lifecycle.stopManagerByNum(TYPES_MANAGER).catch(() => {});
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[variables-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) => console.error(`[variables-e2e] stop failed: ${e.message}`));
         }
     });
 
@@ -152,9 +154,7 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
      * Hit the BP in all_types.ctl and return the complete locals variable list.
      * Also logs the raw variable list for discovery/debugging.
      */
-    async function hitBpAndGetLocals(
-        helper: DebugSessionHelper,
-    ): Promise<DapVariable[]> {
+    async function hitBpAndGetLocals(helper: DebugSessionHelper): Promise<DapVariable[]> {
         await helper.startSession(undefined, buildLaunchConfig('E2E: variables'), 25_000);
 
         const stopped = await helper.waitForEvent('stopped', 20_000);
@@ -173,22 +173,22 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
         );
 
         const frameId = st.stackFrames[0].id;
-        const scopes = await helper.request<{ scopes: Array<{ name: string; variablesReference: number }> }>(
-            'scopes',
-            { frameId },
-        );
+        const scopes = await helper.request<{
+            scopes: Array<{ name: string; variablesReference: number }>;
+        }>('scopes', { frameId });
         assert.ok(scopes.scopes.length > 0, 'scopes must not be empty');
 
         const localsScope = scopes.scopes.find((s) => s.name === 'Locals') ?? scopes.scopes[0];
-        const vars = await helper.request<{ variables: DapVariable[] }>(
-            'variables',
-            { variablesReference: localsScope.variablesReference },
-        );
+        const vars = await helper.request<{ variables: DapVariable[] }>('variables', {
+            variablesReference: localsScope.variablesReference,
+        });
 
         // ── Discovery: log raw variable list so we know what WinCC OA actually sends ──
         console.log('[variables-e2e] === RAW LOCALS ===');
         for (const v of vars.variables) {
-            console.log(`  ${v.name}: ${JSON.stringify(v.value)}  (varRef=${v.variablesReference})`);
+            console.log(
+                `  ${v.name}: ${JSON.stringify(v.value)}  (varRef=${v.variablesReference})`,
+            );
         }
         console.log('[variables-e2e] === END RAW ===');
 
@@ -198,7 +198,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 1: primitive types ───────────────────────────────────────────────
 
     test('primitive types — int, uint, float, double, bool, string', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -211,7 +214,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
 
             const find = (name: string) => {
                 const v = vars.find((v) => v.name === name);
-                assert.ok(v, `variable "${name}" must be present in Locals scope (got: ${vars.map((x) => x.name).join(', ')})`);
+                assert.ok(
+                    v,
+                    `variable "${name}" must be present in Locals scope (got: ${vars.map((x) => x.name).join(', ')})`,
+                );
                 return v!;
             };
 
@@ -227,12 +233,18 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
 
             // float — allow minor representation variance (3.14 vs 3.14000...)
             const vf = find('vf');
-            assert.ok(vf.value.startsWith('3.14'), `float vf must start with "3.14", got: ${vf.value}`);
+            assert.ok(
+                vf.value.startsWith('3.14'),
+                `float vf must start with "3.14", got: ${vf.value}`,
+            );
             assert.strictEqual(vf.variablesReference, 0);
 
             // double
             const vd = find('vd');
-            assert.ok(vd.value.startsWith('2.718'), `double vd must start with "2.718", got: ${vd.value}`);
+            assert.ok(
+                vd.value.startsWith('2.718'),
+                `double vd must start with "2.718", got: ${vd.value}`,
+            );
             assert.strictEqual(vd.variablesReference, 0);
 
             // bool
@@ -244,7 +256,6 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             const vs = find('vs');
             assert.strictEqual(vs.value, '"hello"', 'string must be displayed with double quotes');
             assert.strictEqual(vs.variablesReference, 0);
-
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -256,7 +267,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 2: dyn (1-D dynamic array) types ────────────────────────────────
 
     test('dyn types — show length, are expandable, children are correct', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -280,9 +294,9 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vdi.value, '[3]', 'dyn_int must show "[3]"');
             assert.ok(vdi.variablesReference > 0, 'dyn_int must be expandable');
 
-            const diChildren = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vdi.variablesReference },
-            );
+            const diChildren = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vdi.variablesReference,
+            });
             assert.strictEqual(diChildren.variables.length, 3);
             assert.strictEqual(diChildren.variables[0].name, '[0]');
             assert.strictEqual(diChildren.variables[0].value, '10');
@@ -294,9 +308,9 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vds.value, '[3]', 'dyn_string must show "[3]"');
             assert.ok(vds.variablesReference > 0);
 
-            const dsChildren = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vds.variablesReference },
-            );
+            const dsChildren = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vds.variablesReference,
+            });
             assert.strictEqual(dsChildren.variables[0].value, '"alpha"');
             assert.strictEqual(dsChildren.variables[1].value, '"beta"');
             assert.strictEqual(dsChildren.variables[2].value, '"gamma"');
@@ -306,9 +320,9 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vdb.value, '[3]');
             assert.ok(vdb.variablesReference > 0);
 
-            const dbChildren = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vdb.variablesReference },
-            );
+            const dbChildren = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vdb.variablesReference,
+            });
             assert.strictEqual(dbChildren.variables[0].value, 'true');
             assert.strictEqual(dbChildren.variables[1].value, 'false');
             assert.strictEqual(dbChildren.variables[2].value, 'true');
@@ -317,7 +331,6 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             const vdf = find('vdf');
             assert.strictEqual(vdf.value, '[3]');
             assert.ok(vdf.variablesReference > 0);
-
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -329,7 +342,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 3: dyn_dyn (2-D dynamic array) types ────────────────────────────
 
     test('dyn_dyn types — outer and inner both expandable', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -352,16 +368,19 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vddi.value, '[2]', 'dyn_dyn_int outer shows "[2]"');
             assert.ok(vddi.variablesReference > 0);
 
-            const outerRows = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vddi.variablesReference },
-            );
+            const outerRows = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vddi.variablesReference,
+            });
             assert.strictEqual(outerRows.variables.length, 2);
             assert.strictEqual(outerRows.variables[0].value, '[2]');
-            assert.ok(outerRows.variables[0].variablesReference > 0, 'inner row must be expandable');
-
-            const row0 = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: outerRows.variables[0].variablesReference },
+            assert.ok(
+                outerRows.variables[0].variablesReference > 0,
+                'inner row must be expandable',
             );
+
+            const row0 = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: outerRows.variables[0].variablesReference,
+            });
             assert.strictEqual(row0.variables[0].value, '1');
             assert.strictEqual(row0.variables[1].value, '2');
 
@@ -370,17 +389,16 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vdds.value, '[2]');
             assert.ok(vdds.variablesReference > 0);
 
-            const dsOuter = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vdds.variablesReference },
-            );
+            const dsOuter = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vdds.variablesReference,
+            });
             assert.ok(dsOuter.variables[0].variablesReference > 0);
 
-            const dsRow0 = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: dsOuter.variables[0].variablesReference },
-            );
+            const dsRow0 = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: dsOuter.variables[0].variablesReference,
+            });
             assert.strictEqual(dsRow0.variables[0].value, '"aa"');
             assert.strictEqual(dsRow0.variables[1].value, '"bb"');
-
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -392,7 +410,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 4: mapping ───────────────────────────────────────────────────────
 
     test('mapping — shows key count, children are key-value pairs', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -409,13 +430,13 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vm!.value, '{2}', 'mapping with 2 keys must show "{2}"');
             assert.ok(vm!.variablesReference > 0, 'mapping must be expandable');
 
-            const children = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vm!.variablesReference },
-            );
+            const children = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vm!.variablesReference,
+            });
             assert.strictEqual(children.variables.length, 2);
 
             const key1 = children.variables.find((c) => c.name === 'key1');
-            const num  = children.variables.find((c) => c.name === 'num');
+            const num = children.variables.find((c) => c.name === 'num');
 
             assert.ok(key1, '"key1" child must exist in mapping');
             assert.strictEqual(key1!.value, '"value1"', 'string mapping values must be quoted');
@@ -424,7 +445,6 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.ok(num, '"num" child must exist in mapping');
             assert.strictEqual(num!.value, '99');
             assert.strictEqual(num!.variablesReference, 0);
-
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -436,7 +456,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 5: anytype ───────────────────────────────────────────────────────
 
     test('anytype — shows contained value, not expandable for scalar', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -451,8 +474,11 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             const vany = vars.find((v) => v.name === 'vany');
             assert.ok(vany, '"vany" (anytype) must be present');
             assert.strictEqual(vany!.value, '42', 'anytype containing int 42 must display "42"');
-            assert.strictEqual(vany!.variablesReference, 0, 'scalar anytype must not be expandable');
-
+            assert.strictEqual(
+                vany!.variablesReference,
+                0,
+                'scalar anytype must not be expandable',
+            );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
@@ -464,7 +490,10 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
     // ── test 6: struct (user-defined type) ────────────────────────────────────
 
     test('struct — shows field count, children are named fields with correct values', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(60_000);
 
         const scriptPath = lifecycle.getScriptPath('all_types.ctl');
@@ -481,27 +510,26 @@ suite('WinCC OA Debugger — E2E variable display (all_types)', function () {
             assert.strictEqual(vst!.value, '{3}', 'struct with 3 fields must show "{3}"');
             assert.ok(vst!.variablesReference > 0, 'struct must be expandable');
 
-            const children = await helper.request<{ variables: DapVariable[] }>(
-                'variables', { variablesReference: vst!.variablesReference },
-            );
+            const children = await helper.request<{ variables: DapVariable[] }>('variables', {
+                variablesReference: vst!.variablesReference,
+            });
             assert.strictEqual(children.variables.length, 3);
 
-            const x      = children.variables.find((c) => c.name === 'x');
-            const label  = children.variables.find((c) => c.name === 'label');
+            const x = children.variables.find((c) => c.name === 'x');
+            const label = children.variables.find((c) => c.name === 'label');
             const active = children.variables.find((c) => c.name === 'active');
 
-            assert.ok(x,      '"x" field must be present');
-            assert.strictEqual(x!.value, '10',      'int field x must display "10"');
+            assert.ok(x, '"x" field must be present');
+            assert.strictEqual(x!.value, '10', 'int field x must display "10"');
             assert.strictEqual(x!.variablesReference, 0);
 
-            assert.ok(label,  '"label" field must be present');
+            assert.ok(label, '"label" field must be present');
             assert.strictEqual(label!.value, '"test"', 'string field label must be quoted');
             assert.strictEqual(label!.variablesReference, 0);
 
             assert.ok(active, '"active" field must be present');
-            assert.strictEqual(active!.value, 'true',  'bool field active must display "true"');
+            assert.strictEqual(active!.value, 'true', 'bool field active must display "true"');
             assert.strictEqual(active!.variablesReference, 0);
-
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];

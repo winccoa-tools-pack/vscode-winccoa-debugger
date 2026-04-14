@@ -107,10 +107,14 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
                 await Promise.resolve(coreApi.setCurrentProject(lifecycle.getProjectName()));
                 console.log('[spurious-stops-e2e] Active project set to "runnable"');
             } else {
-                console.warn('[spurious-stops-e2e] Core API not available — continuing without setCurrentProject');
+                console.warn(
+                    '[spurious-stops-e2e] Core API not available — continuing without setCurrentProject',
+                );
             }
         } catch (err) {
-            console.warn(`[spurious-stops-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`);
+            console.warn(
+                `[spurious-stops-e2e] setCurrentProject failed (non-fatal): ${(err as Error).message}`,
+            );
         }
 
         console.log('[spurious-stops-e2e] ✓ Setup complete — ready to run tests');
@@ -126,9 +130,11 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
         }
 
         if (lifecycle.isWinccoaAvailable()) {
-            await lifecycle.stop().catch((e: Error) =>
-                console.error(`[spurious-stops-e2e] stop failed: ${e.message}`),
-            );
+            await lifecycle
+                .stop()
+                .catch((e: Error) =>
+                    console.error(`[spurious-stops-e2e] stop failed: ${e.message}`),
+                );
         }
     });
 
@@ -157,7 +163,10 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
     // ── test: no spurious stops after context requests ────────────────────────
 
     test('context requests (stackTrace/variables) do not trigger spurious stopped events', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(45_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -167,12 +176,23 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
 
         try {
             await lifecycle.startManagerByNum(BP_MANAGER);
-            await helper.startSession(undefined, buildLaunchConfig('E2E: spurious stops check'), 25_000);
+            await helper.startSession(
+                undefined,
+                buildLaunchConfig('E2E: spurious stops check'),
+                25_000,
+            );
             // ── 1. Wait for genuine first stop ────────────────────────────────
             const stop1 = await helper.waitForEvent('stopped', 20_000);
             const body1 = stop1.body as { reason?: string; threadId?: number };
-            assert.strictEqual(body1?.reason, 'breakpoint', `first stop reason must be "breakpoint", got: ${body1?.reason}`);
-            assert.ok(typeof body1?.threadId === 'number', 'first stop must have a numeric threadId');
+            assert.strictEqual(
+                body1?.reason,
+                'breakpoint',
+                `first stop reason must be "breakpoint", got: ${body1?.reason}`,
+            );
+            assert.ok(
+                typeof body1?.threadId === 'number',
+                'first stop must have a numeric threadId',
+            );
 
             const threadId = body1.threadId!;
 
@@ -181,7 +201,11 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
                 stackFrames: Array<{ id: number; line: number; source?: { name?: string } }>;
             }>('stackTrace', { threadId, levels: 1 });
             assert.ok(st.stackFrames.length > 0, 'stackTrace must return at least one frame');
-            assert.strictEqual(st.stackFrames[0].line, BP_LINE, `frame must be at BP_LINE=${BP_LINE}`);
+            assert.strictEqual(
+                st.stackFrames[0].line,
+                BP_LINE,
+                `frame must be at BP_LINE=${BP_LINE}`,
+            );
 
             const frameId = st.stackFrames[0].id;
 
@@ -193,7 +217,9 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
             assert.ok(scopes.scopes.length > 0, 'scopes must return at least one scope');
 
             const localScope = scopes.scopes[0];
-            await helper.request('variables', { variablesReference: localScope.variablesReference });
+            await helper.request('variables', {
+                variablesReference: localScope.variablesReference,
+            });
 
             // ── 4. Assert NO spurious stopped events within the check window ──
             //
@@ -204,14 +230,16 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
             // If the fix is in place:
             //   No spurious events → waitForEvent rejects after SPURIOUS_CHECK_MS.
             //   We convert the rejection to null and assert null.
-            const spuriousStop = await helper.waitForEvent('stopped', SPURIOUS_CHECK_MS).catch(() => null);
+            const spuriousStop = await helper
+                .waitForEvent('stopped', SPURIOUS_CHECK_MS)
+                .catch(() => null);
             assert.strictEqual(
                 spuriousStop,
                 null,
                 `SPURIOUS STOP DETECTED: a 'stopped' event arrived within ${SPURIOUS_CHECK_MS}ms ` +
-                `after context requests (stackTrace/scopes/variables). ` +
-                `This means context commands triggered an extra StoppedEvent — the spurious stop ` +
-                `filter in DatapointClient.ts or WinCCDebugSession.ts is not working.`,
+                    `after context requests (stackTrace/scopes/variables). ` +
+                    `This means context commands triggered an extra StoppedEvent — the spurious stop ` +
+                    `filter in DatapointClient.ts or WinCCDebugSession.ts is not working.`,
             );
 
             // ── 5. Send ONE continue → must reach the next genuine stop ───────
@@ -227,19 +255,28 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
 
             const stop2 = await helper.waitForEvent('stopped', 8_000);
             const body2 = stop2.body as { reason?: string };
-            assert.strictEqual(body2?.reason, 'breakpoint', `second stop reason must be "breakpoint", got: ${body2?.reason}`);
+            assert.strictEqual(
+                body2?.reason,
+                'breakpoint',
+                `second stop reason must be "breakpoint", got: ${body2?.reason}`,
+            );
 
             console.log(`[spurious-stops-e2e] ✔ No spurious stops — ONE continue was sufficient`);
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
-            addedBreakpoints = [];            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});            await helper.dispose();
+            addedBreakpoints = [];
+            await lifecycle.stopManagerByNum(BP_MANAGER).catch(() => {});
+            await helper.dispose();
         }
     });
 
     // ── test: single continue — no extra continue needed ─────────────────────
 
     test('single continue resumes from BP without extra presses needed', async function () {
-        if (!canRun) { this.skip(); return; }
+        if (!canRun) {
+            this.skip();
+            return;
+        }
         this.timeout(45_000);
 
         const scriptPath = lifecycle.getScriptPath('bp_basic_loop.ctl');
@@ -270,10 +307,16 @@ suite('WinCC OA Debugger — E2E spurious stop filter (bp_basic_loop)', function
             const elapsed = Date.now() - t0;
 
             const body2 = stop2.body as { reason?: string };
-            assert.strictEqual(body2?.reason, 'breakpoint', `second stop reason must be "breakpoint"`);
+            assert.strictEqual(
+                body2?.reason,
+                'breakpoint',
+                `second stop reason must be "breakpoint"`,
+            );
 
             // ONE continue was enough — script resumed and hit the BP on the next iteration
-            console.log(`[spurious-stops-e2e] ✔ Second stop arrived after ${elapsed}ms (single continue sufficient)`);
+            console.log(
+                `[spurious-stops-e2e] ✔ Second stop arrived after ${elapsed}ms (single continue sufficient)`,
+            );
         } finally {
             vscode.debug.removeBreakpoints(addedBreakpoints);
             addedBreakpoints = [];
