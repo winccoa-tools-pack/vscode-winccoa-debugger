@@ -122,16 +122,19 @@ graph LR
 ### DP-Nachrichten Format
 
 **Command (Adapter → CTRL):**
+
 ```json
 { "id": "1712345678-abc123", "cmd": "break scripts/debugTest.ctl:42" }
 ```
 
 **Response (CTRL → Adapter) — Solicited:**
+
 ```json
 ["1712345678-abc123", "OK", "Breakpoint 1 at scripts/debugTest.ctl:42"]
 ```
 
 **Response — Unsolicited (Stop-Event vom CTRL):**
+
 ```json
 ["", "stopped", "breakpoint", "1", "scripts/debugTest.ctl", "42"]
 ```
@@ -211,7 +214,7 @@ sequenceDiagram
 WinCC OA kennt Skript-Pfade relativ zum Projekt-Root (z.B. `scripts/debugTest.ctl`).
 VS Code arbeitet mit absoluten Dateisystem-Pfaden (`/home/testus/wincc_proj/DevEnv3.21/scripts/debugTest.ctl`).
 
-```
+```json
 launch.json:
 "pathMappings": {
   "/home/testus/wincc_proj/DevEnv3.21/scripts": "${workspaceFolder}/scripts"

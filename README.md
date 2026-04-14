@@ -10,7 +10,7 @@
 
 ## Debug WinCC OA CTRL scripts directly from Visual Studio Code
 
-[Features](#-features) • [Configuration](#-configuration) • [Known Issues](#-known-issues)
+[Features](#-features) • [Configuration](#️-configuration) • [Known Issues](#-known-issues)
 
 ---
 

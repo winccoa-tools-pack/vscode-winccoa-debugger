@@ -2,5 +2,7 @@
   "default": true,
   "MD013": { "line_length": 300, "code_blocks": false },
   "MD024": false,
-  "MD033": { "allowed_elements": ["center", "div"] }
+  "MD033": { "allowed_elements": ["center", "div"] },
+  "MD051": false,
+  "MD060": false
 }

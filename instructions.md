@@ -44,6 +44,7 @@ Der Adapter wird **nicht** von der Extension gestartet — er läuft als WinCC O
 `node`-Manager in der `progs`-Datei (`once`).
 
 `debugAdapterFactory.ts`:
+
 1. Liest `adapterPort` aus `session.configuration`
 2. Wartet per TCP-Poll bis Port erreichbar (max 15s)
 3. Gibt `new DebugAdapterServer(port, '127.0.0.1')` zurück
@@ -57,7 +58,7 @@ Der Adapter wird **nicht** von der Extension gestartet — er läuft als WinCC O
 
 ### Fixture-Projekt: `runnable`
 
-```
+```text
 src/test/fixtures/projects/runnable/
 ├── config/
 │   ├── config          # WinCC OA Projektkonfiguration (Platzhalter)
@@ -85,7 +86,7 @@ src/test/fixtures/projects/runnable/
 
 ### progs-Konfiguration (aktueller Stand)
 
-```
+```text
 WCCILpmon        | manual  | 30 | 3 | 1 |
 WCCILdataSQLite  | always  | 30 | 3 | 1 |
 WCCILevent       | always  | 30 | 3 | 1 |
