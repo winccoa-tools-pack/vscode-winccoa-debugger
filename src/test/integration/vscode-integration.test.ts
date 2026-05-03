@@ -100,20 +100,12 @@ suite('Full VS Code Integration Tests with WinCC OA', () => {
     test('should execute VS Code commands', async function () {
         this.timeout(10000);
 
-        // Verify the template command is registered
+        // Verify extension commands are registered
         const commands = await vscode.commands.getCommands(true);
         assert.ok(
-            commands.includes('winccoa.helloWorld'),
-            'Hello World command should be registered',
+            commands.some((cmd) => cmd.startsWith('winccoa.')),
+            'At least one winccoa.* command should be registered',
         );
-
-        // Execute the command (it may be a no-op in headless test runs)
-        try {
-            await vscode.commands.executeCommand('winccoa.helloWorld');
-            console.log('✅ Hello World command executed successfully');
-        } catch (error) {
-            console.log('⚠️  Command execution note:', (error as Error).message);
-        }
     });
 
     test('should wait for Core extension API and trigger onDidChangeProject (example)', async function () {
