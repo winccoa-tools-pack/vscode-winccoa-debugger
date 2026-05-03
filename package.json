@@ -308,6 +308,7 @@
     "compile": "webpack && webpack --config webpack.adapter.config.js",
     "compile:extension": "webpack",
     "compile:adapter": "webpack --config webpack.adapter.config.js",
+    "update:adapter:local": "node scripts/update-adapter.mjs",
     "clean:out": "node -e \"require('fs').rmSync('out',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
     "clean:out-tests": "node -e \"try{require('fs').rmSync('out/test',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })}catch(e){console.warn('clean:out-tests skipped:', e.message)}\"",
     "clean:coverage": "node -e \"require('fs').rmSync('coverage',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
