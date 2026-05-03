@@ -2,7 +2,7 @@
 // Test script for DebugBreak() / stop-on-entry integration tests.
 // Manager -num 2   Mode: manual   Flags: -dbg CTRL_DEBUGBREAK
 //
-// Expected stop at DebugBreak() on line 22.
+// Expected stop at the next executable line after DebugBreak() — line 24.
 // (Without -dbg CTRL_DEBUGBREAK, DebugBreak() is a no-op.)
 //
 // Test flow:
@@ -12,7 +12,7 @@
 //   4. Inspect locals: a=10, b=32
 //   5. Continue → script computes result=42 and exits
 //
-// STOP_LINE = 22  (DebugBreak())
+// STOP_LINE = 24  (next executable line after DebugBreak())
 
 main()
 {
