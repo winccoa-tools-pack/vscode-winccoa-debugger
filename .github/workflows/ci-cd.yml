@@ -23,7 +23,7 @@ jobs:
   ci-cd:
     uses: winccoa-tools-pack/.github/.github/workflows/reusable-ci-cd.yml@main
     with:
-      build_command: "npm run compile:tsc"
+      build_command: "npm run adapter:fetch && npm run compile:tsc"
       enable_coverage: true
       enable_xvfb: true
       integration_test_command: "xvfb-run -a npx --no-install vscode-test --label integrationTests"
