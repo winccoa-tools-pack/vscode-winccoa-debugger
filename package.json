@@ -304,10 +304,10 @@
     "RichardJanisch.winccoa-project-admin"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "webpack && webpack --config webpack.adapter.config.js",
+    "vscode:prepublish": "npm run adapter:fetch && npm run compile:extension",
+    "compile": "npm run adapter:fetch && npm run compile:extension",
     "compile:extension": "webpack",
-    "compile:adapter": "webpack --config webpack.adapter.config.js",
+    "adapter:fetch": "node scripts/download-adapter.mjs",
     "update:adapter:local": "node scripts/update-adapter.mjs",
     "clean:out": "node -e \"require('fs').rmSync('out',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
     "clean:out-tests": "node -e \"try{require('fs').rmSync('out/test',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })}catch(e){console.warn('clean:out-tests skipped:', e.message)}\"",
@@ -350,7 +350,6 @@
     "style-check": "npm run format:check && npm run lint"
   },
   "dependencies": {
-    "@winccoa-tools-pack/winccoa-debug-adapter": "file:../../npm-winccoa-repos/npm-winccoa-debugger",
     "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
   },
   "devDependencies": {
