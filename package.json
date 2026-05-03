@@ -3,7 +3,7 @@
   "displayName": "WinCC OA — Debugger",
   "description": "Debug Adapter for WinCC OA CTRL scripts",
   "publisher": "winccoa-tools-pack",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "author": "winccoa-tools-pack",
   "license": "BUSL-1.1",
   "icon": "resources/winccoa-debugger-512.png",

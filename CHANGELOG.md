@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-05-03
+
+### Added
+
+- fetch debugAdapter.js from GH release instead of bundling via webpack
+- add update:adapter:local script for local debugger development
+- auto-rebuild npm-debugger and register sub-project fixture
+- autoStartManager flag for attach, launch.json docs, tasks.json analysis
+- sub-project debugging E2E test, Quick Debug, session-first flow
+- add debug adapter lifecycle management (deploy, pmon, cleanup)
+- add struct to all_types.ctl fixture and E2E variable test (test 6)
+- add E2E variable display tests (all_types fixture + test suite)
+- add register-project/unregister-project Makefile targets for manual testing
+- add VS Code E2E debugger tests with DebugSessionHelper
+- spawn debug adapter via bootstrap.js with TCP DAP transport
+- add onStartupFinished activation + contribute commands
+- wire ProjectDetector into extension + configurationProvider
+- add ProjectDetector for Project Admin integration
+- initial setup for vscode-winccoa-debugger extension
+
+### Fixed
+
+- replace gh CLI with Node.js fetch() in download-adapter.mjs (public repo, no auth needed)
+- forward GITHUB_TOKEN to GH_TOKEN for gh CLI in GitHub Actions
+- correct E2E test issues found during full test run
+- replace placeholder helloWorld command test with real command check
+- sort releases by date descending before find to always get newest
+- find release with debugAdapter.js asset instead of blindly taking newest release
+- markdown lint cleanup
+- lint and format cleanup
+- portable adapter path resolution and Windows junction support
+- vscodeignore + Makefile cross-platform packaging (--no-dependencies, 109KB VSIX)
+- cross-platform path handling (Windows + Linux support)
+- test 4 — find runnable fixture project by name, not by index [0]
+- add missing const.ts and otherExtensions.ts
+- pathMappings template uses empty remote for scripts root
+- correct pathMappings direction in configuration template
+- kill adapter process on session terminate, prevent pmonIndex conflict
+
+### Changed
+
+- prettier format fix on debugger-stop-on-entry-e2e
+- rewrite README to match project-admin structure (badges, features, config reference)
+- switch license from MIT to BSL-1.1 (2 user limit, Apache 2.0 after 2028-04-12)
+- add BP verification assertions to lib BP E2E test
+- update instructions.md — current test status + open findings
+- CTRL class debugging E2E tests (Shape, Circle with inheritance)
+- multi-lib BP E2E tests, fix library BP line constants
+- register-project substitutes config placeholders, fix launch.json
+- library BP e2e passes, skip flaky test 2
+- fix e2e bpcycle test 1 — manager nums +1, once start mode, no manual start/stop
+- add foundation E2E setup test (debugger-setup-e2e)
+- add instructions.md with architecture, known issues and next steps
+- wip: e2e test wiring — pmon-only factory, lifecycle start/stop, configDone wait
+- wip: install debug adapter package, e2e test infrastructure, fixture scripts + launch.json
+- wip: wire debug adapter cli path via symlink in test-local workflow
+- add Makefile with test-local target and DevEnv workspace
+
 ## [0.2.1] - 2026-03-23
 
 ### Fixed
