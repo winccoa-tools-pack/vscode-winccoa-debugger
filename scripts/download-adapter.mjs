@@ -24,6 +24,12 @@ const dst = resolve(repoRoot, 'resources', 'debugAdapter.js');
 
 const DEBUGGER_REPO = 'winccoa-tools-pack/npm-winccoa-debugger';
 
+// In GitHub Actions, gh CLI requires GH_TOKEN. GITHUB_TOKEN is available automatically
+// but gh reads GH_TOKEN, so forward it if not already set.
+if (!process.env['GH_TOKEN'] && process.env['GITHUB_TOKEN']) {
+    process.env['GH_TOKEN'] = process.env['GITHUB_TOKEN'];
+}
+
 if (process.argv.includes('--skip-if-exists') && existsSync(dst)) {
     console.log('⏭️  resources/debugAdapter.js already exists — skipping download.');
     process.exit(0);
