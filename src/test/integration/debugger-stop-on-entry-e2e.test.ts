@@ -219,7 +219,9 @@ suite('WinCC OA Debugger — E2E stop-on-entry (DebugBreak)', function () {
             try {
                 terminated = await helper.waitForEvent('terminated', 15_000);
             } catch {
-                console.log('[soe-e2e] ⚠️  terminated event not received — known adapter limitation, skipping assertion');
+                console.log(
+                    '[soe-e2e] ⚠️  terminated event not received — known adapter limitation, skipping assertion',
+                );
             }
             if (terminated) {
                 console.log('[soe-e2e] session terminated after continue ✔');
