@@ -1,161 +1,214 @@
 /**
- * @fileoverview Main extension entry point for WinCC OA VS Code extensions.
+ * WinCC OA Debugger Extension
  *
- * This file serves as a template/example for building WinCC OA VS Code extensions.
- * It demonstrates:
- * - Basic extension activation and deactivation
- * - Integration with dependent extensions (WinCC OA Project Admin)
- * - Configuration handling
- * - Command registration
- * - Logging setup
+ * VS Code extension that provides debugging support for WinCC OA CTRL scripts.
  *
- * Key concepts shown:
- * - Extension lifecycle management
- * - Safe dependency handling with activation waiting
- * - Project change event subscription
- * - Configuration change watching
- * - Proper cleanup on deactivation
- *
- * @example
- * ```typescript
- * // Basic extension structure
- * export async function activate(context: vscode.ExtensionContext) {
- *     // Initialize logging
- *     const outputChannel = ExtensionOutputChannel.initialize();
- *     context.subscriptions.push(outputChannel);
- *
- *     // Setup dependent extension integration
- *     await setupCoreExtensionIntegration(context);
- *
- *     // Register commands
- *     const command = vscode.commands.registerCommand('myExtension.command', handler);
- *     context.subscriptions.push(command);
- * }
- *
- * export function deactivate() {
- *     // Cleanup resources
- * }
- * ```
+ * On activation the extension:
+ *   1. Detects the active WinCC OA project via Project Admin extension
+ *   2. Subscribes to project changes so the debug configuration is always current
+ *   3. Registers the WinCC OA debug type (adapter + configuration provider)
+ *   4. Shows a status-bar item reflecting the detected project / readiness
  */
 
-// src/extension.ts
 import * as vscode from 'vscode';
-import { ExtensionOutputChannel } from './extensionOutput';
-import { EXTENSION_CONFIG_SECTION, EXTENSION_ID, EXTENSION_NAME } from './const';
-import { setupCoreExtensionIntegration, cleanupCoreExtensionIntegration } from './otherExtensions';
+import { WinCCDebugAdapterDescriptorFactory } from './debugAdapterFactory';
+import { WinCCConfigurationProvider } from './configurationProvider';
+import { ProjectDetector, ProjectDetectionResult } from './projectDetector';
+import { AdapterDeployer, ManagerLifecycle } from './lifecycle';
 
-/**
- * Interface representing a WinCC OA project.
- *
- * This matches the project structure provided by the WinCC OA Project Admin extension.
- * Used when subscribing to project change events.
- */
+let outputChannel: vscode.OutputChannel;
+let statusBarItem: vscode.StatusBarItem;
+let projectDetector: ProjectDetector;
+let configProvider: WinCCConfigurationProvider;
+let managerLifecycle: ManagerLifecycle;
 
-/**
- * Extension activation function - called when VS Code activates the extension.
- *
- * This function sets up the extension's core functionality:
- * 1. Initializes logging infrastructure
- * 2. Sets up integration with dependent extensions
- * 3. Registers configuration watchers
- * 4. Registers commands
- *
- * @param context - VS Code extension context for managing subscriptions and state
- *
- * @example
- * ```typescript
- * // VS Code calls this automatically when the extension activates
- * export async function activate(context: vscode.ExtensionContext) {
- *     // Your setup code here
- * }
- * ```
- */
-export async function activate(context: vscode.ExtensionContext) {
-    // Initialize output channel
-    const outputChannel = ExtensionOutputChannel.initialize();
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+    outputChannel = vscode.window.createOutputChannel('WinCC OA Debugger');
     context.subscriptions.push(outputChannel);
+    outputChannel.appendLine('WinCC OA Debugger extension activating...');
 
-    ExtensionOutputChannel.info('Extension', `${EXTENSION_NAME} (${EXTENSION_ID}) activated`);
-    ExtensionOutputChannel.info('Extension', `Extension Path: ${context.extensionPath}`);
-    ExtensionOutputChannel.debug('Extension', `VS Code Version: ${vscode.version}`);
+    // ── Status bar ────────────────────────────────────────────────────────────
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 90);
+    statusBarItem.command = 'winccoa.debugger.showStatus';
+    context.subscriptions.push(statusBarItem);
 
-    // Setup Core extension integration if in automatic mode
-    await setupCoreExtensionIntegration(context);
+    // ── Lifecycle management ──────────────────────────────────────────────────
+    const deployer = new AdapterDeployer(context);
+    managerLifecycle = new ManagerLifecycle(deployer, outputChannel);
+    context.subscriptions.push(managerLifecycle);
 
-    // Watch for configuration changes
+    // ── Debug adapter components ──────────────────────────────────────────────
+    const factory = new WinCCDebugAdapterDescriptorFactory(context);
+    factory.setLifecycle(managerLifecycle);
+    configProvider = new WinCCConfigurationProvider();
+
     context.subscriptions.push(
-        vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration(`${EXTENSION_CONFIG_SECTION}.logLevel`)) {
-                ExtensionOutputChannel.updateLogLevel();
+        factory,
+        vscode.debug.registerDebugAdapterDescriptorFactory('winccoa', factory),
+        vscode.debug.registerDebugConfigurationProvider('winccoa', configProvider),
+        // Register as dynamic provider so "Debug CTRL Script" appears in the
+        // Run and Debug dropdown even without a launch.json
+        vscode.debug.registerDebugConfigurationProvider(
+            'winccoa',
+            configProvider,
+            vscode.DebugConfigurationProviderTriggerKind.Dynamic,
+        ),
+    );
+
+    // ── Project detection ─────────────────────────────────────────────────────
+    projectDetector = new ProjectDetector();
+    context.subscriptions.push(projectDetector);
+
+    // Initial detection
+    const initial = await projectDetector.detectProject();
+    applyDetectionResult(initial, factory);
+
+    // Subscribe to future project changes
+    await projectDetector.subscribeToProjectChanges();
+    context.subscriptions.push(
+        projectDetector.onDidChangeProject((result) => {
+            applyDetectionResult(result, factory);
+        }),
+    );
+
+    // ── Debug session cleanup ─────────────────────────────────────────────────
+    context.subscriptions.push(
+        vscode.debug.onDidTerminateDebugSession(async (session) => {
+            if (session.type !== 'winccoa') {
+                return;
             }
-            if (e.affectsConfiguration(`${EXTENSION_CONFIG_SECTION}.pathSource`)) {
-                // Re-setup Core integration when mode changes
-                void setupCoreExtensionIntegration(context);
+            const project = projectDetector.getCachedResult()?.project ?? null;
+            try {
+                await managerLifecycle.cleanupScriptManager(project, session.id);
+            } catch (e: unknown) {
+                outputChannel.appendLine(`[lifecycle] Cleanup warning: ${(e as Error).message}`);
+            }
+            try {
+                const autoStop = session.configuration?.autoStopOnDisconnect ?? false;
+                await managerLifecycle.cleanupAttachManager(project, session.id, autoStop);
+            } catch (e: unknown) {
+                outputChannel.appendLine(
+                    `[lifecycle] Attach cleanup warning: ${(e as Error).message}`,
+                );
             }
         }),
     );
 
-    // Register a simple command
-    const disposable = vscode.commands.registerCommand('winccoa.helloWorld', () => {
-        vscode.window.showInformationMessage(
-            `Hello from WinCC OA VS Code Extension!\n${EXTENSION_NAME}`,
-        );
-    });
+    // ── Commands ──────────────────────────────────────────────────────────────
+    context.subscriptions.push(
+        vscode.commands.registerCommand('winccoa.debugger.showStatus', showStatus),
+        vscode.commands.registerCommand('winccoa.debugger.showOutput', () => outputChannel.show()),
+        // Keep the input variable command for backwards compat with launch.json
+        vscode.commands.registerCommand('extension.winccoa.debugger.getSystemName', async () => {
+            const current = projectDetector.getCachedResult()?.project?.system;
+            const result = await vscode.window.showInputBox({
+                prompt: 'Enter WinCC OA System Name',
+                placeHolder: 'System1',
+                value: current ?? 'System1',
+            });
+            return result ?? current ?? 'System1';
+        }),
+    );
 
-    context.subscriptions.push(disposable);
+    outputChannel.appendLine('WinCC OA Debugger extension activated');
 }
 
-/**
- * Sets up integration with the WinCC OA Project Admin core extension.
- *
- * This function demonstrates best practices for handling dependent extensions:
- * - Checks if the dependent extension is installed
- * - Waits for the dependent extension to activate (with timeout)
- * - Falls back to manual activation if needed
- * - Subscribes to project change events
- * - Handles configuration-based enable/disable
- *
- * The integration supports two modes:
- * - 'automatic': Full integration with project detection
- * - Other values: Static mode (integration disabled)
- *
- * @param context - VS Code extension context for managing subscriptions
- * @returns Promise that resolves when setup is complete
- *
- * @example
- * ```typescript
- * // In your activate function:
- * await setupCoreExtensionIntegration(context);
- *
- * // The extension will now automatically:
- * // - Detect when WinCC OA projects change
- * // - Log project information
- * // - Adapt to the current project context
- * ```
- */
+export function deactivate(): void {
+    outputChannel?.dispose();
+    statusBarItem?.dispose();
+}
 
-/**
- * Extension deactivation function - called when VS Code deactivates the extension.
- *
- * This function should clean up any resources that were allocated during activation:
- * - Unsubscribe from event listeners
- * - Clear timers/intervals
- * - Close connections
- * - Log deactivation
- *
- * Note: VS Code may call this function at any time, so it should be robust
- * and handle cases where resources may not be initialized.
- *
- * @example
- * ```typescript
- * export function deactivate() {
- *     // Clean up your resources here
- *     ExtensionOutputChannel.info('Extension', 'Extension deactivated');
- * }
- * ```
- */
-export function deactivate() {
-    ExtensionOutputChannel.info('Extension', `WinCC OA ${EXTENSION_NAME} Extension deactivated`);
-    // Clean up core extension integration resources
-    cleanupCoreExtensionIntegration();
+export function getOutputChannel(): vscode.OutputChannel {
+    return outputChannel;
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function applyDetectionResult(
+    result: ProjectDetectionResult,
+    factory: WinCCDebugAdapterDescriptorFactory,
+): void {
+    const { project, readiness } = result;
+
+    // Update configuration provider so new debug sessions use the current project
+    configProvider.setActiveProject(project);
+
+    // Update factory so it can auto-start the adapter for the current project
+    factory.setProject(project);
+
+    // Update status bar
+    switch (readiness) {
+        case 'ready':
+            statusBarItem.text = `$(debug) ${project!.name} (${project!.system})`;
+            statusBarItem.tooltip = `WinCC OA Debugger ready\nProject: ${project!.projectDir}\nWinCC OA: ${project!.version}`;
+            statusBarItem.backgroundColor = undefined;
+            statusBarItem.show();
+            outputChannel.appendLine(
+                `Project detected: ${project!.name} — system=${project!.system} dir=${project!.projectDir}`,
+            );
+            break;
+
+        case 'no-project':
+            statusBarItem.text = `$(debug) No project`;
+            statusBarItem.tooltip =
+                'No WinCC OA project selected — open Project Admin and select a project';
+            statusBarItem.backgroundColor = new vscode.ThemeColor(
+                'statusBarItem.warningBackground',
+            );
+            statusBarItem.show();
+            outputChannel.appendLine('No WinCC OA project selected');
+            break;
+
+        case 'no-project-admin':
+            statusBarItem.text = `$(debug) Project Admin missing`;
+            statusBarItem.tooltip = 'WinCC OA Project Admin extension not installed or not active';
+            statusBarItem.backgroundColor = new vscode.ThemeColor(
+                'statusBarItem.warningBackground',
+            );
+            statusBarItem.show();
+            outputChannel.appendLine('Project Admin extension not found');
+            break;
+
+        case 'winccoa-not-found':
+            statusBarItem.text = `$(error) WinCC OA not found`;
+            statusBarItem.tooltip =
+                'WinCC OA installation not found on this machine — debug adapter will fail to connect';
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+            statusBarItem.show();
+            outputChannel.appendLine('WinCC OA installation not found');
+            break;
+    }
+}
+
+function showStatus(): void {
+    const result = projectDetector.getCachedResult();
+    if (!result || !result.project) {
+        vscode.window
+            .showWarningMessage(
+                'No WinCC OA project active. Open Project Admin and select a project, then debugging will auto-configure.',
+                'Open Project Admin',
+            )
+            .then((sel) => {
+                if (sel === 'Open Project Admin') {
+                    vscode.commands.executeCommand(
+                        'workbench.view.extension.winccoa-project-admin',
+                    );
+                }
+            });
+        return;
+    }
+
+    const p = result.project;
+    vscode.window
+        .showInformationMessage(
+            `WinCC OA Debugger — ${p.name} | system: ${p.system} | ${p.host}:${p.port} | v${p.version}`,
+            'Show Output',
+        )
+        .then((sel) => {
+            if (sel === 'Show Output') {
+                outputChannel.show();
+            }
+        });
 }

@@ -1,177 +1,204 @@
-# WinCC OA VS Code Extension Template
+# WinCC OA Debugger
 
 <div align="center">
 
-![Version](https://img.shields.io/github/v/release/winccoa-tools-pack/template-vscode-extension?label=version)
-![License](https://img.shields.io/github/license/winccoa-tools-pack/template-vscode-extension)
-![VS Code](https://img.shields.io/badge/VS%20Code-1.109.2-007ACC.svg)
-[![Coverage](https://codecov.io/gh/winccoa-tools-pack/template-vscode-extension/graph/badge.svg)](https://codecov.io/gh/winccoa-tools-pack/template-vscode-extension)
-[![Quality gate](https://github.com/winccoa-tools-pack/template-vscode-extension/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/winccoa-tools-pack/template-vscode-extension/actions/workflows/ci-cd.yml)
-[![Released](https://github.com/winccoa-tools-pack/template-vscode-extension/actions/workflows/release.yml/badge.svg)](https://github.com/winccoa-tools-pack/template-vscode-extension/actions/workflows/release.yml)
+![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![License](https://img.shields.io/badge/license-BUSL--1.1-orange.svg)
+![VS Code](https://img.shields.io/badge/VS%20Code-1.110.0-007ACC.svg)
 
 </div>
 
-Template repository for building **VS Code extensions for WinCC OA**, with a GitFlow-style branching model and a CI → prerelease → release pipeline.
+## Debug WinCC OA CTRL scripts directly from Visual Studio Code
 
-## Quick start
+[Features](#-features) • [Configuration](#️-configuration) • [Known Issues](#-known-issues)
 
-Create a new repository from this template, then:
+---
 
-```bash
-npm install
-npm run compile
-npm run test:unit
+> **⚠️ Early Access Notice**
+> This extension is in active development. While core features are stable, you may encounter:
+>
+> - **Edge cases** not yet fully covered
+> - **Library breakpoint** handling still being refined
+>
+> **🐛 Found a bug?** Please report it on our [GitHub Issues](https://github.com/winccoa-tools-pack/vscode-winccoa-debugger/issues)!
+> Your feedback helps us make this extension better for everyone. 🙏
+>
+> **Quick Fix:** If something doesn't work, try `Ctrl+Shift+P` → `Reload Window`
+
+---
+
+## ✨ Features
+
+### 🚀 Launch & Attach
+
+- **Launch Mode**: Open a CTRL script and press `F5` — a temporary WCCOActrl manager is started automatically and removed after the session
+- **Attach Mode**: Attach to any running WinCC OA manager (CTRL, UI, etc.)
+- **Quick Debug**: Debug the currently active CTRL file with zero configuration
+
+### 🔴 Breakpoints
+
+- Set breakpoints in `.ctl` and `.ctc` files
+- **Library breakpoints**: Breakpoints in shared library files are resolved across sub-projects
+- **Conditional breakpoints**: Break only when a condition is met
+- Breakpoints in nested libraries and multi-lib projects
+
+### 🔍 Stepping & Inspection
+
+- **Step In / Step Out / Step Over**: Navigate through your CTRL code
+- **Variable Inspection**: View local, script-global, and manager-global variables
+- **Call Stack**: Full call stack with source file and line information
+- **Expression Evaluation**: Evaluate CTRL expressions in the Debug Console
+
+### 📁 Sub-Project Support
+
+- Automatic project detection from workspace
+- Path mappings between local and remote paths
+- Sub-project library resolution
+
+---
+
+## ⚙️ Configuration
+
+### Quick Start (Launch Mode)
+
+No configuration required! Open a `.ctl` file and press `F5`. The extension auto-detects your WinCC OA project and starts a temporary manager.
+
+### Launch Configuration
+
+Add to your `.vscode/launch.json`:
+
+```json
+{
+  "type": "winccoa",
+  "request": "launch",
+  "name": "Debug CTRL Script",
+  "script": "${file}"
+}
 ```
 
-Run locally in VS Code:
+### Attach Configuration
 
-To launch this extension, press **F5** in your VS Code instance to open an **Extension Development Host**.
-
-## Customize the template
-
-When you create a new repository from this template, update these placeholders first.
-
-Update values in `package.json`:
-
-- `name`, `displayName`, `description`
-- `publisher` (VS Code Marketplace publisher ID) - **Note:** It's recommended to use the organization's publisher for easier trust and no need for individual VSCE tokens.
-- `icon` (this repo includes a placeholder at `resources/icon.png` — replace it with your own 128x128 (or 256x256) PNG)
-- `repository.url`, `bugs.url`, `homepage` (remove `<your-repository>` placeholders)
-- `activationEvents` and `contributes.commands[].command`
-
-Example:
-
-```bash
-npm pkg set name='vscode-my-extension'
-npm pkg set displayName='WinCC OA — My Extension'
-# Optional: Set your own publisher if not using the organization's
-# npm pkg set publisher='my-publisher'  # Requires VSCE_PAT and user trust
+```json
+{
+  "type": "winccoa",
+  "request": "attach",
+  "name": "Attach to WinCC OA Manager",
+  "host": "localhost",
+  "port": 4999,
+  "system": "System1",
+  "manager": {
+    "type": "CTRL",
+    "number": 1
+  },
+  "pathMappings": {
+    "/opt/WinCC_OA/3.21/scripts": "${workspaceFolder}/scripts"
+  }
+}
 ```
 
-Additionally, this template includes a dummy "Hello World" project. Search for and replace the following placeholders throughout the codebase:
+### Configuration Reference
 
-- `'hello-world'` → your extension's identifier or name
-- `'<your-repository>'` → your repository name
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `script` | `string` | `${file}` | Path to the CTRL script to debug (launch mode only) |
+| `scriptManagerNum` | `number` | `98` | Manager number for the auto-started script manager |
+| `host` | `string` | `localhost` | Host where WinCC OA is running |
+| `port` | `number` | `4999` | Port for datapoint connection |
+| `project` | `string` | — | WinCC OA project name (e.g. `DevEnv3.21`) |
+| `system` | `string` | — | WinCC OA system name (e.g. `System1`) |
+| `manager.type` | `string` | `CTRL` | Manager type: `CTRL`, `UI`, `EVENT`, `ASCII`, `DEVICE`, `API`, `DRIVER` |
+| `manager.number` | `number` | `1` | Manager number |
+| `pathMappings` | `object` | `{}` | Path mappings from WinCC OA to local paths |
+| `adapterManagerNumber` | `number` | `99` | Manager number for the debug adapter (must not collide) |
+| `adapterPort` | `number` | `7474` | TCP port the debug adapter listens on |
+| `trace` | `boolean` | `false` | Enable trace logging |
 
-Also, update `src/const.ts` with the appropriate values for `EXTENSION_ID`, `EXTENSION_NAME`, and `EXTENSION_CONFIG_SECTION`.
+### Settings
 
-### Template checklist
+| Setting | Default | Description |
+| ------- | ------- | ----------- |
+| `winccoa.debugger.adapterCliPath` | `""` | Absolute path to the debug adapter cli.js (fallback for development) |
+| `winccoa.debugger.bootstrapPath` | (auto-detected) | Absolute path to the WinCC OA bootstrap.js |
 
-- Replace the placeholder icon in `resources/icon.png`.
-- Replace all occurrences of `<your-repository>` with your actual repository name.
-- Update the Marketplace identifiers (`publisher`, `name`) before publishing.
-- Update links in `package.json` (`repository`, `bugs`, `homepage`) so they point to your new repo.
+---
 
-## Development scripts
+## 📝 Commands
 
-These scripts exist in this template:
+Access via `Ctrl+Shift+P`:
 
-- Build: `npm run compile`
-- Watch: `npm run watch`
-- Lint: `npm run lint` and `npm run lint:md`
-- Format check: `npm run format:check`
-- Unit tests: `npm run test:unit`
-- Integration tests (WinCC OA container): `npm run ci:integration`
+| Command | Description |
+| ------- | ----------- |
+| `WinCC OA: Show Debugger Status` | Show current debugger connection status |
+| `WinCC OA: Show Debugger Output` | Open the debugger output channel |
 
-## Branching model (GitFlow)
+---
 
-- `develop` is the default branch (day-to-day work)
-- `main` is the stable branch (releases)
-- `feature/*` / `bugfix/*` target `develop`
-- `release/vX.Y.Z` and `hotfix/vX.Y.Z` target `main`
+## 🐛 Known Issues
 
-Automation overview:
+### Current Limitations
 
-- PR validation: `.github/workflows/gitflow-validation.yml`
-- Upmerge `main` → `develop` via PR: `.github/workflows/gitflow.yml`
-- Create release/hotfix branches + PR: `.github/workflows/create-release-branch.yml`
-  - Important: this workflow does **not** update `CHANGELOG.md`.
+1. **Library Breakpoints**:
+   - Breakpoints in deeply nested library chains may not resolve on first hit
+   - Workaround: Set the breakpoint and restart the debug session
 
-More details:
+2. **Stop on Entry**:
+   - `stopOnEntry` may report incorrect line numbers in some scenarios
+   - Under investigation
 
-- `docs/automation/GITFLOW_WORKFLOW.md`
+3. **Quick Debug**:
+   - Stop reason may show "entry" instead of "breakpoint" in some edge cases
 
-## CI + Integration tests
+4. **Path Mappings**:
+   - Required when WinCC OA project paths differ between local and remote systems
+   - Windows UNC paths are supported but may need explicit mappings
 
-- CI pipeline: `.github/workflows/ci-cd.yml`
-- WinCC OA integration tests: `.github/workflows/integration-winccoa.yml`
+### Reporting Bugs
 
-More details:
+Found an issue? Please report it with:
 
-- `docs/automation/CI-INTEGRATION.md`
+- WinCC OA version
+- Extension version (`0.1.0`)
+- Steps to reproduce the issue
+- Enable `trace: true` in launch.json and attach log output
 
-## Pre-release + release pipeline
-
-This template uses a **tested-artifact flow**:
-
-1. A prerelease workflow builds/tests and uploads a VSIX to a GitHub **pre-release**.
-2. The stable release workflow requires that prerelease artifact and republishes that tested VSIX.
-
-Workflows:
-
-- `.github/workflows/pre-release.yml` (alpha prerelease on PRs to `main`)
-- `.github/workflows/release.yml` + `.github/workflows/release-reusable.yml` (stable release from `main`)
-
-Marketplace publishing:
-
-- Optional secret: `VSCE_PAT` (if set, the release workflow publishes to the VS Code Marketplace).
-
-## First-time setup checklist
-
-- Fill out the vision document: `docs/dev/VISION.md`.
-- Update placeholders in `package.json` (name, publisher, repo URLs, command IDs).
-- Decide on your default branch strategy (this template assumes `develop` is default).
-- Configure secrets (as needed):
-  - `VSCE_PAT` (optional) to publish to VS Code Marketplace during stable release.
-  - `REPO_ADMIN_TOKEN` (recommended) to let `.github/workflows/apply-settings-and-rulesets.yml` apply `.github/repository.settings.yml` and `.github/rulesets/*`.
-  - `DOCKER_USER` + `DOCKER_PASSWORD` (optional) only if your WinCC OA image is private on Docker Hub.
-- Run Actions once to verify everything:
-  - `CI/CD Pipeline`
-  - `PR Labels` (open a PR to see labels apply)
-  - `Git Flow Validation` (open a PR to see validation)
-  - `Integration Tests - WinCC OA` (optional; requires a working image)
-
-## Repo settings + rulesets automation
-
-This template can apply repository settings + rulesets from YAML:
-
-- Source of truth:
-  - `.github/repository.settings.yml`
-  - `.github/rulesets/*.yml`
-- Workflow:
-  - `.github/workflows/apply-settings-and-rulesets.yml`
-
-To apply settings/rulesets, provide an admin-capable token:
-
-- Secret: `REPO_ADMIN_TOKEN`
-  - Classic PAT: scope `repo` (and authorize SSO if required)
-  - Fine-grained PAT: repository access + **Administration: Read and write**
+[Report Issue on GitHub](https://github.com/winccoa-tools-pack/vscode-winccoa-debugger/issues)
 
 ---
 
 ## 🛠️ Requirements
 
-- **VS Code:** 1.107.1 or higher
+- **VS Code:** 1.110.0 or higher
 - **WinCC OA:** 3.19+ installed on your system
+- **Dependency:** [WinCC OA Project Admin](https://marketplace.visualstudio.com/items?itemName=winccoa-tools-pack.winccoa-project-admin) extension
 
 ---
 
-## License
+## 📄 License
 
-MIT License. See <https://github.com/winccoa-tools-pack/.github/blob/main/LICENSE>.
+This project is licensed under the Business Source License 1.1 — see the [LICENSE](LICENSE) file for details.
+
+**Additional Use Grant:** Production use is permitted for up to two (2) individuals per organization. For larger teams, a commercial license is required.
+
+**Change Date:** 2028-04-12 — after this date, the code is available under the Apache License 2.0.
+
+---
+
+## 🔗 Related Extensions
+
+- [WinCC OA Project Admin](https://marketplace.visualstudio.com/items?itemName=winccoa-tools-pack.winccoa-project-admin) - Project management and PMON control
+- [WinCC OA Script Actions](https://marketplace.visualstudio.com/items?itemName=RichardJanisch.winccoa-script-actions) - Execute CTRL scripts
+- [WinCC OA Test Explorer](https://marketplace.visualstudio.com/items?itemName=RichardJanisch.winccoa-vscode-tests) - Run unit tests
+- [WinCC OA CTRL Language](https://marketplace.visualstudio.com/items?itemName=mPokornyETM.wincc-oa-ctrl-lang) - Language support
+- [WinCC OA LogViewer](https://marketplace.visualstudio.com/items?itemName=RichardJanisch.winccoa-logviewer) - View log files
 
 ---
 
 ## ⚠️ Disclaimer
 
-**WinCC OA** and **Siemens** are trademarks of Siemens AG. This project is not affiliated with, endorsed by, or sponsored by Siemens AG. This is a community-driven open source project created to enhance the development experience for WinCC OA developers.
-
----
-
-## Quick Links
-
-• [📦 VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=mPokornyETM.wincc-oa-tools-pack)
+**WinCC OA** and **Siemens** are trademarks of Siemens AG. This project is not affiliated with, endorsed by, or sponsored by Siemens AG. This is a community-driven project created to enhance the development experience for WinCC OA developers.
 
 ---
 
 <center>Made with ❤️ for and by the WinCC OA community</center>
+
+[GitHub](https://github.com/winccoa-tools-pack/vscode-winccoa-debugger) • [Issues](https://github.com/winccoa-tools-pack/vscode-winccoa-debugger/issues) • [WinCC OA Docs](https://www.winccoa.com)

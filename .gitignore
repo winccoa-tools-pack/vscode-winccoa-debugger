@@ -7,6 +7,7 @@ dist/
 dist-esm/
 out/
 bin/
+resources/debugAdapter.js
 
 # VS Code extension packages
 *.vsix
@@ -40,7 +41,7 @@ coverage/
 # Temporary files
 *.tmp
 .cache/
-DevEnv.code-workspace
+# DevEnv.code-workspace  # tracked in repo so make test-local can open it
 
 # TypeScript build info
 **/*.tsbuildinfo
@@ -48,3 +49,4 @@ DevEnv.code-workspace
 # Optional extras
 *.tgz
 .env
+DevEnv.code-workspace

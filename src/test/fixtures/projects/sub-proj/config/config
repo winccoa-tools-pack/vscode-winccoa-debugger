@@ -1,0 +1,5 @@
+[general]
+pvss_path = "<WinCC_OA_PATH>"
+proj_path = "<SUB_PROJ_DIR>"
+proj_version = "<WinCC_OA_VERSION>"
+

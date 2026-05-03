@@ -1,12 +1,12 @@
 {
-  "name": "winccoa-hello-world",
-  "displayName": "WinCC OA — Hello World",
-  "description": "VS Code extension template for WinCC OA tools.",
+  "name": "vscode-winccoa-debugger",
+  "displayName": "WinCC OA — Debugger",
+  "description": "Debug Adapter for WinCC OA CTRL scripts",
   "publisher": "winccoa-tools-pack",
-  "version": "0.2.1",
+  "version": "0.1.0",
   "author": "winccoa-tools-pack",
-  "license": "MIT",
-  "icon": "resources/icon.png",
+  "license": "BUSL-1.1",
+  "icon": "resources/winccoa-debugger-512.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/winccoa-tools-pack/<your-repository>"
@@ -19,7 +19,7 @@
     "vscode": "^1.110.0"
   },
   "categories": [
-    "Other"
+    "Debuggers"
   ],
   "keywords": [
     "wincc-oa",
@@ -29,27 +29,285 @@
     "siemens",
     "etm",
     "industrial",
-    "automation"
+    "automation",
+    "debugger",
+    "ctrl"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onDebugResolve:winccoa",
+    "onDebugDynamicConfigurations:winccoa"
   ],
   "main": "./dist/extension.js",
   "private": false,
   "contributes": {
+    "breakpoints": [
+      {
+        "language": "ctrl"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "winccoa",
+        "label": "WinCC OA Debugger",
+        "languages": [
+          "ctrl"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [],
+            "properties": {
+              "script": {
+                "type": "string",
+                "description": "Path to the CTRL script to debug. When set, a temporary WCCOActrl manager is started automatically and removed after the session.",
+                "default": "${file}"
+              },
+              "scriptManagerNum": {
+                "type": "number",
+                "description": "Manager number (-num) for the auto-started script manager.",
+                "default": 98
+              },
+              "host": {
+                "type": "string",
+                "description": "Host where WinCC OA is running",
+                "default": "localhost"
+              },
+              "port": {
+                "type": "number",
+                "description": "Port for datapoint connection",
+                "default": 4999
+              },
+              "project": {
+                "type": "string",
+                "description": "WinCC OA project name used for the -proj connection argument (e.g. 'DevEnv3.21'). When omitted, 'system' is used as fallback."
+              },
+              "system": {
+                "type": "string",
+                "description": "WinCC OA system name used as DP prefix (e.g. 'System1:'). Use empty string for single-system projects."
+              },
+              "manager": {
+                "type": "object",
+                "description": "Manager configuration",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CTRL",
+                      "UI",
+                      "EVENT",
+                      "ASCII",
+                      "DEVICE",
+                      "API",
+                      "DRIVER"
+                    ],
+                    "description": "Manager type",
+                    "default": "CTRL"
+                  },
+                  "number": {
+                    "type": "number",
+                    "description": "Manager number",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "number"
+                ]
+              },
+              "pathMappings": {
+                "type": "object",
+                "description": "Path mappings from local to remote",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "adapterManagerNumber": {
+                "type": "number",
+                "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
+                "default": 99
+              },
+              "adapterPort": {
+                "type": "number",
+                "description": "TCP port the debug adapter listens on. Auto-injected (default: 7474) — normally no need to change.",
+                "default": 7474
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable trace logging",
+                "default": false
+              }
+            }
+          },
+          "attach": {
+            "required": [
+              "host",
+              "system",
+              "manager"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Host where WinCC OA is running",
+                "default": "localhost"
+              },
+              "port": {
+                "type": "number",
+                "description": "Port for datapoint connection",
+                "default": 4999
+              },
+              "project": {
+                "type": "string",
+                "description": "WinCC OA project name used for the -proj connection argument (e.g. 'DevEnv3.21'). When omitted, 'system' is used as fallback."
+              },
+              "system": {
+                "type": "string",
+                "description": "WinCC OA system name used as DP prefix (e.g. 'System1:'). Use empty string for single-system projects."
+              },
+              "manager": {
+                "type": "object",
+                "description": "Manager configuration",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CTRL",
+                      "UI",
+                      "EVENT",
+                      "ASCII",
+                      "DEVICE",
+                      "API",
+                      "DRIVER"
+                    ],
+                    "description": "Manager type",
+                    "default": "CTRL"
+                  },
+                  "number": {
+                    "type": "number",
+                    "description": "Manager number",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "type",
+                  "number"
+                ]
+              },
+              "pathMappings": {
+                "type": "object",
+                "description": "Path mappings from local to remote",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "default": {}
+              },
+              "adapterManagerNumber": {
+                "type": "number",
+                "description": "Manager number the debug adapter itself registers with in WinCC OA. Must not collide with existing managers in the project.",
+                "default": 99
+              },
+              "adapterPort": {
+                "type": "number",
+                "description": "TCP port the debug adapter listens on. Auto-injected (default: 7474) — normally no need to change.",
+                "default": 7474
+              },
+              "trace": {
+                "type": "boolean",
+                "description": "Enable trace logging",
+                "default": false
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "winccoa",
+            "request": "attach",
+            "name": "Attach to WinCC OA Manager",
+            "host": "localhost",
+            "port": 4999,
+            "system": "${input:systemName}",
+            "manager": {
+              "type": "CTRL",
+              "number": 1
+            },
+            "pathMappings": {
+              "/opt/WinCC_OA/3.21/scripts": "${workspaceFolder}/scripts"
+            }
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "WinCC OA: Debug CTRL Script",
+            "description": "Launch and debug the active CTRL script (auto-starts a temporary manager)",
+            "body": {
+              "type": "winccoa",
+              "request": "launch",
+              "name": "Debug CTRL Script",
+              "script": "^\"\\${file}\""
+            }
+          },
+          {
+            "label": "WinCC OA: Attach to Manager",
+            "description": "Attach to a running WinCC OA manager",
+            "body": {
+              "type": "winccoa",
+              "request": "attach",
+              "name": "Attach to WinCC OA Manager",
+              "host": "localhost",
+              "port": 4999,
+              "system": "^\"\\${1:System1}\"",
+              "manager": {
+                "type": "^\"\\${2:CTRL}\"",
+                "number": "^\"\\${3:1}\""
+              },
+              "pathMappings": {
+                "/opt/WinCC_OA/3.21/scripts": "^\"\\${workspaceFolder}/scripts\""
+              }
+            }
+          }
+        ],
+        "variables": {
+          "systemName": "extension.winccoa.debugger.getSystemName"
+        }
+      }
+    ],
     "commands": [
       {
-        "command": "winccoa.helloWorld",
-        "title": "WinCC OA: Hello World"
+        "command": "winccoa.debugger.showStatus",
+        "title": "Show Debugger Status",
+        "category": "WinCC OA"
+      },
+      {
+        "command": "winccoa.debugger.showOutput",
+        "title": "Show Debugger Output",
+        "category": "WinCC OA"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "WinCC OA Debugger",
+      "properties": {
+        "winccoa.debugger.adapterCliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the debug adapter cli.js. Used as fallback when the bundled adapter is not found (e.g. during development). Example: /home/user/npm-winccoa-repos/npm-winccoa-debugger/dist/cjs/cli.js"
+        },
+        "winccoa.debugger.bootstrapPath": {
+          "type": "string",
+          "default": "/opt/WinCC_OA/3.21/javascript/winccoa-manager/lib/bootstrap.js",
+          "description": "Absolute path to the WinCC OA bootstrap.js. Required to start the debug adapter with pmon authentication."
+        }
+      }
+    }
   },
   "extensionDependencies": [
     "RichardJanisch.winccoa-project-admin"
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "webpack",
+    "compile": "webpack && webpack --config webpack.adapter.config.js",
+    "compile:extension": "webpack",
+    "compile:adapter": "webpack --config webpack.adapter.config.js",
     "clean:out": "node -e \"require('fs').rmSync('out',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
     "clean:out-tests": "node -e \"try{require('fs').rmSync('out/test',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })}catch(e){console.warn('clean:out-tests skipped:', e.message)}\"",
     "clean:coverage": "node -e \"require('fs').rmSync('coverage',{ recursive:true, force:true, maxRetries:10, retryDelay:200 })\"",
@@ -71,11 +329,28 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vscode-test --label unitTests",
     "test:integration": "vscode-test --label integrationTests",
+    "setup:e2e-links": "node scripts/setup-e2e-links.mjs",
+    "test:e2e": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerE2eTests",
+    "test:e2e:setup": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSetupE2e",
+    "test:e2e:bpcycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e",
+    "test:e2e:step": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStepCommandsE2e",
+    "test:e2e:libbp": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLibraryBpE2e",
+    "test:e2e:soe": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerStopOnEntryE2e",
+    "test:e2e:spuriousstops": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerSpuriousStopsE2e",
+    "test:e2e:racecondition": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerRaceConditionE2e",
+    "test:e2e:variables": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerVariablesE2e",
+    "test:e2e:lifecycle": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerLifecycleE2e",
+    "test:e2e:quickdebug": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerQuickDebugE2e",
+    "test:e2e:full": "npm run compile:tsc && npm run setup:e2e-links && vscode-test --label debuggerBpCycleE2e && vscode-test --label debuggerStepCommandsE2e && vscode-test --label debuggerLibraryBpE2e && vscode-test --label debuggerStopOnEntryE2e && vscode-test --label debuggerSpuriousStopsE2e && vscode-test --label debuggerRaceConditionE2e",
     "test:unit:coverage": "npm run compile:tsc && npm run clean:coverage:unitTests && vscode-test --label unitTests --coverage --coverage-output coverage/unitTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:integration:coverage": "npm run compile:tsc && npm run clean:coverage:integrationTests && vscode-test --label integrationTests --coverage --coverage-output coverage/integrationTests --coverage-reporter lcov --coverage-reporter html --coverage-reporter json-summary --coverage-reporter text-summary",
     "test:coverage": "npm run test:unit:coverage && npm run test:integration:coverage",
     "ci:integration": "npm ci && npm run compile && npm run test:integration",
     "style-check": "npm run format:check && npm run lint"
+  },
+  "dependencies": {
+    "@winccoa-tools-pack/winccoa-debug-adapter": "file:../../npm-winccoa-repos/npm-winccoa-debugger",
+    "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -120,8 +395,5 @@
   },
   "config": {
     "winccoaImage": "mpokornyetm/winccoa-tools-pack-npm-winccoa-core:npm-winccoa-core"
-  },
-  "dependencies": {
-    "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
   }
 }
