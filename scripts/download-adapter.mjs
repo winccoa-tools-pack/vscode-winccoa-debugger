@@ -4,8 +4,8 @@
  * Downloads debugAdapter.js from the latest npm-winccoa-debugger GitHub release
  * (pre-releases included) and places it in resources/debugAdapter.js.
  *
- * Requires the `gh` CLI to be installed and authenticated.
- * In GitHub Actions this works automatically via GITHUB_TOKEN.
+ * Uses the public GitHub REST API via Node.js built-in fetch() — no gh CLI or
+ * authentication required (winccoa-tools-pack/npm-winccoa-debugger is a public repo).
  *
  * Usage:
  *   node scripts/download-adapter.mjs             # always download
@@ -13,8 +13,9 @@
  *   npm run adapter:fetch
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import { Readable } from 'node:stream';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,12 +24,7 @@ const repoRoot = resolve(__dirname, '..');
 const dst = resolve(repoRoot, 'resources', 'debugAdapter.js');
 
 const DEBUGGER_REPO = 'winccoa-tools-pack/npm-winccoa-debugger';
-
-// In GitHub Actions, gh CLI requires GH_TOKEN. GITHUB_TOKEN is available automatically
-// but gh reads GH_TOKEN, so forward it if not already set.
-if (!process.env['GH_TOKEN'] && process.env['GITHUB_TOKEN']) {
-    process.env['GH_TOKEN'] = process.env['GITHUB_TOKEN'];
-}
+const GH_API = 'https://api.github.com';
 
 if (process.argv.includes('--skip-if-exists') && existsSync(dst)) {
     console.log('⏭️  resources/debugAdapter.js already exists — skipping download.');
@@ -37,12 +33,14 @@ if (process.argv.includes('--skip-if-exists') && existsSync(dst)) {
 
 // Find the most recent release (pre-release included, not draft) that has debugAdapter.js as an asset
 let latestTag;
+let downloadUrl;
 try {
-    const raw = execSync(
-        `gh api repos/${DEBUGGER_REPO}/releases?per_page=20`,
-        { encoding: 'utf8' },
+    const res = await fetch(
+        `${GH_API}/repos/${DEBUGGER_REPO}/releases?per_page=20`,
+        { headers: { 'User-Agent': 'vscode-winccoa-debugger-build', Accept: 'application/vnd.github+json' } },
     );
-    const releases = JSON.parse(raw);
+    if (!res.ok) throw new Error(`GitHub API returned ${res.status} ${res.statusText}`);
+    const releases = await res.json();
     // Sort newest first (API order is not guaranteed)
     releases.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
     const match = releases.find(
@@ -50,9 +48,9 @@ try {
     );
     if (!match) throw new Error('No release with debugAdapter.js asset found (yet)');
     latestTag = match.tag_name;
+    downloadUrl = match.assets.find((a) => a.name === 'debugAdapter.js').browser_download_url;
 } catch (e) {
     console.error(`❌ Could not find a suitable release in ${DEBUGGER_REPO}: ${e.message}`);
-    console.error('   Make sure the gh CLI is installed and you are authenticated.');
     console.error('   Hint: for a local build use "npm run update:adapter:local" instead.');
     process.exit(1);
 }
@@ -60,12 +58,11 @@ try {
 console.log(`📥 Downloading debugAdapter.js from ${DEBUGGER_REPO}@${latestTag}...`);
 
 try {
-    execSync(
-        `gh release download ${latestTag} --repo ${DEBUGGER_REPO} --pattern "debugAdapter.js" --dir resources --clobber`,
-        { cwd: repoRoot, stdio: 'inherit' },
-    );
-} catch {
-    console.error(`❌ Failed to download debugAdapter.js from release ${latestTag}`);
+    const res = await fetch(downloadUrl, { headers: { 'User-Agent': 'vscode-winccoa-debugger-build' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    await pipeline(Readable.fromWeb(res.body), createWriteStream(dst));
+} catch (e) {
+    console.error(`❌ Failed to download debugAdapter.js from release ${latestTag}: ${e.message}`);
     console.error('   The release may not yet have a debugAdapter.js asset.');
     console.error('   Hint: for a local build use "npm run update:adapter:local" instead.');
     process.exit(1);
