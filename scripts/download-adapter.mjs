@@ -37,6 +37,8 @@ try {
         { encoding: 'utf8' },
     );
     const releases = JSON.parse(raw);
+    // Sort newest first (API order is not guaranteed)
+    releases.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
     const match = releases.find(
         (r) => !r.draft && r.assets.some((a) => a.name === 'debugAdapter.js'),
     );
