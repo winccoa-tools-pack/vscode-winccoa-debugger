@@ -29,18 +29,21 @@ if (process.argv.includes('--skip-if-exists') && existsSync(dst)) {
     process.exit(0);
 }
 
-// Find the newest non-draft release (pre-releases included, sorted by date)
+// Find the most recent release (pre-release included, not draft) that has debugAdapter.js as an asset
 let latestTag;
 try {
     const raw = execSync(
-        `gh release list --repo ${DEBUGGER_REPO} --limit 50 --json tagName,isDraft,createdAt`,
+        `gh api repos/${DEBUGGER_REPO}/releases?per_page=20`,
         { encoding: 'utf8' },
     );
-    const releases = JSON.parse(raw).filter((r) => !r.isDraft);
-    if (releases.length === 0) throw new Error('No releases found');
-    latestTag = releases[0].tagName;
+    const releases = JSON.parse(raw);
+    const match = releases.find(
+        (r) => !r.draft && r.assets.some((a) => a.name === 'debugAdapter.js'),
+    );
+    if (!match) throw new Error('No release with debugAdapter.js asset found (yet)');
+    latestTag = match.tag_name;
 } catch (e) {
-    console.error(`❌ Could not list releases for ${DEBUGGER_REPO}: ${e.message}`);
+    console.error(`❌ Could not find a suitable release in ${DEBUGGER_REPO}: ${e.message}`);
     console.error('   Make sure the gh CLI is installed and you are authenticated.');
     console.error('   Hint: for a local build use "npm run update:adapter:local" instead.');
     process.exit(1);
