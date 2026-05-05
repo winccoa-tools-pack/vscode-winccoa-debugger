@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
-![License](https://img.shields.io/badge/license-BUSL--1.1-orange.svg)
+![License](https://img.shields.io/badge/license-proprietary-red.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-1.110.0-007ACC.svg)
 
 </div>
@@ -175,11 +175,9 @@ Found an issue? Please report it with:
 
 ## 📄 License
 
-This project is licensed under the Business Source License 1.1 — see the [LICENSE](LICENSE) file for details.
+This project is proprietary software. All rights reserved — see the [LICENSE](LICENSE) file for details.
 
-**Additional Use Grant:** Production use is permitted for up to two (2) individuals per organization. For larger teams, a commercial license is required.
-
-**Change Date:** 2028-04-12 — after this date, the code is available under the Apache License 2.0.
+Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
 ---
 
