@@ -9,12 +9,12 @@
   "icon": "resources/winccoa-debugger-512.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/winccoa-tools-pack/<your-repository>"
+    "url": "https://github.com/winccoa-tools-pack/vscode-winccoa-debugger"
   },
   "bugs": {
-    "url": "https://github.com/winccoa-tools-pack/<your-repository>/issues"
+    "url": "https://github.com/winccoa-tools-pack/vscode-winccoa-debugger/issues"
   },
-  "homepage": "https://github.com/winccoa-tools-pack/<your-repository>#readme",
+  "homepage": "https://github.com/winccoa-tools-pack/vscode-winccoa-debugger#readme",
   "engines": {
     "vscode": "^1.110.0"
   },
