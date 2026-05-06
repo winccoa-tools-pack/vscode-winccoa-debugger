@@ -16,7 +16,7 @@
   },
   "homepage": "https://github.com/winccoa-tools-pack/vscode-winccoa-debugger#readme",
   "engines": {
-    "vscode": "^1.110.0"
+    "vscode": "^1.118.0"
   },
   "categories": [
     "Debuggers"
