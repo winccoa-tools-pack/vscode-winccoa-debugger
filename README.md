@@ -4,7 +4,7 @@
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-proprietary-red.svg)
-![VS Code](https://img.shields.io/badge/VS%20Code-1.110.0-007ACC.svg)
+![VS Code](https://img.shields.io/badge/VS%20Code-1.118.0-007ACC.svg)
 
 </div>
 
