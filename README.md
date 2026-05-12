@@ -2,13 +2,15 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)
 ![License](https://img.shields.io/badge/license-proprietary-red.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-1.118.0-007ACC.svg)
 
 </div>
 
 ## Debug WinCC OA CTRL scripts directly from Visual Studio Code
+
+![WinCC OA Debugger Demo](https://github.com/winccoa-tools-pack/vscode-winccoa-debugger/blob/develop/resources/Animation.gif?raw=true)
 
 [Features](#-features) • [Configuration](#️-configuration) • [Known Issues](#-known-issues)
 
