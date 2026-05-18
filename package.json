@@ -350,7 +350,7 @@
     "style-check": "npm run format:check && npm run lint"
   },
   "dependencies": {
-    "@winccoa-tools-pack/npm-winccoa-core": "0.2.6"
+    "@winccoa-tools-pack/npm-winccoa-core": "2.0.8"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
